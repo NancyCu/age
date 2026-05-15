@@ -137,6 +137,13 @@ h2 {
   transform: translateY(-2px);
 }
 
+.degenerates-text {
+  margin: -8px 0 0;
+  color: var(--accent-2);
+  font: 700 0.78rem "Space Grotesk", sans-serif;
+  letter-spacing: 0.14em;
+}
+
 main {
   display: grid;
   gap: 22px;
