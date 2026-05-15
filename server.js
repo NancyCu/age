@@ -10,7 +10,13 @@ const host = process.env.HOST || "0.0.0.0";
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
-  ".js": "application/javascript; charset=utf-8"
+  ".js": "application/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".ico": "image/x-icon"
 };
 
 const liveEndpoints = {
@@ -25,6 +31,11 @@ async function serveFile(response, filePath) {
   response.end(content);
 }
 
+function sendJson(response, statusCode, payload) {
+  response.writeHead(statusCode, { "Content-Type": "application/json; charset=utf-8" });
+  response.end(JSON.stringify(payload));
+}
+
 async function proxyJson(response, url, sourceLabel) {
   const upstream = await fetch(url, {
     headers: {
@@ -33,19 +44,27 @@ async function proxyJson(response, url, sourceLabel) {
   });
 
   if (!upstream.ok) {
-    response.writeHead(upstream.status, { "Content-Type": "application/json; charset=utf-8" });
-    response.end(JSON.stringify({ error: `Upstream request failed: ${upstream.status}` }));
+    sendJson(response, upstream.status, { error: `Upstream request failed: ${upstream.status}` });
     return;
   }
 
   const payload = await upstream.json();
-  response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-  response.end(JSON.stringify({ ...payload, source: sourceLabel }));
+  sendJson(response, 200, { ...payload, source: sourceLabel });
 }
 
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url, `http://${request.headers.host}`);
+
+    if (url.pathname === "/health") {
+      sendJson(response, 200, {
+        ok: true,
+        service: "nba-playoff-prediction",
+        host,
+        port
+      });
+      return;
+    }
 
     if (url.pathname === "/api/playoffs") {
       await proxyJson(response, liveEndpoints.playoffs, "ESPN scoreboard");
@@ -59,8 +78,22 @@ const server = http.createServer(async (request, response) => {
 
     const safePath = url.pathname === "/" ? "index.html" : url.pathname.replace(/^\/+/, "");
     const resolvedPath = path.join(rootDir, safePath);
+    const relativePath = path.relative(rootDir, resolvedPath);
+
+    if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
+      response.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
+      response.end("Forbidden");
+      return;
+    }
+
     await serveFile(response, resolvedPath);
   } catch (error) {
+    if (error && error.code === "ENOENT") {
+      response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+      response.end("Not found");
+      return;
+    }
+
     response.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
     response.end(`Server error: ${error.message}`);
   }

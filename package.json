@@ -1,0 +1,13 @@
+{
+  "name": "nba-playoff-prediction",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive NBA playoff dashboard with live standings and betting predictions.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
