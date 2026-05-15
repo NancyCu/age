@@ -83,7 +83,7 @@ function getNetworkUrls() {
 
 server.listen(port, host, () => {
   const networkUrls = getNetworkUrls();
-  console.log(`NBA Playoff Pulse is running at http://localhost:${port}`);
+  console.log(`NBA Playoff Prediction is running at http://localhost:${port}`);
 
   if (networkUrls.length) {
     console.log(`Network access enabled on: ${networkUrls.join(", ")}`);
