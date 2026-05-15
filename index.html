@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NBA Playoff Pulse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Interactive NBA dashboard</p>
+        <h1>NBA Playoff Pulse</h1>
+        <p class="hero-text">
+          Track playoff scores, compare team standings, and explore how every club stacks up by conference and division.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <button id="refreshButton" class="primary-button" type="button">Refresh data</button>
+        <p id="statusText" class="status-text">Loading live playoff and standings data...</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel controls-panel">
+        <div class="controls-header">
+          <div>
+            <p class="section-kicker">Filters</p>
+            <h2>Slice the league your way</h2>
+          </div>
+          <p class="panel-caption">Conference and division filters update every standings view together.</p>
+        </div>
+
+        <div class="controls-grid">
+          <label class="control">
+            <span>Search team</span>
+            <input id="teamSearch" type="search" placeholder="Lakers, Celtics, Knicks..." />
+          </label>
+
+          <label class="control">
+            <span>Conference</span>
+            <select id="conferenceFilter">
+              <option value="all">All conferences</option>
+            </select>
+          </label>
+
+          <label class="control">
+            <span>Division</span>
+            <select id="divisionFilter">
+              <option value="all">All divisions</option>
+            </select>
+          </label>
+
+          <label class="control">
+            <span>Sort standings</span>
+            <select id="sortBy">
+              <option value="winPct">Win %</option>
+              <option value="wins">Wins</option>
+              <option value="seed">Seed</option>
+              <option value="streak">Streak</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="stats-grid" id="summaryStats"></section>
+
+      <section class="panel">
+        <div class="section-header">
+          <div>
+            <p class="section-kicker">Playoff scoreboard</p>
+            <h2>Current postseason games</h2>
+          </div>
+          <p class="panel-caption">Live scores and final results are grouped into quick-read matchup cards.</p>
+        </div>
+        <div id="gamesGrid" class="games-grid"></div>
+      </section>
+
+      <section class="panel prediction-panel">
+        <div class="section-header">
+          <div>
+            <p class="section-kicker">NBA Prediction Engine</p>
+            <h2>Betting Edge Analyzer</h2>
+          </div>
+          <p class="panel-caption">Transparent model leans for moneyline, spread, and total on upcoming games only.</p>
+        </div>
+        <div id="predictionDashboard"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-header">
+          <div>
+            <p class="section-kicker">Conference standings</p>
+            <h2>East and West at a glance</h2>
+          </div>
+          <p class="panel-caption">Rows highlight playoff teams found in the current postseason scoreboard.</p>
+        </div>
+        <div id="conferenceBoards" class="board-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-header">
+          <div>
+            <p class="section-kicker">Division breakdown</p>
+            <h2>Performance by division</h2>
+          </div>
+          <p class="panel-caption">Compare records, playoff representation, and average win rates within each division.</p>
+        </div>
+        <div id="divisionCards" class="division-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="section-header">
+          <div>
+            <p class="section-kicker">Team focus</p>
+            <h2>Standings per team</h2>
+          </div>
+          <p class="panel-caption">A compact card view for scanning seeds, records, and conference positioning team by team.</p>
+        </div>
+        <div id="teamCards" class="team-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <template id="emptyStateTemplate">
+    <div class="empty-state">
+      <h3>No teams matched these filters</h3>
+      <p>Try clearing the search or choosing a broader conference or division.</p>
+    </div>
+  </template>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

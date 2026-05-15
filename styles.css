@@ -1,0 +1,600 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f0e8;
+  --bg-strong: #efe0cb;
+  --surface: rgba(255, 252, 247, 0.82);
+  --surface-strong: #fffaf2;
+  --border: rgba(60, 41, 22, 0.12);
+  --ink: #1f1a17;
+  --muted: #6f6357;
+  --accent: #d7642c;
+  --accent-soft: rgba(215, 100, 44, 0.12);
+  --accent-2: #17636f;
+  --success: #15803d;
+  --shadow: 0 18px 60px rgba(72, 47, 21, 0.12);
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(215, 100, 44, 0.22), transparent 34%),
+    radial-gradient(circle at top right, rgba(23, 99, 111, 0.18), transparent 30%),
+    linear-gradient(180deg, #f8f3ec 0%, #f0e7dc 100%);
+  min-height: 100vh;
+}
+
+.page-shell {
+  width: min(1240px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 56px;
+}
+
+.hero,
+.panel,
+.stat-card,
+.game-card,
+.conference-board,
+.division-card,
+.team-card {
+  backdrop-filter: blur(18px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.hero {
+  border-radius: var(--radius-xl);
+  padding: 30px;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.eyebrow,
+.section-kicker {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  color: var(--accent-2);
+  font-weight: 700;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Space Grotesk", sans-serif;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 4vw, 4.6rem);
+  line-height: 0.95;
+  margin-bottom: 16px;
+}
+
+h2 {
+  font-size: clamp(1.3rem, 2vw, 2rem);
+  margin-bottom: 0;
+}
+
+.hero-text,
+.panel-caption,
+.status-text,
+.control span,
+.metric-label,
+.table-subtitle,
+.team-meta,
+.empty-state p {
+  color: var(--muted);
+}
+
+.hero-text {
+  max-width: 58ch;
+  font-size: 1.04rem;
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.primary-button {
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), #ee8d42);
+  color: white;
+  padding: 14px 22px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  box-shadow: 0 14px 30px rgba(215, 100, 44, 0.28);
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+}
+
+main {
+  display: grid;
+  gap: 22px;
+}
+
+.panel {
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.controls-panel {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(255, 250, 242, 0.85)),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0,
+      transparent 18px,
+      rgba(23, 99, 111, 0.03) 18px,
+      rgba(23, 99, 111, 0.03) 36px
+    );
+}
+
+.controls-header,
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.controls-grid,
+.stats-grid,
+.games-grid,
+.board-grid,
+.division-grid,
+.team-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.controls-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control input,
+.control select {
+  width: 100%;
+  border: 1px solid rgba(71, 53, 36, 0.14);
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+}
+
+.stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stat-card {
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.stat-number {
+  font: 700 clamp(2rem, 3vw, 3rem) "Space Grotesk", sans-serif;
+  margin-bottom: 4px;
+}
+
+.metric-label {
+  font-size: 0.94rem;
+}
+
+.games-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.prediction-summary-grid,
+.prediction-grid,
+.prediction-hero-grid,
+.pick-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.prediction-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.prediction-control {
+  min-width: 220px;
+}
+
+.prediction-disclaimer {
+  max-width: 48ch;
+  margin: 0;
+}
+
+.prediction-summary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 18px;
+}
+
+.prediction-summary-card,
+.prediction-card,
+.pick-row {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow);
+}
+
+.prediction-summary-card {
+  padding: 18px;
+}
+
+.prediction-grid {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.prediction-card {
+  padding: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(23, 99, 111, 0.1), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 242, 233, 0.94));
+}
+
+.prediction-card-top,
+.prediction-badges,
+.pick-row,
+.pick-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.prediction-badges {
+  align-items: start;
+  flex-wrap: wrap;
+}
+
+.prediction-hero-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 18px 0;
+}
+
+.prediction-hero-stat {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 247, 238, 0.9);
+}
+
+.prediction-hero-stat strong {
+  display: block;
+  font: 700 1.45rem "Space Grotesk", sans-serif;
+  margin: 4px 0;
+}
+
+.pick-row {
+  padding: 14px;
+  align-items: start;
+}
+
+.pick-market {
+  margin-bottom: 6px;
+  color: var(--accent-2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.pick-row h4 {
+  margin-bottom: 6px;
+  font-size: 1.05rem;
+}
+
+.pick-meta {
+  flex-direction: column;
+  align-items: end;
+  min-width: 92px;
+}
+
+.pick-recommendation,
+.signal-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.pick-recommendation.bet,
+.signal-pill.bet {
+  background: rgba(21, 128, 61, 0.14);
+  color: #166534;
+}
+
+.pick-recommendation.lean,
+.signal-pill.lean {
+  background: rgba(215, 100, 44, 0.16);
+  color: #b45309;
+}
+
+.pick-recommendation.pass,
+.signal-pill.pass {
+  background: rgba(107, 114, 128, 0.14);
+  color: #4b5563;
+}
+
+.pick-edge {
+  font: 700 0.95rem "Space Grotesk", sans-serif;
+  color: var(--ink);
+}
+
+.prediction-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(71, 53, 36, 0.08);
+}
+
+.game-card,
+.conference-board,
+.division-card,
+.team-card,
+.empty-state {
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.game-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 246, 236, 0.95));
+}
+
+.game-topline,
+.team-row,
+.series-line,
+.division-metrics,
+.team-card header,
+.team-card footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.team-row {
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(71, 53, 36, 0.08);
+}
+
+.team-row:last-child {
+  border-bottom: 0;
+}
+
+.team-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.seed {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(23, 99, 111, 0.12);
+  color: var(--accent-2);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.team-name {
+  font-weight: 600;
+}
+
+.team-subtext {
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.score {
+  font: 700 1.15rem "Space Grotesk", sans-serif;
+}
+
+.board-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.94rem;
+}
+
+.standings-table th,
+.standings-table td {
+  padding: 11px 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(71, 53, 36, 0.08);
+}
+
+.standings-table th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.standings-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.playoff-row {
+  background: rgba(215, 100, 44, 0.07);
+}
+
+.division-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.division-card {
+  background:
+    linear-gradient(180deg, rgba(255, 250, 245, 0.95), rgba(250, 246, 240, 0.88));
+}
+
+.division-metrics {
+  margin: 14px 0 18px;
+}
+
+.metric-stack strong {
+  display: block;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.2rem;
+}
+
+.metric-stack span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.mini-list {
+  display: grid;
+  gap: 10px;
+}
+
+.mini-team {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.team-grid {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+
+.team-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(246, 238, 229, 0.92));
+}
+
+.record {
+  font: 700 2rem "Space Grotesk", sans-serif;
+}
+
+.trend {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  min-height: 180px;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+@media (max-width: 1024px) {
+  .hero,
+  .controls-grid,
+  .stats-grid,
+  .board-grid,
+  .division-grid,
+  .prediction-summary-grid,
+  .prediction-hero-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .page-shell {
+    width: min(100% - 20px, 1240px);
+    padding-top: 20px;
+  }
+
+  .hero,
+  .controls-grid,
+  .stats-grid,
+  .board-grid,
+  .division-grid,
+  .prediction-summary-grid,
+  .prediction-hero-grid,
+  .controls-header,
+  .section-header,
+  .prediction-filter-bar {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .hero {
+    padding: 22px;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  .standings-table {
+    font-size: 0.86rem;
+  }
+
+  .pick-row,
+  .prediction-card-top {
+    flex-direction: column;
+  }
+
+  .pick-meta {
+    align-items: start;
+  }
+}
