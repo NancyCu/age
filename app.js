@@ -14,8 +14,8 @@ const elements = {
   countMinors: document.querySelector("#countMinors"),
   countSeniors: document.querySelector("#countSeniors"),
   countYoungAdults: document.querySelector("#countYoungAdults"),
+  guessAvailableNamesTableBody: document.querySelector("#guessAvailableNamesTableBody"),
   guessForm: document.querySelector("#guessForm"),
-  guessNamesList: document.querySelector("#guessNamesList"),
   guessesTableBody: document.querySelector("#guessesTableBody"),
   nearestGuessMeta: document.querySelector("#nearestGuessMeta"),
   nearestGuessName: document.querySelector("#nearestGuessName"),
@@ -94,8 +94,8 @@ function renderNearestGuess(nearestGuess) {
 
 function renderSummary(summary) {
   const counts = summary.ageClassifications || {};
+  const availableGuessNames = summary.availableGuessNames || [];
   const userNames = summary.userNames || [];
-  const guessNames = summary.guessNames || [];
 
   elements.countMinors.textContent = String(counts.minors ?? 0);
   elements.countYoungAdults.textContent = String(counts.youngAdults ?? 0);
@@ -103,18 +103,7 @@ function renderSummary(summary) {
   elements.countSeniors.textContent = String(counts.seniors ?? 0);
   elements.countBeyondSeniors.textContent = String(counts.beyondSeniors ?? 0);
   renderSingleColumnTable(elements.userNamesTableBody, userNames, "No age entries yet.");
-  renderNameList(elements.guessNamesList, guessNames, "No estimate entries yet.");
-}
-
-function renderNameList(container, names, emptyMessage) {
-  if (!names.length) {
-    container.innerHTML = `<p class="empty-inline">${emptyMessage}</p>`;
-    return;
-  }
-
-  container.innerHTML = names
-    .map((name) => `<span class="name-pill">${name}</span>`)
-    .join("");
+  renderSingleColumnTable(elements.guessAvailableNamesTableBody, availableGuessNames, "No available first names yet.");
 }
 
 function renderSingleColumnTable(tableBody, names, emptyMessage) {

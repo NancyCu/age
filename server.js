@@ -245,13 +245,19 @@ async function handlePublicSummary(response) {
 }
 
 function buildPublicSummary(store) {
+  const userNames = store.users.map((entry) => entry.name).sort((left, right) => left.localeCompare(right));
+  const guessNames = store.guesses.map((entry) => entry.name).sort((left, right) => left.localeCompare(right));
+  const guessedNameKeys = new Set(store.guesses.map((entry) => normalizeKey(entry.name)));
+  const availableGuessNames = userNames.filter((name) => !guessedNameKeys.has(normalizeKey(name)));
+
   return {
     ageClassifications: getAgeClassificationCounts(store),
     ...getTotals(store),
     guessCount: store.guesses.length,
-    guessNames: store.guesses.map((entry) => entry.name).sort((left, right) => left.localeCompare(right)),
+    availableGuessNames,
+    guessNames,
     userCount: store.users.length,
-    userNames: store.users.map((entry) => entry.name).sort((left, right) => left.localeCompare(right))
+    userNames
   };
 }
 
@@ -273,6 +279,15 @@ async function handleCreateEntry(request, response, type) {
   }
 
   const store = await readStore();
+  if (type === "guesses") {
+    const matchingUser = store.users.some((entry) => normalizeKey(entry.name) === normalizeKey(validated.name));
+
+    if (!matchingUser) {
+      sendJson(response, 400, { error: "Invalid name. Enter a first name that already exists in the User tab." });
+      return;
+    }
+  }
+
   const duplicate = store[type].some((entry) => normalizeKey(entry.name) === normalizeKey(validated.name));
 
   if (duplicate) {

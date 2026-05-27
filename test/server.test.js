@@ -52,6 +52,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
       seniors: 0,
       youngAdults: 0
     });
+    assert.deepEqual(createPayload.summary.availableGuessNames, ["Alice"]);
     assert.deepEqual(createPayload.summary.userNames, ["Alice"]);
     assert.deepEqual(createPayload.summary.guessNames, []);
 
@@ -69,6 +70,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
       seniors: 0,
       youngAdults: 0
     });
+    assert.deepEqual(createPayload.summary.availableGuessNames, ["Alice", "Mia"]);
     assert.deepEqual(createPayload.summary.userNames, ["Alice", "Mia"]);
 
     response = await fetch(`${baseUrl}/api/users`, {
@@ -86,11 +88,28 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(response.status, 409);
 
     response = await fetch(`${baseUrl}/api/guesses`, {
+      body: JSON.stringify({ estimatedTotalAge: 41, name: "Ben" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error, "Invalid name. Enter a first name that already exists in the User tab.");
+
+    response = await fetch(`${baseUrl}/api/guesses`, {
       body: JSON.stringify({ estimatedTotalAge: 34, name: "Ben" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
+    assert.equal(response.status, 400);
+
+    response = await fetch(`${baseUrl}/api/guesses`, {
+      body: JSON.stringify({ estimatedTotalAge: 34, name: "Alice" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
     assert.equal(response.status, 201);
+    createPayload = await response.json();
+    assert.deepEqual(createPayload.summary.availableGuessNames, ["Mia", "Nora"]);
 
     response = await fetch(`${baseUrl}/api/summary`);
     const summary = await response.json();
@@ -102,8 +121,9 @@ test("user, guess, duplicate, and admin flows work", async () => {
         seniors: 1,
         youngAdults: 0
       },
+      availableGuessNames: ["Mia", "Nora"],
       guessCount: 1,
-      guessNames: ["Ben"],
+      guessNames: ["Alice"],
       guessTotal: 34,
       userCount: 3,
       userNames: ["Alice", "Mia", "Nora"],
@@ -132,8 +152,8 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(dashboard.accumulatedAge, 116);
     assert.equal(dashboard.guessTotal, 34);
     assert.equal(dashboard.users[0].name, "Nora");
-    assert.equal(dashboard.guesses[0].name, "Ben");
-    assert.equal(dashboard.nearestGuess.name, "Ben");
+    assert.equal(dashboard.guesses[0].name, "Alice");
+    assert.equal(dashboard.nearestGuess.name, "Alice");
     assert.equal(dashboard.nearestGuess.difference, 82);
 
     response = await fetch(`${baseUrl}/api/admin/clear`, {
@@ -151,6 +171,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
         seniors: 0,
         youngAdults: 0
       },
+      availableGuessNames: [],
       guessCount: 0,
       guessNames: [],
       guessTotal: 0,
