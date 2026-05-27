@@ -1,11 +1,11 @@
 {
-  "name": "nba-playoff-prediction",
+  "name": "age-pool-tracker",
   "version": "1.0.0",
   "private": true,
-  "description": "Interactive NBA playoff dashboard with live standings and betting predictions.",
+  "description": "LAN-hosted app for collecting ages, collecting guesses, and showing admin results.",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "test": "node --test test/server.test.js"
   },
   "engines": {
     "node": ">=18"

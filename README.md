@@ -1,31 +1,40 @@
-# nba-playoff2026
+# Age Pool Tracker
 
-Interactive NBA playoff dashboard with live scoreboard, standings, and prediction cards.
+Small web app for a private home network with three tabs:
+
+- `User`: public form for `(first name, age)` entries with duplicate-name protection and a running age total.
+- `Guess`: public form for `(first name, estimated-total-age)` entries with duplicate-name protection and a running guess total.
+- `Admin`: password-protected dashboard with descending tables, accumulated age, and the participant whose guess is closest to the real total.
 
 ## Run locally
 
-```bash
-npm start
+```powershell
+$env:ADMIN_PASSWORD="choose-a-strong-password"
+.\start-lan.ps1
 ```
 
-The server listens on:
+Open:
 
 - `http://localhost:3000`
-- `http://<your-lan-ip>:3000`
+- `http://<your-computer-lan-ip>:3000`
 
-You can override the bind host or port if needed:
+## Deploy on your private home network
 
-```bash
-$env:HOST="0.0.0.0"
-$env:PORT="3000"
-npm start
+1. Pick one computer on the network to host the app.
+2. Install Node.js 18 or newer on that machine.
+3. In PowerShell on that machine, set a real admin password and start the server:
+
+```powershell
+$env:ADMIN_PASSWORD="replace-this-password"
+$env:SESSION_SECRET="replace-this-with-a-long-random-string"
+.\start-lan.ps1
 ```
 
-## Deploy on your network
+4. Allow inbound traffic to port `3000` on the host computer's private/home firewall profile.
+5. From phones, tablets, or laptops on the same network, visit `http://<host-lan-ip>:3000`.
 
-1. Start the app with `npm start`.
-2. Keep port `3000` open on the machine firewall if other devices need access.
-3. Visit `http://<machine-ip>:3000` from another device on the same network.
-4. Use `http://<machine-ip>:3000/health` for a simple health check.
+## Notes
 
-The UI will fall back to demo data if the live ESPN feeds are unavailable.
+- Data persists in [`data/store.json`](./data/store.json).
+- Names are treated case-insensitively for duplicate detection inside each tab.
+- Default admin password is `admin123` only if `ADMIN_PASSWORD` is not set. Change it before network use.
