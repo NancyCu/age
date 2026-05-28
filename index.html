@@ -36,7 +36,7 @@
         <div class="user-tab-grid">
           <article class="panel standout-panel">
             <p class="section-kicker">User Entry</p>
-            <h2>Add a first name and age</h2>
+            <h2>Enter first name and age</h2>
             <form id="userForm" class="stack narrow-stack">
               <label class="field">
                 <span>First name</span>
@@ -50,10 +50,25 @@
             </form>
           </article>
 
+          <article class="panel names-panel">
+            <p class="section-kicker">Available Names</p>
+            <h2>Users who provided their age</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>First name</th>
+                  </tr>
+                </thead>
+                <tbody id="userNamesTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+
           <article class="panel classification-panel">
-            <p class="section-kicker">Age Classification Count</p>
+            <p class="section-kicker">Age Category Count</p>
             <h2>User breakdown</h2>
-            <p class="summary-copy">Number of users in each age classification.</p>
+            <p class="summary-copy">Number of users in each age category.</p>
             <div class="classification-list">
               <div class="classification-row">
                 <span>Minors (0-17)</span>
@@ -77,36 +92,20 @@
               </div>
             </div>
           </article>
-
-          <article class="panel names-panel">
-            <p class="section-kicker">Available Names</p>
-            <h2>Users who entered an age value</h2>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>First name</th>
-                  </tr>
-                </thead>
-                <tbody id="userNamesTableBody"></tbody>
-              </table>
-            </div>
-          </article>
         </div>
       </section>
 
       <section id="guessTab" class="tab-panel" aria-labelledby="Guess">
-        <div class="panel-grid">
+        <div class="guess-tab-grid">
           <article class="panel standout-panel alt-panel">
-            <p class="section-kicker">Guess Entry</p>
-            <h2>Add a first name and estimated total age</h2>
+            <h2>Enter first name and sum of guest ages</h2>
             <form id="guessForm" class="stack narrow-stack">
               <label class="field">
-                <span>First name</span>
+                <span>Name</span>
                 <input id="guessName" name="name" type="text" maxlength="50" required />
               </label>
               <label class="field">
-                <span>Estimated total age</span>
+                <span>Sum of guest ages</span>
                 <input id="guessAge" name="estimatedTotalAge" type="number" min="0" max="130000" required />
               </label>
               <button class="primary-button alt-button" type="submit">Save guess</button>
@@ -114,16 +113,29 @@
           </article>
 
           <article class="panel names-panel">
-            <p class="section-kicker">Available Names</p>
-            <h2>First names available for guess entry</h2>
+            <h2>Need to provide a Sum of guest ages</h2>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th>First name</th>
+                    <th>Name</th>
                   </tr>
                 </thead>
                 <tbody id="guessAvailableNamesTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel names-panel">
+            <h2>Already provided a Sum of guest ages</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                  </tr>
+                </thead>
+                <tbody id="guessSubmittedNamesTableBody"></tbody>
               </table>
             </div>
           </article>
@@ -141,7 +153,6 @@
             </label>
             <button class="primary-button" type="submit">Log in</button>
           </form>
-          <p class="hint-text">Default password is <code>admin123</code>. Change it before sharing this on your network.</p>
         </div>
 
         <div id="adminDashboard" class="admin-dashboard hidden">
@@ -193,15 +204,15 @@
               <div class="table-header">
                 <div>
                   <p class="section-kicker">Guesses</p>
-                  <h3>First name and estimated total age</h3>
+                  <h3>Name and sum of guest ages</h3>
                 </div>
               </div>
               <div class="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>First name</th>
-                      <th>Estimated total age</th>
+                      <th>Name</th>
+                      <th>Sum of guest ages</th>
                     </tr>
                   </thead>
                   <tbody id="guessesTableBody"></tbody>

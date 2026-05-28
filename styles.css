@@ -159,7 +159,8 @@ th {
 
 .panel-grid,
 .stats-row,
-.user-tab-grid {
+.user-tab-grid,
+.guess-tab-grid {
   display: grid;
   gap: 18px;
 }
@@ -169,6 +170,10 @@ th {
 }
 
 .user-tab-grid {
+  grid-template-columns: 1.2fr 0.9fr 0.9fr;
+}
+
+.guess-tab-grid {
   grid-template-columns: 1.2fr 0.9fr 0.9fr;
 }
 
@@ -420,7 +425,8 @@ code {
   .panel-grid,
   .admin-grid,
   .stats-row,
-  .user-tab-grid {
+  .user-tab-grid,
+  .guess-tab-grid {
     grid-template-columns: 1fr;
   }
 }

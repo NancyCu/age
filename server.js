@@ -11,7 +11,7 @@ const staticFiles = new Set(["index.html", "app.js", "styles.css"]);
 
 const host = process.env.HOST || "0.0.0.0";
 const port = Number(process.env.PORT) || 3000;
-const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+const adminPassword = process.env.ADMIN_PASSWORD || "admin3462";
 const sessionSecret = process.env.SESSION_SECRET || "local-network-session-secret";
 const sessionDurationMs = 12 * 60 * 60 * 1000;
 
@@ -472,10 +472,6 @@ function createServer() {
 
 async function startServer() {
   await ensureStore();
-
-  if (adminPassword === "admin123") {
-    console.warn("Using the default admin password. Set ADMIN_PASSWORD before exposing the app on your network.");
-  }
 
   const server = createServer();
 

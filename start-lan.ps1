@@ -2,7 +2,7 @@ $env:HOST = "0.0.0.0"
 $env:PORT = "3000"
 
 if (-not $env:ADMIN_PASSWORD) {
-  $env:ADMIN_PASSWORD = "admin123"
+  $env:ADMIN_PASSWORD = "admin3462"
 }
 
 if (-not $env:SESSION_SECRET) {
@@ -13,6 +13,5 @@ if (-not $env:SESSION_SECRET) {
 
 Write-Host "Starting Age Pool Tracker on http://localhost:$env:PORT"
 Write-Host "To share on your LAN, open http://<this-computer-ip>:$env:PORT from another device."
-Write-Host "Admin password: $env:ADMIN_PASSWORD"
 
 node server.js

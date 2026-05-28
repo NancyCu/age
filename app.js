@@ -16,6 +16,7 @@ const elements = {
   countYoungAdults: document.querySelector("#countYoungAdults"),
   guessAvailableNamesTableBody: document.querySelector("#guessAvailableNamesTableBody"),
   guessForm: document.querySelector("#guessForm"),
+  guessSubmittedNamesTableBody: document.querySelector("#guessSubmittedNamesTableBody"),
   guessesTableBody: document.querySelector("#guessesTableBody"),
   nearestGuessMeta: document.querySelector("#nearestGuessMeta"),
   nearestGuessName: document.querySelector("#nearestGuessName"),
@@ -95,6 +96,7 @@ function renderNearestGuess(nearestGuess) {
 function renderSummary(summary) {
   const counts = summary.ageClassifications || {};
   const availableGuessNames = summary.availableGuessNames || [];
+  const guessNames = summary.guessNames || [];
   const userNames = summary.userNames || [];
 
   elements.countMinors.textContent = String(counts.minors ?? 0);
@@ -104,6 +106,7 @@ function renderSummary(summary) {
   elements.countBeyondSeniors.textContent = String(counts.beyondSeniors ?? 0);
   renderSingleColumnTable(elements.userNamesTableBody, userNames, "No age entries yet.");
   renderSingleColumnTable(elements.guessAvailableNamesTableBody, availableGuessNames, "No available first names yet.");
+  renderSingleColumnTable(elements.guessSubmittedNamesTableBody, guessNames, "No guesses submitted yet.");
 }
 
 function renderSingleColumnTable(tableBody, names, emptyMessage) {
