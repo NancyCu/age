@@ -48,9 +48,10 @@ body {
 
 .hero {
   display: grid;
-  grid-template-columns: 1.4fr 0.8fr;
   gap: 18px;
   padding: 28px;
+  text-align: center;
+  justify-items: center;
   background:
     linear-gradient(135deg, rgba(255, 249, 239, 0.95), rgba(249, 242, 231, 0.82)),
     repeating-linear-gradient(-45deg, transparent 0, transparent 16px, rgba(45, 109, 103, 0.04) 16px, rgba(45, 109, 103, 0.04) 32px);
@@ -103,6 +104,7 @@ th {
 
 .hero-copy {
   max-width: 56ch;
+  margin-inline: auto;
   line-height: 1.65;
 }
 
@@ -147,6 +149,15 @@ th {
   transform: translateY(-1px);
   background: linear-gradient(135deg, var(--orange), #e89b49);
   color: #fffefb;
+}
+
+.tab-button.is-disabled,
+.tab-button.is-disabled:hover {
+  transform: none;
+  background: rgba(125, 115, 102, 0.2);
+  color: rgba(33, 25, 16, 0.42);
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .tab-panel {
@@ -303,6 +314,12 @@ th {
   padding: 13px 14px;
   font: inherit;
   background: var(--surface-strong);
+}
+
+.field input:disabled,
+.primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .primary-button,

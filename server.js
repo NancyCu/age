@@ -23,6 +23,9 @@ const contentTypes = {
 };
 
 const defaultStore = {
+  settings: {
+    guessEnabled: true
+  },
   users: [],
   guesses: []
 };
@@ -72,6 +75,9 @@ async function readStore() {
   const parsed = safeJsonParse(file, defaultStore);
 
   return {
+    settings: {
+      guessEnabled: parsed.settings?.guessEnabled !== false
+    },
     users: Array.isArray(parsed.users) ? parsed.users : [],
     guesses: Array.isArray(parsed.guesses) ? parsed.guesses : []
   };
@@ -253,6 +259,7 @@ function buildPublicSummary(store) {
   return {
     ageClassifications: getAgeClassificationCounts(store),
     ...getTotals(store),
+    guessEnabled: store.settings?.guessEnabled !== false,
     guessCount: store.guesses.length,
     availableGuessNames,
     guessNames,
@@ -280,6 +287,11 @@ async function handleCreateEntry(request, response, type) {
 
   const store = await readStore();
   if (type === "guesses") {
+    if (store.settings?.guessEnabled === false) {
+      sendJson(response, 403, { error: "Guess tab is currently disabled." });
+      return;
+    }
+
     const matchingUser = store.users.some((entry) => normalizeKey(entry.name) === normalizeKey(validated.name));
 
     if (!matchingUser) {
@@ -342,10 +354,44 @@ async function handleAdminDashboard(request, response) {
 
   sendJson(response, 200, {
     accumulatedAge: totals.userTotal,
+    guessEnabled: store.settings?.guessEnabled !== false,
     guessTotal: totals.guessTotal,
     guesses: sortDescending(store.guesses, "estimatedTotalAge"),
     nearestGuess: findNearestGuess(store),
     users: sortDescending(store.users, "age")
+  });
+}
+
+async function handleAdminGuessToggle(request, response) {
+  if (!hasAdminSession(request)) {
+    sendJson(response, 401, { error: "Admin login required." });
+    return;
+  }
+
+  const body = await readRequestBody(request);
+  if (!body || typeof body.enabled !== "boolean") {
+    sendJson(response, 400, { error: "Enabled flag must be provided." });
+    return;
+  }
+
+  const store = await readStore();
+  store.settings = {
+    guessEnabled: body.enabled
+  };
+  await writeStore(store);
+
+  const totals = getTotals(store);
+  sendJson(response, 200, {
+    dashboard: {
+      accumulatedAge: totals.userTotal,
+      guessEnabled: store.settings.guessEnabled,
+      guessTotal: totals.guessTotal,
+      guesses: sortDescending(store.guesses, "estimatedTotalAge"),
+      nearestGuess: findNearestGuess(store),
+      users: sortDescending(store.users, "age")
+    },
+    ok: true,
+    summary: buildPublicSummary(store)
   });
 }
 
@@ -355,21 +401,28 @@ async function handleAdminClear(request, response) {
     return;
   }
 
-  await writeStore({
+  const existingStore = await readStore();
+  const clearedStore = {
+    settings: {
+      guessEnabled: existingStore.settings?.guessEnabled !== false
+    },
     users: [],
     guesses: []
-  });
+  };
+
+  await writeStore(clearedStore);
 
   sendJson(response, 200, {
     dashboard: {
       accumulatedAge: 0,
+      guessEnabled: clearedStore.settings.guessEnabled,
       guessTotal: 0,
       guesses: [],
       nearestGuess: null,
       users: []
     },
     ok: true,
-    summary: buildPublicSummary(defaultStore)
+    summary: buildPublicSummary(clearedStore)
   });
 }
 
@@ -445,6 +498,11 @@ function createServer() {
 
       if (request.method === "POST" && url.pathname === "/api/admin/clear") {
         await handleAdminClear(request, response);
+        return;
+      }
+
+      if (request.method === "POST" && url.pathname === "/api/admin/guess-tab") {
+        await handleAdminGuessToggle(request, response);
         return;
       }
 

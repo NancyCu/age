@@ -12,6 +12,9 @@ async function resetStore() {
     dataFile,
     JSON.stringify(
       {
+        settings: {
+          guessEnabled: true
+        },
         guesses: [],
         users: []
       },
@@ -53,6 +56,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
       youngAdults: 0
     });
     assert.deepEqual(createPayload.summary.availableGuessNames, ["Alice"]);
+    assert.equal(createPayload.summary.guessEnabled, true);
     assert.deepEqual(createPayload.summary.userNames, ["Alice"]);
     assert.deepEqual(createPayload.summary.guessNames, []);
 
@@ -122,6 +126,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
         youngAdults: 0
       },
       availableGuessNames: ["Mia", "Nora"],
+      guessEnabled: true,
       guessCount: 1,
       guessNames: ["Alice"],
       guessTotal: 34,
@@ -150,11 +155,51 @@ test("user, guess, duplicate, and admin flows work", async () => {
 
     const dashboard = await response.json();
     assert.equal(dashboard.accumulatedAge, 116);
+    assert.equal(dashboard.guessEnabled, true);
     assert.equal(dashboard.guessTotal, 34);
     assert.equal(dashboard.users[0].name, "Nora");
     assert.equal(dashboard.guesses[0].name, "Alice");
     assert.equal(dashboard.nearestGuess.name, "Alice");
     assert.equal(dashboard.nearestGuess.difference, 82);
+
+    response = await fetch(`${baseUrl}/api/admin/guess-tab`, {
+      body: JSON.stringify({ enabled: false }),
+      headers: { Cookie: cookie, "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 200);
+    const disabledGuessTab = await response.json();
+    assert.equal(disabledGuessTab.summary.guessEnabled, false);
+    assert.equal(disabledGuessTab.dashboard.guessEnabled, false);
+
+    response = await fetch(`${baseUrl}/api/summary`);
+    const disabledSummary = await response.json();
+    assert.equal(disabledSummary.guessEnabled, false);
+
+    response = await fetch(`${baseUrl}/api/guesses`, {
+      body: JSON.stringify({ estimatedTotalAge: 120, name: "Mia" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 403);
+    assert.equal((await response.json()).error, "Guess tab is currently disabled.");
+
+    response = await fetch(`${baseUrl}/api/admin/guess-tab`, {
+      body: JSON.stringify({ enabled: true }),
+      headers: { Cookie: cookie, "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 200);
+    const enabledGuessTab = await response.json();
+    assert.equal(enabledGuessTab.summary.guessEnabled, true);
+    assert.equal(enabledGuessTab.dashboard.guessEnabled, true);
+
+    response = await fetch(`${baseUrl}/api/guesses`, {
+      body: JSON.stringify({ estimatedTotalAge: 120, name: "Mia" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 201);
 
     response = await fetch(`${baseUrl}/api/admin/clear`, {
       headers: { Cookie: cookie, "Content-Type": "application/json" },
@@ -172,6 +217,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
         youngAdults: 0
       },
       availableGuessNames: [],
+      guessEnabled: true,
       guessCount: 0,
       guessNames: [],
       guessTotal: 0,
@@ -180,6 +226,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
       userTotal: 0
     });
     assert.equal(cleared.dashboard.accumulatedAge, 0);
+    assert.equal(cleared.dashboard.guessEnabled, true);
     assert.equal(cleared.dashboard.guessTotal, 0);
     assert.equal(cleared.dashboard.nearestGuess, null);
     assert.deepEqual(cleared.dashboard.users, []);

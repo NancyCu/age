@@ -1,11 +1,13 @@
 const state = {
-  adminAuthenticated: false
+  adminAuthenticated: false,
+  guessEnabled: true
 };
 
 const elements = {
   adminClearButton: document.querySelector("#adminClearButton"),
   adminAccumulatedAge: document.querySelector("#adminAccumulatedAge"),
   adminDashboard: document.querySelector("#adminDashboard"),
+  adminGuessToggleButton: document.querySelector("#adminGuessToggleButton"),
   adminLoginForm: document.querySelector("#adminLoginForm"),
   adminLoginPanel: document.querySelector("#adminLoginPanel"),
   adminLogoutButton: document.querySelector("#adminLogoutButton"),
@@ -20,6 +22,7 @@ const elements = {
   guessesTableBody: document.querySelector("#guessesTableBody"),
   nearestGuessMeta: document.querySelector("#nearestGuessMeta"),
   nearestGuessName: document.querySelector("#nearestGuessName"),
+  guessTabButton: document.querySelector('[data-tab-target="guessTab"]'),
   tabButtons: document.querySelectorAll(".tab-button"),
   tabPanels: document.querySelectorAll(".tab-panel"),
   userForm: document.querySelector("#userForm"),
@@ -45,6 +48,10 @@ async function requestJson(url, options = {}) {
 }
 
 function activateTab(targetId) {
+  if (targetId === "guessTab" && !state.guessEnabled) {
+    return;
+  }
+
   elements.tabButtons.forEach((button) => {
     button.classList.toggle("is-active", button.dataset.tabTarget === targetId);
   });
@@ -58,6 +65,21 @@ function setAdminView(authenticated) {
   state.adminAuthenticated = authenticated;
   elements.adminLoginPanel.classList.toggle("hidden", authenticated);
   elements.adminDashboard.classList.toggle("hidden", !authenticated);
+}
+
+function applyGuessTabState() {
+  const disabled = !state.guessEnabled;
+
+  elements.guessTabButton.classList.toggle("is-disabled", disabled);
+  elements.guessTabButton.setAttribute("aria-disabled", String(disabled));
+  elements.guessTabButton.disabled = disabled;
+  elements.guessForm.querySelectorAll("input, button").forEach((control) => {
+    control.disabled = disabled;
+  });
+
+  if (disabled && elements.guessTabButton.classList.contains("is-active")) {
+    activateTab("userTab");
+  }
 }
 
 function renderTable(tableBody, rows, valueKey) {
@@ -97,6 +119,7 @@ function renderSummary(summary) {
   const counts = summary.ageClassifications || {};
   const availableGuessNames = summary.availableGuessNames || [];
   const guessNames = summary.guessNames || [];
+  state.guessEnabled = summary.guessEnabled !== false;
   const userNames = summary.userNames || [];
 
   elements.countMinors.textContent = String(counts.minors ?? 0);
@@ -107,6 +130,7 @@ function renderSummary(summary) {
   renderSingleColumnTable(elements.userNamesTableBody, userNames, "No age entries yet.");
   renderSingleColumnTable(elements.guessAvailableNamesTableBody, availableGuessNames, "No available first names yet.");
   renderSingleColumnTable(elements.guessSubmittedNamesTableBody, guessNames, "No guesses submitted yet.");
+  applyGuessTabState();
 }
 
 function renderSingleColumnTable(tableBody, names, emptyMessage) {
@@ -131,10 +155,16 @@ function renderSingleColumnTable(tableBody, names, emptyMessage) {
 }
 
 function renderAdminDashboard(dashboard) {
+  if (typeof dashboard.guessEnabled === "boolean") {
+    state.guessEnabled = dashboard.guessEnabled;
+  }
+
   elements.adminAccumulatedAge.textContent = String(dashboard.accumulatedAge ?? 0);
+  elements.adminGuessToggleButton.textContent = state.guessEnabled ? "Disable Guess Tab" : "Enable Guess Tab";
   renderNearestGuess(dashboard.nearestGuess ?? null);
   renderTable(elements.usersTableBody, dashboard.users || [], "age");
   renderTable(elements.guessesTableBody, dashboard.guesses || [], "estimatedTotalAge");
+  applyGuessTabState();
 }
 
 async function refreshSummary() {
@@ -244,6 +274,19 @@ elements.adminClearButton.addEventListener("click", async () => {
 
   try {
     const result = await requestJson("/api/admin/clear", { method: "POST" });
+    renderSummary(result.summary || {});
+    renderAdminDashboard(result.dashboard || {});
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
+elements.adminGuessToggleButton.addEventListener("click", async () => {
+  try {
+    const result = await requestJson("/api/admin/guess-tab", {
+      body: JSON.stringify({ enabled: !state.guessEnabled }),
+      method: "POST"
+    });
     renderSummary(result.summary || {});
     renderAdminDashboard(result.dashboard || {});
   } catch (error) {
