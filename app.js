@@ -131,9 +131,9 @@ function renderSingleColumnTable(tableBody, rows, emptyMessage) {
 }
 
 function renderNearestGuess(nearestGuess) {
-  if (!state.winnerRevealed) {
+  if (state.winnerRevealed) {
     elements.nearestGuessName.textContent = "Teddy-Tami-Tili-Guchi-Damien";
-    elements.nearestGuessMeta.textContent = "Temporary winner. Select Reveal Winner to show the actual winner.";
+    elements.nearestGuessMeta.textContent = "Temporary winner is shown while Mask Winner is active.";
     return;
   }
 
@@ -173,7 +173,7 @@ function renderAdminDashboard(dashboard) {
     state.winnerRevealed = dashboard.winnerRevealed;
   }
 
-  elements.adminAccumulatedAge.textContent = String(dashboard.accumulatedAge ?? 0);
+  elements.adminAccumulatedAge.textContent = state.winnerRevealed ? "Hidden" : String(dashboard.accumulatedAge ?? 0);
   elements.adminGuessToggleButton.textContent = state.guessEnabled ? "Disable Guess Tab" : "Enable Guess Tab";
   elements.adminRevealWinnerButton.textContent = state.winnerRevealed ? "Mask Winner" : "Touch Down";
   renderNearestGuess(dashboard.nearestGuess ?? null);
@@ -183,7 +183,7 @@ function renderAdminDashboard(dashboard) {
 }
 
 function renderAdminGuessesTable(guesses) {
-  const hiddenValue = state.winnerRevealed ? null : "Hidden";
+  const hiddenValue = state.winnerRevealed ? "Hidden" : null;
   renderTable(elements.adminGuessesTableBody, guesses, "estimatedTotalAge", { hiddenValue });
 }
 
@@ -215,6 +215,19 @@ async function refreshAdminDashboard() {
   renderAdminDashboard(dashboard);
 }
 
+async function activateAdminMaskState() {
+  if (!state.adminAuthenticated) {
+    return;
+  }
+
+  const result = await requestJson("/api/admin/reveal-winner", {
+    body: JSON.stringify({ winnerRevealed: true }),
+    method: "POST"
+  });
+  renderSummary(result.summary || {});
+  renderAdminDashboard(result.dashboard || {});
+}
+
 async function submitForm(url, payload, form) {
   try {
     const result = await requestJson(url, {
@@ -242,8 +255,16 @@ async function submitForm(url, payload, form) {
 }
 
 elements.tabButtons.forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     activateTab(button.dataset.tabTarget);
+
+    if (button.dataset.tabTarget === "adminTab") {
+      try {
+        await activateAdminMaskState();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
   });
 });
 
