@@ -1,33 +1,35 @@
 const state = {
   adminAuthenticated: false,
-  guessEnabled: true
+  guessEnabled: true,
+  winnerRevealed: false
 };
 
 const elements = {
   adminClearButton: document.querySelector("#adminClearButton"),
   adminAccumulatedAge: document.querySelector("#adminAccumulatedAge"),
   adminDashboard: document.querySelector("#adminDashboard"),
+  adminGuessesTableBody: document.querySelector("#adminGuessesTableBody"),
   adminGuessToggleButton: document.querySelector("#adminGuessToggleButton"),
   adminLoginForm: document.querySelector("#adminLoginForm"),
   adminLoginPanel: document.querySelector("#adminLoginPanel"),
   adminLogoutButton: document.querySelector("#adminLogoutButton"),
+  adminRevealWinnerButton: document.querySelector("#adminRevealWinnerButton"),
+  adminUsersTableBody: document.querySelector("#adminUsersTableBody"),
   countAdults: document.querySelector("#countAdults"),
   countBeyondSeniors: document.querySelector("#countBeyondSeniors"),
   countMinors: document.querySelector("#countMinors"),
   countSeniors: document.querySelector("#countSeniors"),
   countYoungAdults: document.querySelector("#countYoungAdults"),
-  guessAvailableNamesTableBody: document.querySelector("#guessAvailableNamesTableBody"),
+  guessAvailableNamesList: document.querySelector("#guessAvailableNamesList"),
   guessForm: document.querySelector("#guessForm"),
-  guessSubmittedNamesTableBody: document.querySelector("#guessSubmittedNamesTableBody"),
-  guessesTableBody: document.querySelector("#guessesTableBody"),
+  guessSubmittedNamesList: document.querySelector("#guessSubmittedNamesList"),
   nearestGuessMeta: document.querySelector("#nearestGuessMeta"),
   nearestGuessName: document.querySelector("#nearestGuessName"),
   guessTabButton: document.querySelector('[data-tab-target="guessTab"]'),
   tabButtons: document.querySelectorAll(".tab-button"),
   tabPanels: document.querySelectorAll(".tab-panel"),
   userForm: document.querySelector("#userForm"),
-  userNamesTableBody: document.querySelector("#userNamesTableBody"),
-  usersTableBody: document.querySelector("#usersTableBody")
+  userNamesList: document.querySelector("#userNamesList")
 };
 
 async function requestJson(url, options = {}) {
@@ -82,7 +84,9 @@ function applyGuessTabState() {
   }
 }
 
-function renderTable(tableBody, rows, valueKey) {
+function renderTable(tableBody, rows, valueKey, options = {}) {
+  const { hiddenValue = null } = options;
+
   if (!rows.length) {
     tableBody.innerHTML = `
       <tr>
@@ -94,10 +98,32 @@ function renderTable(tableBody, rows, valueKey) {
 
   tableBody.innerHTML = rows
     .map((row) => {
+      const displayValue = hiddenValue === null ? row[valueKey] : hiddenValue;
       return `
         <tr>
           <td>${row.name}</td>
-          <td>${row[valueKey]}</td>
+          <td>${displayValue}</td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
+function renderSingleColumnTable(tableBody, rows, emptyMessage) {
+  if (!rows.length) {
+    tableBody.innerHTML = `
+      <tr>
+        <td class="empty-row">${emptyMessage}</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tableBody.innerHTML = rows
+    .map((row) => {
+      return `
+        <tr>
+          <td>${row.name}</td>
         </tr>
       `;
     })
@@ -105,9 +131,15 @@ function renderTable(tableBody, rows, valueKey) {
 }
 
 function renderNearestGuess(nearestGuess) {
+  if (!state.winnerRevealed) {
+    elements.nearestGuessName.textContent = "Teddy-Tami-Tili-Guchi-Damien";
+    elements.nearestGuessMeta.textContent = "Temporary winner. Select Reveal Winner to show the actual winner.";
+    return;
+  }
+
   if (!nearestGuess) {
     elements.nearestGuessName.textContent = "No winner yet";
-    elements.nearestGuessMeta.textContent = "Waiting for guesses.";
+    elements.nearestGuessMeta.textContent = "Waiting for best guess";
     return;
   }
 
@@ -127,44 +159,46 @@ function renderSummary(summary) {
   elements.countAdults.textContent = String(counts.adults ?? 0);
   elements.countSeniors.textContent = String(counts.seniors ?? 0);
   elements.countBeyondSeniors.textContent = String(counts.beyondSeniors ?? 0);
-  renderSingleColumnTable(elements.userNamesTableBody, userNames, "No age entries yet.");
-  renderSingleColumnTable(elements.guessAvailableNamesTableBody, availableGuessNames, "No available first names yet.");
-  renderSingleColumnTable(elements.guessSubmittedNamesTableBody, guessNames, "No guesses submitted yet.");
+  renderColoredNameList(elements.userNamesList, userNames, "No age entries yet.");
+  renderColoredNameList(elements.guessAvailableNamesList, availableGuessNames, "No available names yet.");
+  renderColoredNameList(elements.guessSubmittedNamesList, guessNames, "No guesses submitted yet.");
   applyGuessTabState();
-}
-
-function renderSingleColumnTable(tableBody, names, emptyMessage) {
-  if (!names.length) {
-    tableBody.innerHTML = `
-      <tr>
-        <td class="empty-row">${emptyMessage}</td>
-      </tr>
-    `;
-    return;
-  }
-
-  tableBody.innerHTML = names
-    .map((name) => {
-      return `
-        <tr>
-          <td>${name}</td>
-        </tr>
-      `;
-    })
-    .join("");
 }
 
 function renderAdminDashboard(dashboard) {
   if (typeof dashboard.guessEnabled === "boolean") {
     state.guessEnabled = dashboard.guessEnabled;
   }
+  if (typeof dashboard.winnerRevealed === "boolean") {
+    state.winnerRevealed = dashboard.winnerRevealed;
+  }
 
   elements.adminAccumulatedAge.textContent = String(dashboard.accumulatedAge ?? 0);
   elements.adminGuessToggleButton.textContent = state.guessEnabled ? "Disable Guess Tab" : "Enable Guess Tab";
+  elements.adminRevealWinnerButton.textContent = state.winnerRevealed ? "Mask Winner" : "Touch Down";
   renderNearestGuess(dashboard.nearestGuess ?? null);
-  renderTable(elements.usersTableBody, dashboard.users || [], "age");
-  renderTable(elements.guessesTableBody, dashboard.guesses || [], "estimatedTotalAge");
+  renderSingleColumnTable(elements.adminUsersTableBody, dashboard.users || [], "No entries yet.");
+  renderAdminGuessesTable(dashboard.guesses || []);
   applyGuessTabState();
+}
+
+function renderAdminGuessesTable(guesses) {
+  const hiddenValue = state.winnerRevealed ? null : "Hidden";
+  renderTable(elements.adminGuessesTableBody, guesses, "estimatedTotalAge", { hiddenValue });
+}
+
+function renderColoredNameList(container, names, emptyMessage) {
+  if (!names.length) {
+    container.textContent = emptyMessage;
+    return;
+  }
+
+  container.innerHTML = names
+    .map((name, index) => {
+      const comma = index < names.length - 1 ? '<span class="name-comma">, </span>' : "";
+      return `<span class="available-name-item available-name-item-${index % 2}">${name}</span>${comma}`;
+    })
+    .join("");
 }
 
 async function refreshSummary() {
@@ -285,6 +319,19 @@ elements.adminGuessToggleButton.addEventListener("click", async () => {
   try {
     const result = await requestJson("/api/admin/guess-tab", {
       body: JSON.stringify({ enabled: !state.guessEnabled }),
+      method: "POST"
+    });
+    renderSummary(result.summary || {});
+    renderAdminDashboard(result.dashboard || {});
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
+elements.adminRevealWinnerButton.addEventListener("click", async () => {
+  try {
+    const result = await requestJson("/api/admin/reveal-winner", {
+      body: JSON.stringify({ winnerRevealed: !state.winnerRevealed }),
       method: "POST"
     });
     renderSummary(result.summary || {});

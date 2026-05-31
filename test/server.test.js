@@ -13,7 +13,8 @@ async function resetStore() {
     JSON.stringify(
       {
         settings: {
-          guessEnabled: true
+          guessEnabled: true,
+          winnerRevealed: false
         },
         guesses: [],
         users: []
@@ -157,10 +158,31 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(dashboard.accumulatedAge, 116);
     assert.equal(dashboard.guessEnabled, true);
     assert.equal(dashboard.guessTotal, 34);
+    assert.equal(dashboard.winnerRevealed, false);
     assert.equal(dashboard.users[0].name, "Nora");
     assert.equal(dashboard.guesses[0].name, "Alice");
     assert.equal(dashboard.nearestGuess.name, "Alice");
     assert.equal(dashboard.nearestGuess.difference, 82);
+
+    response = await fetch(`${baseUrl}/api/admin/reveal-winner`, {
+      body: JSON.stringify({ winnerRevealed: true }),
+      headers: { Cookie: cookie, "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 200);
+    const revealedWinner = await response.json();
+    assert.equal(revealedWinner.dashboard.winnerRevealed, true);
+    assert.equal(revealedWinner.dashboard.nearestGuess.name, "Alice");
+
+    response = await fetch(`${baseUrl}/api/admin/reveal-winner`, {
+      body: JSON.stringify({ winnerRevealed: false }),
+      headers: { Cookie: cookie, "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 200);
+    const maskedWinner = await response.json();
+    assert.equal(maskedWinner.dashboard.winnerRevealed, false);
+    assert.equal(maskedWinner.dashboard.nearestGuess.name, "Alice");
 
     response = await fetch(`${baseUrl}/api/admin/guess-tab`, {
       body: JSON.stringify({ enabled: false }),
@@ -229,6 +251,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(cleared.dashboard.guessEnabled, true);
     assert.equal(cleared.dashboard.guessTotal, 0);
     assert.equal(cleared.dashboard.nearestGuess, null);
+    assert.equal(cleared.dashboard.winnerRevealed, false);
     assert.deepEqual(cleared.dashboard.users, []);
     assert.deepEqual(cleared.dashboard.guesses, []);
 
