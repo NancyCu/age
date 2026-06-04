@@ -1,0 +1,31 @@
+runConfig:
+  maxInstances: 5
+  minInstances: 0
+  concurrency: 40
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  - variable: DATA_BACKEND
+    value: firebase
+  - variable: FIREBASE_PROJECT_ID
+    value: shawncountdown
+  - variable: FIREBASE_DATABASE_URL
+    value: https://shawncountdown-default-rtdb.firebaseio.com
+  - variable: FIREBASE_GAME_ID
+    value: age-game
+  - variable: FIREBASE_DATA_ROOT
+    value: ageGames
+  - variable: ADMIN_PASSWORD
+    secret: age-game-admin-password
+  - variable: SESSION_SECRET
+    secret: age-game-session-secret
+
+scripts:
+  buildCommand: npm run build
+  runCommand: npm start
+
+outputFiles:
+  serverApp:
+    include:
+      - .

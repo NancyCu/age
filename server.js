@@ -2,30 +2,42 @@ const http = require("http");
 const fs = require("fs/promises");
 const path = require("path");
 const crypto = require("crypto");
+const { execFile } = require("child_process");
 const os = require("os");
+const QRCode = require("qrcode");
 
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
 const dataFile = path.join(dataDir, "store.json");
-const staticFiles = new Set(["index.html", "app.js", "styles.css"]);
+const staticFiles = new Set(["index.html", "instructions.html", "app.js", "host.html", "host.js", "styles.css"]);
+const assetDir = path.join(rootDir, "public", "assets");
 
 const host = process.env.HOST || "0.0.0.0";
 const port = Number(process.env.PORT) || 3000;
 const adminPassword = process.env.ADMIN_PASSWORD || "admin3462";
 const sessionSecret = process.env.SESSION_SECRET || "local-network-session-secret";
 const sessionDurationMs = 12 * 60 * 60 * 1000;
+const fakeWinnerName = "Teddy-Tami-Tili-Guchi-Damien";
+const winnerModes = new Set(["hidden", "real", "fake"]);
+const dataBackend = String(process.env.DATA_BACKEND || "local").toLowerCase();
+const firebaseGameId = process.env.FIREBASE_GAME_ID || "age-pool-tracker";
+const firebaseDatabaseURL = process.env.FIREBASE_DATABASE_URL || "https://shawncountdown-default-rtdb.firebaseio.com";
+const firebaseDataRoot = process.env.FIREBASE_DATA_ROOT || "ageGames";
+const liveClients = new Set();
+let storeAdapterPromise = null;
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8"
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png"
 };
 
 const defaultStore = {
   settings: {
     guessEnabled: true,
-    winnerRevealed: false
+    winnerMode: "hidden"
   },
   users: [],
   guesses: []
@@ -52,6 +64,76 @@ function parseNumber(value) {
   return Number.isFinite(number) ? number : NaN;
 }
 
+function createHash(value) {
+  return crypto
+    .createHmac("sha256", sessionSecret)
+    .update(String(value))
+    .digest("base64url");
+}
+
+function normalizeSourceToken(value) {
+  const token = String(value || "").trim();
+  return /^[a-zA-Z0-9_-]{16,128}$/.test(token) ? token : "";
+}
+
+function parseBirthDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || "").trim());
+
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+    return null;
+  }
+
+  return { day, month, year };
+}
+
+function calculateAgeFromBirthDate(birthDate, now = new Date()) {
+  let age = now.getFullYear() - birthDate.year;
+  const currentMonth = now.getMonth() + 1;
+  const currentDay = now.getDate();
+
+  if (currentMonth < birthDate.month || (currentMonth === birthDate.month && currentDay < birthDate.day)) {
+    age -= 1;
+  }
+
+  return age;
+}
+
+function normalizeBirthDate(value) {
+  const birthDate = parseBirthDate(value);
+
+  if (!birthDate) {
+    return { error: "Choose a valid birth month, day, and year." };
+  }
+
+  const birthTime = Date.UTC(birthDate.year, birthDate.month - 1, birthDate.day);
+  const today = new Date();
+  const todayTime = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+
+  if (birthTime > todayTime) {
+    return { error: "Birthday cannot be in the future." };
+  }
+
+  const age = calculateAgeFromBirthDate(birthDate, today);
+
+  if (!Number.isInteger(age) || age < 0 || age > 130) {
+    return { error: "Birthday must calculate to an age from 0 to 130." };
+  }
+
+  return {
+    age,
+    birthDate: `${birthDate.year}-${String(birthDate.month).padStart(2, "0")}-${String(birthDate.day).padStart(2, "0")}`
+  };
+}
+
 function safeJsonParse(value, fallback) {
   try {
     return JSON.parse(value);
@@ -60,7 +142,71 @@ function safeJsonParse(value, fallback) {
   }
 }
 
-async function ensureStore() {
+function parseFirebaseCliJson(stdout, fallback) {
+  const parsed = safeJsonParse(stdout, undefined);
+  if (parsed !== undefined) {
+    return parsed;
+  }
+
+  const lines = String(stdout || "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  for (const line of lines) {
+    const lineValue = safeJsonParse(line, undefined);
+    if (lineValue === undefined) {
+      continue;
+    }
+
+    if (lineValue && typeof lineValue === "object" && lineValue.status && Object.keys(lineValue).length === 1) {
+      continue;
+    }
+
+    return lineValue;
+  }
+
+  return fallback;
+}
+
+function normalizeWinnerMode(settings = {}) {
+  if (winnerModes.has(settings.winnerMode)) {
+    return settings.winnerMode;
+  }
+
+  if (settings.winnerRevealed === true) {
+    return "fake";
+  }
+
+  return "hidden";
+}
+
+function buildSettings(settings = {}) {
+  return {
+    guessEnabled: settings.guessEnabled !== false,
+    winnerMode: normalizeWinnerMode(settings)
+  };
+}
+
+function cloneStore(store) {
+  return JSON.parse(JSON.stringify(store));
+}
+
+function runCommand(command, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    execFile(command, args, { maxBuffer: 10 * 1024 * 1024, ...options }, (error, stdout, stderr) => {
+      if (error) {
+        error.message = `${error.message}${stderr ? `\n${stderr}` : ""}`;
+        reject(error);
+        return;
+      }
+
+      resolve(stdout);
+    });
+  });
+}
+
+async function ensureLocalStore() {
   await fs.mkdir(dataDir, { recursive: true });
 
   try {
@@ -70,24 +216,163 @@ async function ensureStore() {
   }
 }
 
-async function readStore() {
-  await ensureStore();
+async function readLocalStore() {
+  await ensureLocalStore();
   const file = await fs.readFile(dataFile, "utf8");
-  const parsed = safeJsonParse(file, defaultStore);
+  return safeJsonParse(file, defaultStore);
+}
+
+async function writeLocalStore(store) {
+  await ensureLocalStore();
+  await fs.writeFile(dataFile, JSON.stringify(store, null, 2));
+}
+
+function readServiceAccountFromEnv() {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    return JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  }
+
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+    return require(path.resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH));
+  }
+
+  return null;
+}
+
+function normalizeFirebasePathSegment(value, fallback) {
+  const segment = String(value || "").trim().replace(/[^a-zA-Z0-9_-]/g, "-").replace(/-+/g, "-");
+  return segment || fallback;
+}
+
+function getFirebaseStorePath() {
+  const safeRoot = normalizeFirebasePathSegment(firebaseDataRoot, "ageGames");
+  const safeGameId = normalizeFirebasePathSegment(firebaseGameId, "age-pool-tracker");
+  return `/${safeRoot}/${safeGameId}/store`;
+}
+
+async function createFirebaseCliStoreAdapter() {
+  const storePath = getFirebaseStorePath();
+  const baseArgs = ["--project", process.env.FIREBASE_PROJECT_ID || "shawncountdown"];
 
   return {
-    settings: {
-      guessEnabled: parsed.settings?.guessEnabled !== false,
-      winnerRevealed: parsed.settings?.winnerRevealed === true
+    async ensure() {
+      const stdout = await runCommand("firebase", ["database:get", storePath, "--json", ...baseArgs]);
+      const parsed = parseFirebaseCliJson(stdout, null);
+      if (parsed === null) {
+        await this.write(defaultStore);
+      }
     },
+    async read() {
+      const stdout = await runCommand("firebase", ["database:get", storePath, "--json", ...baseArgs]);
+      return parseFirebaseCliJson(stdout, defaultStore) || defaultStore;
+    },
+    async write(store) {
+      await runCommand("firebase", [
+        "database:set",
+        storePath,
+        "--data",
+        JSON.stringify({
+          ...cloneStore(store),
+          updatedAt: Date.now()
+        }),
+        ...baseArgs,
+        "-f"
+      ]);
+    }
+  };
+}
+
+async function createFirebaseStoreAdapter() {
+  let firebaseApp;
+  let firebaseDatabase;
+
+  try {
+    firebaseApp = require("firebase-admin/app");
+    firebaseDatabase = require("firebase-admin/database");
+  } catch (error) {
+    throw new Error("Firebase mode requires setup first: run npm install firebase-admin and configure Firebase service account env vars.");
+  }
+
+  const { applicationDefault, cert, getApps, initializeApp } = firebaseApp;
+  const { getDatabase, ServerValue } = firebaseDatabase;
+  const serviceAccount = readServiceAccountFromEnv();
+  const appOptions = {
+    credential: serviceAccount ? cert(serviceAccount) : applicationDefault(),
+    databaseURL: firebaseDatabaseURL
+  };
+
+  if (process.env.FIREBASE_PROJECT_ID) {
+    appOptions.projectId = process.env.FIREBASE_PROJECT_ID;
+  }
+
+  const app = getApps().length ? getApps()[0] : initializeApp(appOptions);
+  const database = getDatabase(app);
+  const storeRef = database.ref(getFirebaseStorePath().replace(/^\//, ""));
+
+  return {
+    async ensure() {
+      const snapshot = await storeRef.get();
+      if (!snapshot.exists()) {
+        await storeRef.set({
+          ...cloneStore(defaultStore),
+          createdAt: ServerValue.TIMESTAMP,
+          updatedAt: ServerValue.TIMESTAMP
+        });
+      }
+    },
+    async read() {
+      await this.ensure();
+      const snapshot = await storeRef.get();
+      return snapshot.exists() ? snapshot.val() : cloneStore(defaultStore);
+    },
+    async write(store) {
+      await storeRef.set({
+        ...cloneStore(store),
+        updatedAt: ServerValue.TIMESTAMP
+      });
+    }
+  };
+}
+
+async function getStoreAdapter() {
+  if (!storeAdapterPromise) {
+    storeAdapterPromise = dataBackend === "firebase"
+      ? createFirebaseStoreAdapter()
+      : dataBackend === "firebase-cli"
+        ? createFirebaseCliStoreAdapter()
+      : Promise.resolve({
+          ensure: ensureLocalStore,
+          read: readLocalStore,
+          write: writeLocalStore
+        });
+  }
+
+  return storeAdapterPromise;
+}
+
+function normalizeStore(parsed = {}) {
+  return {
+    settings: buildSettings(parsed.settings),
     users: Array.isArray(parsed.users) ? parsed.users : [],
     guesses: Array.isArray(parsed.guesses) ? parsed.guesses : []
   };
 }
 
+async function ensureStore() {
+  const adapter = await getStoreAdapter();
+  await adapter.ensure();
+}
+
+async function readStore() {
+  const adapter = await getStoreAdapter();
+  const parsed = await adapter.read();
+  return normalizeStore(parsed);
+}
+
 async function writeStore(store) {
-  await ensureStore();
-  await fs.writeFile(dataFile, JSON.stringify(store, null, 2));
+  const adapter = await getStoreAdapter();
+  await adapter.write(normalizeStore(store));
+  await broadcastLiveUpdate();
 }
 
 function sendJson(response, statusCode, payload) {
@@ -227,7 +512,7 @@ function findNearestGuess(store) {
   };
 }
 
-function validateNameAndValue(name, numericValue, label) {
+function validateNameAndValue(name, numericValue, label, maxValue) {
   const cleanName = normalizeName(name);
   const cleanValue = parseNumber(numericValue);
 
@@ -235,13 +520,55 @@ function validateNameAndValue(name, numericValue, label) {
     return { error: "First name is required." };
   }
 
-  if (!Number.isInteger(cleanValue) || cleanValue < 0 || cleanValue > 130000) {
-    return { error: `${label} must be a whole number from 0 to 130000.` };
+  if (!Number.isInteger(cleanValue) || cleanValue < 0 || cleanValue > maxValue) {
+    return { error: `${label} must be a whole number from 0 to ${maxValue}.` };
   }
 
   return {
     name: cleanName,
     value: cleanValue
+  };
+}
+
+function validateCreateEntryBody(body, type) {
+  const valueKey = type === "users" ? "age" : "estimatedTotalAge";
+  const label = type === "users" ? "Age" : "Estimated total age";
+  const maxValue = type === "users" ? 130 : 130000;
+  const token = normalizeSourceToken(body.sourceToken);
+
+  if (!token) {
+    return { error: "Open the guest link from this device before submitting." };
+  }
+
+  if (type === "users" && body.birthDate) {
+    const cleanName = normalizeName(body.name);
+    const birthDateResult = normalizeBirthDate(body.birthDate);
+
+    if (!cleanName) {
+      return { error: "First name is required." };
+    }
+
+    if (birthDateResult.error) {
+      return { error: birthDateResult.error };
+    }
+
+    return {
+      birthDate: birthDateResult.birthDate,
+      name: cleanName,
+      sourceTokenHash: createHash(token),
+      value: birthDateResult.age
+    };
+  }
+
+  const validated = validateNameAndValue(body.name, body[valueKey], label, maxValue);
+
+  if (validated.error) {
+    return validated;
+  }
+
+  return {
+    ...validated,
+    sourceTokenHash: createHash(token)
   };
 }
 
@@ -270,6 +597,55 @@ function buildPublicSummary(store) {
   };
 }
 
+function buildAdminDashboard(store) {
+  const totals = getTotals(store);
+  const winnerMode = normalizeWinnerMode(store.settings);
+
+  return {
+    accumulatedAge: totals.userTotal,
+    fakeWinnerName,
+    guessEnabled: store.settings?.guessEnabled !== false,
+    guessTotal: totals.guessTotal,
+    guesses: sortDescending(store.guesses, "estimatedTotalAge"),
+    nearestGuess: findNearestGuess(store),
+    users: sortDescending(store.users, "age"),
+    winnerMode
+  };
+}
+
+function writeSse(response, payload) {
+  response.write(`data: ${JSON.stringify(payload)}\n\n`);
+}
+
+async function buildLivePayload() {
+  const store = await readStore();
+  return {
+    backend: dataBackend === "firebase" || dataBackend === "firebase-cli" ? "firebase" : "local",
+    dashboard: buildAdminDashboard(store),
+    summary: buildPublicSummary(store),
+    updatedAt: Date.now()
+  };
+}
+
+async function broadcastLiveUpdate() {
+  if (!liveClients.size) {
+    return;
+  }
+
+  try {
+    const payload = await buildLivePayload();
+    liveClients.forEach((client) => {
+      try {
+        writeSse(client, payload);
+      } catch {
+        liveClients.delete(client);
+      }
+    });
+  } catch {
+    // Live dashboard updates are helpful, but writes should not fail because a client disconnected.
+  }
+}
+
 async function handleCreateEntry(request, response, type) {
   const body = await readRequestBody(request);
 
@@ -279,8 +655,7 @@ async function handleCreateEntry(request, response, type) {
   }
 
   const valueKey = type === "users" ? "age" : "estimatedTotalAge";
-  const label = type === "users" ? "Age" : "Estimated total age";
-  const validated = validateNameAndValue(body.name, body[valueKey], label);
+  const validated = validateCreateEntryBody(body, type);
 
   if (validated.error) {
     sendJson(response, 400, { error: validated.error });
@@ -288,6 +663,14 @@ async function handleCreateEntry(request, response, type) {
   }
 
   const store = await readStore();
+  const tokenMatchedUser = store.users.find((entry) => entry.sourceTokenHash && entry.sourceTokenHash === validated.sourceTokenHash);
+  const tokenMatchedGuess = store.guesses.find((entry) => entry.sourceTokenHash && entry.sourceTokenHash === validated.sourceTokenHash);
+
+  if (type === "users" && tokenMatchedUser) {
+    sendJson(response, 409, { error: "This device already added an age. Ask the host to reset if you need to fix it." });
+    return;
+  }
+
   if (type === "guesses") {
     if (store.settings?.guessEnabled === false) {
       sendJson(response, 403, { error: "Guess tab is currently disabled." });
@@ -300,6 +683,16 @@ async function handleCreateEntry(request, response, type) {
       sendJson(response, 400, { error: "Invalid name. Enter a first name that already exists in the User tab." });
       return;
     }
+
+    if (tokenMatchedGuess) {
+      sendJson(response, 409, { error: "This device already submitted a guess. Ask the host to reset if you need to fix it." });
+      return;
+    }
+
+    if (tokenMatchedUser && normalizeKey(tokenMatchedUser.name) !== normalizeKey(validated.name)) {
+      sendJson(response, 400, { error: "Use the same first name you used when adding your age." });
+      return;
+    }
   }
 
   const duplicate = store[type].some((entry) => normalizeKey(entry.name) === normalizeKey(validated.name));
@@ -310,9 +703,11 @@ async function handleCreateEntry(request, response, type) {
   }
 
   store[type].push({
+    ...(validated.birthDate ? { birthDate: validated.birthDate } : {}),
     createdAt: Date.now(),
     [valueKey]: validated.value,
-    name: validated.name
+    name: validated.name,
+    sourceTokenHash: validated.sourceTokenHash
   });
 
   await writeStore(store);
@@ -322,6 +717,50 @@ async function handleCreateEntry(request, response, type) {
     summary: buildPublicSummary(store),
     totals: getTotals(store)
   });
+}
+
+function getPreferredGuestUrl(request) {
+  const hostHeader = request.headers.host || `localhost:${port}`;
+  const origin = `http://${hostHeader}`;
+  const [hostname, requestedPort] = hostHeader.split(":");
+  const isLoopback = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+
+  if (isLoopback) {
+    const [lanUrl] = getNetworkUrls(Number(requestedPort) || port);
+    if (lanUrl) {
+      return `${lanUrl}/guest`;
+    }
+  }
+
+  return `${origin}/guest`;
+}
+
+function handleGuestLink(request, response) {
+  const guestUrl = getPreferredGuestUrl(request);
+  sendJson(response, 200, {
+    guestUrl,
+    qrUrl: "/api/guest-qr.svg"
+  });
+}
+
+async function handleGuestQr(request, response) {
+  const guestUrl = getPreferredGuestUrl(request);
+  const svg = await QRCode.toString(guestUrl, {
+    color: {
+      dark: "#241915",
+      light: "#fffdf7"
+    },
+    errorCorrectionLevel: "M",
+    margin: 1,
+    type: "svg",
+    width: 320
+  });
+
+  response.writeHead(200, {
+    "Cache-Control": "no-store",
+    "Content-Type": "image/svg+xml; charset=utf-8"
+  });
+  response.end(svg);
 }
 
 async function handleAdminLogin(request, response) {
@@ -352,17 +791,7 @@ async function handleAdminDashboard(request, response) {
   }
 
   const store = await readStore();
-  const totals = getTotals(store);
-
-  sendJson(response, 200, {
-    accumulatedAge: totals.userTotal,
-    guessEnabled: store.settings?.guessEnabled !== false,
-    guessTotal: totals.guessTotal,
-    guesses: sortDescending(store.guesses, "estimatedTotalAge"),
-    nearestGuess: findNearestGuess(store),
-    winnerRevealed: store.settings?.winnerRevealed === true,
-    users: sortDescending(store.users, "age")
-  });
+  sendJson(response, 200, buildAdminDashboard(store));
 }
 
 async function handleAdminGuessToggle(request, response) {
@@ -380,21 +809,40 @@ async function handleAdminGuessToggle(request, response) {
   const store = await readStore();
   store.settings = {
     guessEnabled: body.enabled,
-    winnerRevealed: store.settings?.winnerRevealed === true
+    winnerMode: normalizeWinnerMode(store.settings)
   };
   await writeStore(store);
 
-  const totals = getTotals(store);
   sendJson(response, 200, {
-    dashboard: {
-      accumulatedAge: totals.userTotal,
-      guessEnabled: store.settings.guessEnabled,
-      guessTotal: totals.guessTotal,
-      guesses: sortDescending(store.guesses, "estimatedTotalAge"),
-      nearestGuess: findNearestGuess(store),
-      winnerRevealed: store.settings.winnerRevealed,
-      users: sortDescending(store.users, "age")
-    },
+    dashboard: buildAdminDashboard(store),
+    ok: true,
+    summary: buildPublicSummary(store)
+  });
+}
+
+async function handleAdminWinnerMode(request, response) {
+  if (!hasAdminSession(request)) {
+    sendJson(response, 401, { error: "Admin login required." });
+    return;
+  }
+
+  const body = await readRequestBody(request);
+  const requestedMode = String(body?.winnerMode || "");
+
+  if (!winnerModes.has(requestedMode)) {
+    sendJson(response, 400, { error: "Winner mode must be hidden, real, or fake." });
+    return;
+  }
+
+  const store = await readStore();
+  store.settings = {
+    guessEnabled: store.settings?.guessEnabled !== false,
+    winnerMode: requestedMode
+  };
+  await writeStore(store);
+
+  sendJson(response, 200, {
+    dashboard: buildAdminDashboard(store),
     ok: true,
     summary: buildPublicSummary(store)
   });
@@ -408,26 +856,14 @@ async function handleAdminRevealWinner(request, response) {
 
   const body = await readRequestBody(request);
   const store = await readStore();
-  const nextWinnerRevealed = typeof body?.winnerRevealed === "boolean"
-    ? body.winnerRevealed
-    : !(store.settings?.winnerRevealed === true);
   store.settings = {
     guessEnabled: store.settings?.guessEnabled !== false,
-    winnerRevealed: nextWinnerRevealed
+    winnerMode: body?.winnerRevealed === true ? "real" : "hidden"
   };
   await writeStore(store);
 
-  const totals = getTotals(store);
   sendJson(response, 200, {
-    dashboard: {
-      accumulatedAge: totals.userTotal,
-      guessEnabled: store.settings.guessEnabled,
-      guessTotal: totals.guessTotal,
-      guesses: sortDescending(store.guesses, "estimatedTotalAge"),
-      nearestGuess: findNearestGuess(store),
-      winnerRevealed: store.settings.winnerRevealed,
-      users: sortDescending(store.users, "age")
-    },
+    dashboard: buildAdminDashboard(store),
     ok: true,
     summary: buildPublicSummary(store)
   });
@@ -443,7 +879,7 @@ async function handleAdminClear(request, response) {
   const clearedStore = {
     settings: {
       guessEnabled: existingStore.settings?.guessEnabled !== false,
-      winnerRevealed: false
+      winnerMode: "hidden"
     },
     users: [],
     guesses: []
@@ -458,8 +894,8 @@ async function handleAdminClear(request, response) {
       guessTotal: 0,
       guesses: [],
       nearestGuess: null,
-      winnerRevealed: false,
-      users: []
+      users: [],
+      winnerMode: "hidden"
     },
     ok: true,
     summary: buildPublicSummary(clearedStore)
@@ -470,8 +906,63 @@ function handleAdminSession(request, response) {
   sendJson(response, 200, { authenticated: hasAdminSession(request) });
 }
 
+async function handleAdminEvents(request, response) {
+  if (!hasAdminSession(request)) {
+    sendJson(response, 401, { error: "Admin login required." });
+    return;
+  }
+
+  response.writeHead(200, {
+    "Cache-Control": "no-store",
+    "Connection": "keep-alive",
+    "Content-Type": "text/event-stream; charset=utf-8"
+  });
+  response.write(": connected\n\n");
+  liveClients.add(response);
+
+  const heartbeat = setInterval(() => {
+    response.write(": heartbeat\n\n");
+  }, 25000);
+
+  request.on("close", () => {
+    clearInterval(heartbeat);
+    liveClients.delete(response);
+  });
+
+  writeSse(response, await buildLivePayload());
+}
+
 async function serveStatic(response, pathname) {
-  const fileName = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  const fileName = pathname === "/"
+    ? "index.html"
+    : pathname === "/guest"
+      ? "index.html"
+      : pathname === "/host"
+        ? "host.html"
+        : pathname === "/instructions"
+          ? "instructions.html"
+          : pathname.replace(/^\/+/, "");
+
+  if (pathname.startsWith("/assets/")) {
+    const assetName = pathname.replace(/^\/assets\/+/, "");
+    const assetPath = path.join(assetDir, assetName);
+
+    if (!assetPath.startsWith(assetDir)) {
+      sendText(response, 404, "Not found");
+      return;
+    }
+
+    try {
+      const content = await fs.readFile(assetPath);
+      const extension = path.extname(assetName);
+      response.writeHead(200, { "Content-Type": contentTypes[extension] || "application/octet-stream" });
+      response.end(content);
+    } catch {
+      sendText(response, 404, "Not found");
+    }
+
+    return;
+  }
 
   if (!staticFiles.has(fileName)) {
     sendText(response, 404, "Not found");
@@ -486,14 +977,14 @@ async function serveStatic(response, pathname) {
   response.end(content);
 }
 
-function getNetworkUrls() {
+function getNetworkUrls(urlPort = port) {
   const interfaces = os.networkInterfaces();
   const urls = [];
 
   Object.values(interfaces).forEach((entries) => {
     (entries || []).forEach((entry) => {
       if (entry.family === "IPv4" && !entry.internal) {
-        urls.push(`http://${entry.address}:${port}`);
+        urls.push(`http://${entry.address}:${urlPort}`);
       }
     });
   });
@@ -513,6 +1004,16 @@ function createServer() {
 
       if (request.method === "GET" && url.pathname === "/api/summary") {
         await handlePublicSummary(response);
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/guest-link") {
+        handleGuestLink(request, response);
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/guest-qr.svg") {
+        await handleGuestQr(request, response);
         return;
       }
 
@@ -546,6 +1047,11 @@ function createServer() {
         return;
       }
 
+      if (request.method === "POST" && url.pathname === "/api/admin/winner-mode") {
+        await handleAdminWinnerMode(request, response);
+        return;
+      }
+
       if (request.method === "POST" && url.pathname === "/api/admin/reveal-winner") {
         await handleAdminRevealWinner(request, response);
         return;
@@ -553,6 +1059,11 @@ function createServer() {
 
       if (request.method === "GET" && url.pathname === "/api/admin/session") {
         handleAdminSession(request, response);
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/admin/events") {
+        await handleAdminEvents(request, response);
         return;
       }
 
@@ -598,12 +1109,15 @@ if (require.main === module) {
 
 module.exports = {
   ageClassificationRanges,
+  buildAdminDashboard,
   buildPublicSummary,
   createServer,
   defaultStore,
+  fakeWinnerName,
   ensureStore,
   getAgeClassificationCounts,
   getTotals,
+  parseFirebaseCliJson,
   readStore,
   startServer,
   writeStore

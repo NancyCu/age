@@ -1,0 +1,35 @@
+{
+  "apphosting": {
+    "backendId": "age-game",
+    "rootDir": ".",
+    "ignore": [
+      "node_modules",
+      ".git",
+      ".firebase",
+      ".env",
+      ".env.*",
+      "output",
+      ".DS_Store",
+      "apphosting.local.yaml",
+      "firebase-debug.log",
+      "firebase-debug.*.log",
+      "functions"
+    ]
+  },
+  "hosting": {
+    "site": "age-game-party",
+    "public": "hosting-redirect",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "**",
+        "destination": "https://age-game--shawncountdown.us-central1.hosted.app",
+        "type": 302
+      }
+    ]
+  }
+}

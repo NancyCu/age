@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Host Dashboard | Age Pool Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="host-body">
+  <main class="host-shell">
+    <header class="host-header">
+      <a class="host-back-link" href="/">Main game</a>
+      <div>
+        <h1>Host Dashboard</h1>
+        <p class="hero-copy">Live control room for the Age Pool game.</p>
+      </div>
+      <p id="hostConnectionStatus" class="host-status">Checking session...</p>
+    </header>
+
+    <section id="hostLoginPanel" class="panel host-login-panel">
+      <h2>Admin sign in</h2>
+      <p class="summary-copy">Use this screen from your Android phone to watch live totals and control the reveal.</p>
+      <form id="hostLoginForm" class="stack">
+        <label class="field">
+          <span>Password</span>
+          <input id="hostPassword" name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <button class="primary-button" type="submit">Open host dashboard</button>
+      </form>
+    </section>
+
+    <section id="hostDashboard" class="host-dashboard hidden" aria-live="polite">
+      <div class="host-card-grid">
+        <article class="panel host-metric-card">
+          <span class="stat-label">Age total</span>
+          <strong id="hostAgeTotal">0</strong>
+          <span class="hint-text">Private host total.</span>
+        </article>
+        <article class="panel host-metric-card">
+          <span class="stat-label">Players</span>
+          <strong id="hostPlayerCount">0</strong>
+          <span class="hint-text">Guests with ages.</span>
+        </article>
+        <article class="panel host-metric-card">
+          <span class="stat-label">Guesses</span>
+          <strong id="hostGuessCount">0</strong>
+          <span class="hint-text">Submitted total guesses.</span>
+        </article>
+      </div>
+
+      <article class="panel winner-panel host-winner-card">
+        <span class="stat-label winner-label">Winner board</span>
+        <strong id="hostWinnerName" class="is-hidden-winner">Ready for the reveal</strong>
+        <span id="hostWinnerMeta" class="hint-text">Live winner status will appear here.</span>
+      </article>
+
+      <section class="panel host-controls">
+        <h2>Game controls</h2>
+        <div class="host-control-grid">
+          <button id="hostTouchDownButton" class="ghost-button reveal-button" type="button">Touch Down</button>
+          <button id="hostMaskWinnerButton" class="ghost-button mask-button" type="button">Mask Winner</button>
+          <button id="hostHideWinnerButton" class="ghost-button" type="button">Hide Winner</button>
+          <button id="hostGuessToggleButton" class="ghost-button" type="button">Disable Guess Tab</button>
+          <button id="hostResetButton" class="danger-button" type="button">Reset Game</button>
+          <button id="hostLogoutButton" class="ghost-button" type="button">Log out</button>
+        </div>
+      </section>
+
+      <section class="panel host-qr-panel">
+        <div>
+          <span class="section-kicker">Guest check-in</span>
+          <h2>Scan to join</h2>
+          <p class="summary-copy">Point guests here for the mobile birthday wheels and guessing flow.</p>
+          <a id="hostGuestQrLink" class="guest-link-copy" href="/guest">Loading guest URL...</a>
+        </div>
+        <img id="hostGuestQrImage" class="guest-qr-image host-qr-image" src="/api/guest-qr.svg" alt="QR code for guests to join the game" />
+      </section>
+
+      <section class="host-lists">
+        <article class="panel">
+          <span class="section-kicker">Age players</span>
+          <p id="hostUserNames" class="available-name-list">No age entries yet.</p>
+        </article>
+        <article class="panel">
+          <span class="section-kicker">Guesses submitted</span>
+          <p id="hostGuessNames" class="available-name-list">No guesses submitted yet.</p>
+        </article>
+      </section>
+
+      <p id="hostLastUpdated" class="host-last-updated">Waiting for live data...</p>
+    </section>
+  </main>
+
+  <script src="/host.js" defer></script>
+</body>
+</html>

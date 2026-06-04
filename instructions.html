@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Play | Age Pool Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Manrope:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="instructions-body">
+  <main class="instructions-shell">
+    <section class="instructions-hero">
+      <span class="instructions-kicker">Party Guide</span>
+      <h1 class="instructions-title">How the Age Game Works</h1>
+      <p class="instructions-lead">Everyone adds their age once, then makes one guess for the total age in the room. The closest total wins when the host hits Touch Down.</p>
+      <div class="instructions-link-row">
+        <a class="hero-link-button" id="guestLink" href="/">Open Guest Game</a>
+        <a class="hero-link-button hero-link-button-secondary" id="hostLink" href="/host">Open Host Dashboard</a>
+      </div>
+    </section>
+
+    <section class="instructions-grid">
+      <div class="instructions-chip-grid">
+        <article class="instructions-chip">
+          <strong>Guest Link</strong>
+          <p><span class="instruction-inline-code" id="guestUrlLabel">/</span></p>
+        </article>
+        <article class="instructions-chip">
+          <strong>Host Link</strong>
+          <p><span class="instruction-inline-code" id="hostUrlLabel">/host</span></p>
+        </article>
+        <article class="instructions-chip">
+          <strong>Admin Password</strong>
+          <p><span class="instruction-inline-code">test-admin</span></p>
+        </article>
+        <article class="instructions-chip">
+          <strong>Best On</strong>
+          <p>Any phone on the same Wi-Fi network as the host computer.</p>
+        </article>
+      </div>
+
+      <section class="panel">
+        <p class="section-kicker">Guest Steps</p>
+        <div class="step-grid">
+          <article class="step-card">
+            <span class="step-number">1</span>
+            <h3>Open My Age</h3>
+            <p>Go to the guest link and stay on the <span class="instruction-inline-code">My Age</span> tab.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">2</span>
+            <h3>Enter Your Name and Age</h3>
+            <p>Type your first name, enter your age, and press <span class="instruction-inline-code">Save age</span>.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">3</span>
+            <h3>Switch to Sum of Ages</h3>
+            <p>Use the same first name you already entered. Each person gets one guess.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">4</span>
+            <h3>Guess the Total</h3>
+            <p>Enter your best guess for the combined age of everyone in the room, then press <span class="instruction-inline-code">Save guess</span>.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <p class="section-kicker">Host Steps</p>
+        <div class="step-grid">
+          <article class="step-card">
+            <span class="step-number">1</span>
+            <h3>Open the Dashboard</h3>
+            <p>Use the host link on your phone or laptop and sign in with the admin password.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">2</span>
+            <h3>Watch Live Totals</h3>
+            <p>You will see player count, guesses, and the real total age privately on the dashboard.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">3</span>
+            <h3>Close Guessing</h3>
+            <p>Press <span class="instruction-inline-code">Disable Guess Tab</span> when everyone is done so no more guesses can be added.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">4</span>
+            <h3>Reveal the Winner</h3>
+            <p>Press <span class="instruction-inline-code">Touch Down</span> to show the real closest guess. Use <span class="instruction-inline-code">Mask Winner</span> or <span class="instruction-inline-code">Hide Winner</span> if needed.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <p class="section-kicker">Quick Notes</p>
+        <div class="instruction-note">
+          The game accepts each first name only once in <span class="instruction-inline-code">My Age</span> and once in <span class="instruction-inline-code">Sum of Ages</span>. If a guest cannot connect, make sure they are on the same Wi-Fi and use the exact guest link shown above.
+        </div>
+      </section>
+
+      <section class="panel">
+        <p class="section-kicker">What To Tell People</p>
+        <ol class="instruction-list">
+          <li>Open the guest link.</li>
+          <li>Enter your first name and your age.</li>
+          <li>Switch to the guessing tab.</li>
+          <li>Use the same name and enter your guess for the total age in the room.</li>
+        </ol>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const origin = window.location.origin;
+      const guestUrl = origin + "/";
+      const hostUrl = origin + "/host";
+
+      const guestLink = document.getElementById("guestLink");
+      const hostLink = document.getElementById("hostLink");
+      const guestUrlLabel = document.getElementById("guestUrlLabel");
+      const hostUrlLabel = document.getElementById("hostUrlLabel");
+
+      guestLink.href = guestUrl;
+      hostLink.href = hostUrl;
+      guestUrlLabel.textContent = guestUrl;
+      hostUrlLabel.textContent = hostUrl;
+    }());
+  </script>
+</body>
+</html>
