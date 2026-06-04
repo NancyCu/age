@@ -1,2 +1,7 @@
 node_modules/
 data/store.json
+.DS_Store
+.env
+.env.local
+service-account*.json
+firebase-service-account*.json

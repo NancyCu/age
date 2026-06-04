@@ -1,7 +1,7 @@
 const state = {
   adminAuthenticated: false,
   guessEnabled: true,
-  winnerRevealed: false
+  winnerMode: "hidden"
 };
 
 const elements = {
@@ -10,9 +10,11 @@ const elements = {
   adminDashboard: document.querySelector("#adminDashboard"),
   adminGuessesTableBody: document.querySelector("#adminGuessesTableBody"),
   adminGuessToggleButton: document.querySelector("#adminGuessToggleButton"),
+  adminHideWinnerButton: document.querySelector("#adminHideWinnerButton"),
   adminLoginForm: document.querySelector("#adminLoginForm"),
   adminLoginPanel: document.querySelector("#adminLoginPanel"),
   adminLogoutButton: document.querySelector("#adminLogoutButton"),
+  adminMaskWinnerButton: document.querySelector("#adminMaskWinnerButton"),
   adminRevealWinnerButton: document.querySelector("#adminRevealWinnerButton"),
   adminUsersTableBody: document.querySelector("#adminUsersTableBody"),
   countAdults: document.querySelector("#countAdults"),
@@ -31,6 +33,15 @@ const elements = {
   userForm: document.querySelector("#userForm"),
   userNamesList: document.querySelector("#userNamesList")
 };
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 async function requestJson(url, options = {}) {
   const response = await fetch(url, {
@@ -101,8 +112,8 @@ function renderTable(tableBody, rows, valueKey, options = {}) {
       const displayValue = hiddenValue === null ? row[valueKey] : hiddenValue;
       return `
         <tr>
-          <td>${row.name}</td>
-          <td>${displayValue}</td>
+          <td>${escapeHtml(row.name)}</td>
+          <td>${escapeHtml(displayValue)}</td>
         </tr>
       `;
     })
@@ -123,28 +134,39 @@ function renderSingleColumnTable(tableBody, rows, emptyMessage) {
     .map((row) => {
       return `
         <tr>
-          <td>${row.name}</td>
+          <td>${escapeHtml(row.name)}</td>
         </tr>
       `;
     })
     .join("");
 }
 
-function renderNearestGuess(nearestGuess) {
-  if (state.winnerRevealed) {
-    elements.nearestGuessName.textContent = "Teddy-Tami-Tili-Guchi-Damien";
-    elements.nearestGuessMeta.textContent = "Temporary winner is shown while Mask Winner is active.";
+function renderNearestGuess(dashboard) {
+  const nearestGuess = dashboard.nearestGuess ?? null;
+  const fakeWinnerName = dashboard.fakeWinnerName || "Teddy-Tami-Tili-Guchi-Damien";
+  elements.nearestGuessName.classList.remove("is-real-winner", "is-fake-winner", "is-hidden-winner");
+  elements.nearestGuessName.classList.add(`is-${state.winnerMode}-winner`);
+
+  if (state.winnerMode === "fake") {
+    elements.nearestGuessName.textContent = fakeWinnerName;
+    elements.nearestGuessMeta.textContent = "Mask Winner is showing a decoy name.";
+    return;
+  }
+
+  if (state.winnerMode === "hidden") {
+    elements.nearestGuessName.textContent = "Ready for the reveal";
+    elements.nearestGuessMeta.textContent = "Use Touch Down to reveal the real closest guess.";
     return;
   }
 
   if (!nearestGuess) {
     elements.nearestGuessName.textContent = "No winner yet";
-    elements.nearestGuessMeta.textContent = "Waiting for best guess";
+    elements.nearestGuessMeta.textContent = "Waiting for guests to submit guesses.";
     return;
   }
 
   elements.nearestGuessName.textContent = nearestGuess.name;
-  elements.nearestGuessMeta.textContent = `Estimate ${nearestGuess.estimatedTotalAge}, difference ${nearestGuess.difference}`;
+  elements.nearestGuessMeta.textContent = `Guessed ${nearestGuess.estimatedTotalAge}. Difference: ${nearestGuess.difference}.`;
 }
 
 function renderSummary(summary) {
@@ -169,22 +191,24 @@ function renderAdminDashboard(dashboard) {
   if (typeof dashboard.guessEnabled === "boolean") {
     state.guessEnabled = dashboard.guessEnabled;
   }
-  if (typeof dashboard.winnerRevealed === "boolean") {
-    state.winnerRevealed = dashboard.winnerRevealed;
+  if (typeof dashboard.winnerMode === "string") {
+    state.winnerMode = dashboard.winnerMode;
   }
 
-  elements.adminAccumulatedAge.textContent = state.winnerRevealed ? "Hidden" : String(dashboard.accumulatedAge ?? 0);
+  elements.adminDashboard.dataset.winnerMode = state.winnerMode;
+  elements.adminAccumulatedAge.textContent = String(dashboard.accumulatedAge ?? 0);
   elements.adminGuessToggleButton.textContent = state.guessEnabled ? "Disable Guess Tab" : "Enable Guess Tab";
-  elements.adminRevealWinnerButton.textContent = state.winnerRevealed ? "Mask Winner" : "Touch Down";
-  renderNearestGuess(dashboard.nearestGuess ?? null);
+  elements.adminRevealWinnerButton.classList.toggle("is-selected", state.winnerMode === "real");
+  elements.adminMaskWinnerButton.classList.toggle("is-selected", state.winnerMode === "fake");
+  elements.adminHideWinnerButton.classList.toggle("is-selected", state.winnerMode === "hidden");
+  renderNearestGuess(dashboard);
   renderSingleColumnTable(elements.adminUsersTableBody, dashboard.users || [], "No entries yet.");
   renderAdminGuessesTable(dashboard.guesses || []);
   applyGuessTabState();
 }
 
 function renderAdminGuessesTable(guesses) {
-  const hiddenValue = state.winnerRevealed ? "Hidden" : null;
-  renderTable(elements.adminGuessesTableBody, guesses, "estimatedTotalAge", { hiddenValue });
+  renderTable(elements.adminGuessesTableBody, guesses, "estimatedTotalAge");
 }
 
 function renderColoredNameList(container, names, emptyMessage) {
@@ -196,7 +220,7 @@ function renderColoredNameList(container, names, emptyMessage) {
   container.innerHTML = names
     .map((name, index) => {
       const comma = index < names.length - 1 ? '<span class="name-comma">, </span>' : "";
-      return `<span class="available-name-item available-name-item-${index % 2}">${name}</span>${comma}`;
+      return `<span class="available-name-item available-name-item-${index % 2}">${escapeHtml(name)}</span>${comma}`;
     })
     .join("");
 }
@@ -215,13 +239,13 @@ async function refreshAdminDashboard() {
   renderAdminDashboard(dashboard);
 }
 
-async function activateAdminMaskState() {
+async function setWinnerMode(winnerMode) {
   if (!state.adminAuthenticated) {
     return;
   }
 
-  const result = await requestJson("/api/admin/reveal-winner", {
-    body: JSON.stringify({ winnerRevealed: true }),
+  const result = await requestJson("/api/admin/winner-mode", {
+    body: JSON.stringify({ winnerMode }),
     method: "POST"
   });
   renderSummary(result.summary || {});
@@ -255,16 +279,8 @@ async function submitForm(url, payload, form) {
 }
 
 elements.tabButtons.forEach((button) => {
-  button.addEventListener("click", async () => {
+  button.addEventListener("click", () => {
     activateTab(button.dataset.tabTarget);
-
-    if (button.dataset.tabTarget === "adminTab") {
-      try {
-        await activateAdminMaskState();
-      } catch (error) {
-        alert(error.message);
-      }
-    }
   });
 });
 
@@ -351,12 +367,23 @@ elements.adminGuessToggleButton.addEventListener("click", async () => {
 
 elements.adminRevealWinnerButton.addEventListener("click", async () => {
   try {
-    const result = await requestJson("/api/admin/reveal-winner", {
-      body: JSON.stringify({ winnerRevealed: !state.winnerRevealed }),
-      method: "POST"
-    });
-    renderSummary(result.summary || {});
-    renderAdminDashboard(result.dashboard || {});
+    await setWinnerMode("real");
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
+elements.adminMaskWinnerButton.addEventListener("click", async () => {
+  try {
+    await setWinnerMode("fake");
+  } catch (error) {
+    alert(error.message);
+  }
+});
+
+elements.adminHideWinnerButton.addEventListener("click", async () => {
+  try {
+    await setWinnerMode("hidden");
   } catch (error) {
     alert(error.message);
   }

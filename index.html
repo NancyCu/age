@@ -12,8 +12,13 @@
 <body>
   <div class="app-shell">
     <header class="hero">
-      <div>
-        <h1>Celebration in Yorba Linda - What is your age?</h1>
+      <div class="hero-copy-block">
+        <h1>Age Pool Tracker</h1>
+        <p class="hero-copy">Guess the total age in the room. Add your age, make your best sum-of-ages guess, and wait for the Touch Down reveal.</p>
+      </div>
+      <div class="hero-scoreboard" aria-label="Party game summary">
+        <span>6/6 Party Bash</span>
+        <strong>Closest guess wins</strong>
       </div>
     </header>
 
@@ -27,7 +32,8 @@
       <section id="userTab" class="tab-panel is-active" aria-labelledby="User">
         <div class="user-tab-grid">
           <article class="panel standout-panel">
-            <h2>Enter name and age</h2>
+            <h2>Add your age</h2>
+            <p class="summary-copy">Enter your first name and age once. Your name will unlock the guessing round.</p>
             <form id="userForm" class="stack narrow-stack">
               <label class="field">
                 <span>First name</span>
@@ -42,13 +48,13 @@
           </article>
 
           <article class="panel names-panel">
-            <h2>Already provided age</h2>
+            <h2>Age players</h2>
             <p id="userNamesList" class="available-name-list">No age entries yet.</p>
           </article>
 
           <article class="panel classification-panel">
             <h2>User breakdown</h2>
-            <p class="summary-copy">Number of users in each age category.</p>
+            <p class="summary-copy">A quick party snapshot by age group.</p>
             <div class="classification-list">
               <div class="classification-row">
                 <span>Minors (0-17)</span>
@@ -78,14 +84,15 @@
       <section id="guessTab" class="tab-panel" aria-labelledby="Guess">
         <div class="guess-tab-grid">
           <article class="panel standout-panel alt-panel">
-            <h2>Enter name and sum of ages</h2>
+            <h2>Guess the total</h2>
+            <p class="summary-copy">Use the same first name you entered on the My Age tab.</p>
             <form id="guessForm" class="stack narrow-stack">
               <label class="field">
-                <span>Name</span>
+                <span>First name</span>
                 <input id="guessName" name="name" type="text" maxlength="50" autocomplete="given-name" autocapitalize="words" required />
               </label>
               <label class="field">
-                <span>Sum of ages</span>
+                <span>Your total-age guess</span>
                 <input id="guessAge" name="estimatedTotalAge" type="number" min="0" max="130000" inputmode="numeric" required />
               </label>
               <button class="primary-button alt-button" type="submit">Save guess</button>
@@ -93,12 +100,12 @@
           </article>
 
           <article class="panel names-panel">
-            <h2>Need to provide a Sum of ages</h2>
+            <h2>Still need guesses</h2>
             <p id="guessAvailableNamesList" class="available-name-list">No available names yet.</p>
           </article>
 
           <article class="panel names-panel">
-            <h2>Already provided a Sum of ages</h2>
+            <h2>Guesses submitted</h2>
             <p id="guessSubmittedNamesList" class="available-name-list">No guesses submitted yet.</p>
           </article>
         </div>
@@ -108,6 +115,7 @@
         <div id="adminLoginPanel" class="panel admin-login">
           <p class="section-kicker">Admin Access</p>
           <h2>Sign in to view results</h2>
+          <p class="summary-copy"><a class="inline-host-link" href="/host">Open the mobile host dashboard</a> for Android-friendly live controls.</p>
           <form id="adminLoginForm" class="stack narrow-stack">
             <label class="field">
               <span>Password</span>
@@ -121,10 +129,13 @@
           <div class="admin-topbar">
             <div>
               <p class="section-kicker">Admin Dashboard</p>
-              <h2>Overview and leaderboards</h2>
+              <h2>Game controls and reveal board</h2>
+              <a class="inline-host-link" href="/host">Open mobile host dashboard</a>
             </div>
             <div class="admin-actions">
-              <button id="adminRevealWinnerButton" class="ghost-button" type="button">Touch Down</button>
+              <button id="adminRevealWinnerButton" class="ghost-button reveal-button" type="button">Touch Down</button>
+              <button id="adminMaskWinnerButton" class="ghost-button mask-button" type="button">Mask Winner</button>
+              <button id="adminHideWinnerButton" class="ghost-button" type="button">Hide Winner</button>
               <button id="adminGuessToggleButton" class="ghost-button" type="button">Disable Guess Tab</button>
               <button id="adminClearButton" class="danger-button" type="button">Reset</button>
               <button id="adminLogoutButton" class="ghost-button" type="button">Log out</button>
@@ -135,11 +146,12 @@
             <article class="panel stat-panel">
               <span class="stat-label">Sum of ages</span>
               <strong id="adminAccumulatedAge">0</strong>
+              <span class="hint-text">Private host total.</span>
             </article>
-            <article class="panel stat-panel">
-              <span class="stat-label winner-label">The Winner is........</span>
-              <strong id="nearestGuessName">Teddy-Tami-Tili-Guchi-Damien</strong>
-              <span id="nearestGuessMeta" class="hint-text">Select Touch Down to show the current winner.</span>
+            <article class="panel stat-panel winner-panel">
+              <span class="stat-label winner-label">Winner board</span>
+              <strong id="nearestGuessName" class="is-hidden-winner">Ready for the reveal</strong>
+              <span id="nearestGuessMeta" class="hint-text">Use Touch Down to reveal the real closest guess.</span>
             </article>
           </div>
 
@@ -147,7 +159,7 @@
             <article class="panel">
               <div class="table-header">
                 <div>
-                  <p class="section-kicker">Guest provided age</p>
+                  <p class="section-kicker">Guests who entered age</p>
                 </div>
               </div>
               <div class="table-wrap">
@@ -165,7 +177,7 @@
             <article class="panel">
               <div class="table-header">
                 <div>
-                  <p class="section-kicker">Guest with best guest</p>
+                  <p class="section-kicker">Guest guesses</p>
                 </div>
               </div>
               <div class="table-wrap">
@@ -173,7 +185,7 @@
                   <thead>
                     <tr>
                       <th>Name</th>
-                      <th>Sum of ages</th>
+                      <th>Total-age guess</th>
                     </tr>
                   </thead>
                   <tbody id="adminGuessesTableBody"></tbody>
