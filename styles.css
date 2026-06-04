@@ -77,7 +77,8 @@ body::before {
   border-radius: var(--radius);
   background:
     linear-gradient(120deg, rgba(255, 252, 244, 0.96), rgba(250, 230, 190, 0.8)),
-    radial-gradient(circle at 82% 20%, rgba(241, 213, 150, 0.42), transparent 21rem);
+    radial-gradient(circle at 82% 20%, rgba(241, 213, 150, 0.42), transparent 21rem),
+    radial-gradient(circle at 18% 18%, rgba(12, 32, 55, 0.08), transparent 18rem);
   box-shadow: var(--shadow);
 }
 
@@ -197,6 +198,7 @@ h2 {
 .goldFiligree,
 .heroSixty,
 .sparkle,
+.floralRosette,
 .easterEggBear,
 .easterEggAardvark,
 .subtleShield,
@@ -211,7 +213,7 @@ h2 {
   z-index: 1;
   height: 90px;
   overflow: hidden;
-  opacity: 0.45;
+  opacity: 0.52;
 }
 
 .heroMountain {
@@ -270,9 +272,9 @@ h2 {
 
 .goldFiligree {
   position: absolute;
-  width: 160px;
-  height: 64px;
-  opacity: 0.22;
+  width: 182px;
+  height: 76px;
+  opacity: 0.28;
 }
 
 .goldFiligree::before,
@@ -292,6 +294,13 @@ h2 {
   border-right-color: transparent;
   border-left-color: var(--gold);
   transform: rotate(35deg);
+}
+
+.heroFiligree::before {
+  box-shadow:
+    48px 22px 0 -18px var(--gold),
+    74px -6px 0 -22px var(--gold),
+    108px 30px 0 -20px var(--gold);
 }
 
 .heroFiligree {
@@ -319,7 +328,7 @@ h2 {
   z-index: 2;
   width: 18px;
   height: 18px;
-  opacity: 0.46;
+  opacity: 0.58;
 }
 
 .sparkle::before,
@@ -467,6 +476,7 @@ h2 {
   z-index: 5;
   width: 116px;
   height: 104px;
+  overflow: visible;
   filter: drop-shadow(0 15px 16px rgba(74, 47, 22, 0.18));
 }
 
@@ -567,8 +577,10 @@ h2 {
 
 .heroDog {
   right: 18px;
-  bottom: -2px;
+  bottom: -12px;
   z-index: 3;
+  width: 156px;
+  height: 140px;
   transform: rotate(3deg);
 }
 
@@ -581,9 +593,9 @@ h2 {
 
 .puppyMascot {
   right: 18px;
-  bottom: 12px;
-  width: 88px;
-  height: 82px;
+  bottom: 8px;
+  width: 112px;
+  height: 104px;
   transform: rotate(-7deg);
 }
 
@@ -623,9 +635,9 @@ h2 {
   --dog-muzzle: #f8d3b0;
   --dog-accent: #3a332f;
   right: 16px;
-  bottom: 14px;
-  width: 94px;
-  height: 106px;
+  bottom: 4px;
+  width: 118px;
+  height: 130px;
   transform: rotate(6deg);
 }
 
@@ -654,6 +666,180 @@ h2 {
 .blackSweaterDog .dogEye {
   background: #fff4df;
   box-shadow: inset 0 0 0 2px #2a1c13;
+}
+
+.dogShadow {
+  fill: #4b2e1b;
+}
+
+.tanDogBody,
+.tanDogHead,
+.tanDogPaw,
+.tanDogPawRaised {
+  fill: #d98e47;
+}
+
+.tanDogHead {
+  stroke: rgba(73, 41, 18, 0.16);
+  stroke-width: 2;
+}
+
+.tanDogBlaze,
+.tanDogPaw,
+.tanDogPawRaised {
+  fill: #f6c98b;
+}
+
+.tanDogEar {
+  fill: #c77a3b;
+}
+
+.tanDogEar.left {
+  fill: #e0a064;
+}
+
+.tanDogHarness,
+.puppyCollar,
+.pinkCollar,
+.sweaterStripe {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tanDogHarness {
+  stroke: #4a473f;
+  stroke-width: 7;
+  opacity: 0.85;
+}
+
+.dogEyeSvg,
+.tanDogNose,
+.puppyNose,
+.blackDogNose {
+  fill: #221711;
+}
+
+.dogEyeShine {
+  fill: #fff7e8;
+}
+
+.tanDogMouth {
+  fill: #4b2019;
+}
+
+.tanDogTongue {
+  fill: #e77b91;
+}
+
+.pawPad,
+.pawToe {
+  fill: #9c673f;
+}
+
+.puppyBody,
+.puppyHead,
+.puppyPaw {
+  fill: #fff0cf;
+}
+
+.puppyHead {
+  stroke: rgba(122, 82, 42, 0.13);
+  stroke-width: 2;
+}
+
+.puppyEar {
+  fill: #f3c48d;
+}
+
+.puppyEar.left {
+  fill: #f9dfb2;
+}
+
+.puppyMuzzle {
+  fill: #fff8e5;
+}
+
+.puppyCollar {
+  stroke: #74b7cc;
+  stroke-width: 8;
+}
+
+.puppyBell {
+  fill: #f4bb24;
+  stroke: #d99100;
+  stroke-width: 2;
+}
+
+.puppySmile,
+.blackDogSmile {
+  fill: none;
+  stroke: rgba(42, 28, 19, 0.62);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.blackDogBody,
+.blackDogHead,
+.blackDogEar,
+.blackDogPaw {
+  fill: #181513;
+}
+
+.blackDogHead {
+  stroke: rgba(255, 244, 223, 0.12);
+  stroke-width: 2;
+}
+
+.blackDogEar.left {
+  fill: #25201d;
+}
+
+.blackDogMuzzle {
+  fill: #d8b083;
+}
+
+.blackDogEye {
+  fill: #3b2418;
+  stroke: #fff0d8;
+  stroke-width: 3;
+}
+
+.sweaterBody {
+  fill: #e85f98;
+}
+
+.pinkCollar {
+  stroke: #f2a4bf;
+  stroke-width: 7;
+}
+
+.sweaterStripe {
+  stroke: rgba(255, 228, 239, 0.7);
+  stroke-width: 5;
+}
+
+.floralRosette {
+  position: absolute;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  opacity: 0.18;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--gold) 0 5px, transparent 6px),
+    conic-gradient(from 0deg, transparent 0 8%, var(--gold) 8% 14%, transparent 14% 25%, var(--gold) 25% 31%, transparent 31% 42%, var(--gold) 42% 48%, transparent 48% 59%, var(--gold) 59% 65%, transparent 65% 76%, var(--gold) 76% 82%, transparent 82%);
+}
+
+.floralRosetteOne {
+  left: 7%;
+  bottom: 20px;
+}
+
+.floralRosetteTwo {
+  right: 3%;
+  top: 18px;
+  transform: scale(0.78) rotate(18deg);
 }
 
 .panel > h2,
