@@ -20,6 +20,7 @@ const sessionDurationMs = 12 * 60 * 60 * 1000;
 const fakeWinnerName = "Teddy-Tami-Tili-Guchi-Damien";
 const winnerModes = new Set(["hidden", "real", "fake"]);
 const dataBackend = String(process.env.DATA_BACKEND || "local").toLowerCase();
+const publicBaseUrl = String(process.env.PUBLIC_BASE_URL || "").replace(/\/+$/, "");
 const firebaseGameId = process.env.FIREBASE_GAME_ID || "age-pool-tracker";
 const firebaseDatabaseURL = process.env.FIREBASE_DATABASE_URL || "https://shawncountdown-default-rtdb.firebaseio.com";
 const firebaseDataRoot = process.env.FIREBASE_DATA_ROOT || "ageGames";
@@ -720,6 +721,10 @@ async function handleCreateEntry(request, response, type) {
 }
 
 function getPreferredGuestUrl(request) {
+  if (publicBaseUrl) {
+    return `${publicBaseUrl}/guest`;
+  }
+
   const forwardedHost = getFirstHeaderValue(request.headers["x-forwarded-host"]);
   const forwardedProto = getFirstHeaderValue(request.headers["x-forwarded-proto"]);
   const hostHeader = forwardedHost || request.headers.host || `localhost:${port}`;

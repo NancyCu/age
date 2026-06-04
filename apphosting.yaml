@@ -16,6 +16,8 @@ env:
     value: age-game
   - variable: FIREBASE_DATA_ROOT
     value: ageGames
+  - variable: PUBLIC_BASE_URL
+    value: https://age-game--shawncountdown.us-central1.hosted.app
   - variable: ADMIN_PASSWORD
     secret: age-game-admin-password
   - variable: SESSION_SECRET
