@@ -468,355 +468,46 @@ h2 {
 }
 
 .dogMascot {
-  --dog-fur: #d89a51;
-  --dog-fur-dark: #9d6735;
-  --dog-muzzle: #ffe4b7;
-  --dog-accent: #f0c176;
   position: absolute;
   z-index: 5;
-  width: 116px;
-  height: 104px;
-  overflow: visible;
-  filter: drop-shadow(0 15px 16px rgba(74, 47, 22, 0.18));
-}
-
-.dogHead {
-  position: absolute;
-  left: 18px;
-  top: 22px;
-  width: 78px;
-  height: 68px;
-  border-radius: 45% 45% 42% 42%;
-  background:
-    radial-gradient(circle at 50% 68%, var(--dog-muzzle) 0 20px, transparent 21px),
-    linear-gradient(155deg, var(--dog-fur), var(--dog-accent));
-  border: 2px solid rgba(92, 54, 22, 0.1);
-}
-
-.dogEar {
-  position: absolute;
-  top: 19px;
-  width: 32px;
-  height: 44px;
-  border-radius: 70% 28% 70% 26%;
-  background: linear-gradient(160deg, var(--dog-fur-dark), var(--dog-fur));
-}
-
-.dogEarLeft {
-  left: 12px;
-  transform: rotate(-24deg);
-}
-
-.dogEarRight {
-  right: 13px;
-  transform: rotate(24deg) scaleX(-1);
-}
-
-.dogEye,
-.dogNose,
-.dogSmile,
-.dogPaw {
-  position: absolute;
-}
-
-.dogEye {
-  top: 24px;
-  width: 7px;
-  height: 8px;
-  border-radius: 50%;
-  background: #2a1c13;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.32);
-}
-
-.dogEyeLeft {
-  left: 22px;
-}
-
-.dogEyeRight {
-  right: 22px;
-}
-
-.dogNose {
-  left: 50%;
-  top: 42px;
-  width: 14px;
-  height: 10px;
-  border-radius: 55% 55% 70% 70%;
-  background: #2a1c13;
-  transform: translateX(-50%);
-}
-
-.dogSmile {
-  left: 50%;
-  top: 53px;
-  width: 28px;
-  height: 14px;
-  border-bottom: 3px solid rgba(42, 28, 19, 0.58);
-  border-radius: 0 0 999px 999px;
-  transform: translateX(-50%);
-}
-
-.dogPaw {
-  bottom: 0;
-  width: 26px;
-  height: 24px;
-  border-radius: 14px 14px 11px 11px;
-  background: var(--dog-muzzle);
-  border: 2px solid rgba(92, 54, 22, 0.08);
-}
-
-.dogPawLeft {
-  left: 24px;
-  transform: rotate(-8deg);
-}
-
-.dogPawRight {
-  right: 24px;
-  transform: rotate(8deg);
+  object-fit: cover;
+  filter:
+    drop-shadow(0 18px 18px rgba(74, 47, 22, 0.18))
+    saturate(1.05)
+    brightness(1.04);
+  pointer-events: none;
+  user-select: none;
 }
 
 .heroDog {
-  right: 18px;
-  bottom: -12px;
+  right: 26px;
+  top: -6px;
+  bottom: auto;
   z-index: 3;
-  width: 156px;
-  height: 140px;
-  transform: rotate(3deg);
-}
-
-.creamPuppy {
-  --dog-fur: #f6ddac;
-  --dog-fur-dark: #c98648;
-  --dog-muzzle: #fff5dc;
-  --dog-accent: #fff0c8;
+  width: 286px;
+  height: 246px;
+  object-position: 50% 46%;
+  transform: rotate(1deg);
+  -webkit-mask-image: radial-gradient(ellipse at 52% 46%, #000 0 48%, rgba(0, 0, 0, 0.82) 58%, transparent 73%);
+  mask-image: radial-gradient(ellipse at 52% 46%, #000 0 48%, rgba(0, 0, 0, 0.82) 58%, transparent 73%);
 }
 
 .puppyMascot {
-  right: 18px;
-  bottom: 8px;
-  width: 112px;
-  height: 104px;
-  transform: rotate(-7deg);
-}
-
-.puppyMascot .dogHead {
-  left: 12px;
-  top: 16px;
-  width: 62px;
-  height: 56px;
-}
-
-.puppyMascot .dogEar {
-  top: 14px;
-  width: 26px;
-  height: 35px;
-}
-
-.puppyMascot .dogEye {
-  top: 20px;
-}
-
-.puppyMascot .dogNose {
-  top: 35px;
-}
-
-.puppyMascot .dogSmile {
-  top: 43px;
-}
-
-.puppyMascot .dogPaw {
-  width: 20px;
-  height: 18px;
+  right: -10px;
+  bottom: -10px;
+  width: 196px;
+  height: 238px;
+  object-position: 46% 46%;
+  transform: rotate(-4deg);
 }
 
 .blackSweaterDog {
-  --dog-fur: #2e2926;
-  --dog-fur-dark: #171311;
-  --dog-muzzle: #f8d3b0;
-  --dog-accent: #3a332f;
-  right: 16px;
-  bottom: 4px;
-  width: 118px;
-  height: 130px;
-  transform: rotate(6deg);
-}
-
-.blackSweaterDog .dogSweater {
-  position: absolute;
-  left: 18px;
-  bottom: 3px;
-  width: 58px;
-  height: 42px;
-  border-radius: 20px 20px 16px 16px;
-  background: linear-gradient(145deg, #ee8faa, #d65c87);
-  border: 2px solid rgba(132, 37, 73, 0.16);
-}
-
-.blackSweaterDog .dogHead {
-  left: 13px;
-  top: 10px;
-  width: 68px;
-  height: 62px;
-}
-
-.blackSweaterDog .dogEar {
-  top: 8px;
-}
-
-.blackSweaterDog .dogEye {
-  background: #fff4df;
-  box-shadow: inset 0 0 0 2px #2a1c13;
-}
-
-.dogShadow {
-  fill: #4b2e1b;
-}
-
-.tanDogBody,
-.tanDogHead,
-.tanDogPaw,
-.tanDogPawRaised {
-  fill: #d98e47;
-}
-
-.tanDogHead {
-  stroke: rgba(73, 41, 18, 0.16);
-  stroke-width: 2;
-}
-
-.tanDogBlaze,
-.tanDogPaw,
-.tanDogPawRaised {
-  fill: #f6c98b;
-}
-
-.tanDogEar {
-  fill: #c77a3b;
-}
-
-.tanDogEar.left {
-  fill: #e0a064;
-}
-
-.tanDogHarness,
-.puppyCollar,
-.pinkCollar,
-.sweaterStripe {
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.tanDogHarness {
-  stroke: #4a473f;
-  stroke-width: 7;
-  opacity: 0.85;
-}
-
-.dogEyeSvg,
-.tanDogNose,
-.puppyNose,
-.blackDogNose {
-  fill: #221711;
-}
-
-.dogEyeShine {
-  fill: #fff7e8;
-}
-
-.tanDogMouth {
-  fill: #4b2019;
-}
-
-.tanDogTongue {
-  fill: #e77b91;
-}
-
-.pawPad,
-.pawToe {
-  fill: #9c673f;
-}
-
-.puppyBody,
-.puppyHead,
-.puppyPaw {
-  fill: #fff0cf;
-}
-
-.puppyHead {
-  stroke: rgba(122, 82, 42, 0.13);
-  stroke-width: 2;
-}
-
-.puppyEar {
-  fill: #f3c48d;
-}
-
-.puppyEar.left {
-  fill: #f9dfb2;
-}
-
-.puppyMuzzle {
-  fill: #fff8e5;
-}
-
-.puppyCollar {
-  stroke: #74b7cc;
-  stroke-width: 8;
-}
-
-.puppyBell {
-  fill: #f4bb24;
-  stroke: #d99100;
-  stroke-width: 2;
-}
-
-.puppySmile,
-.blackDogSmile {
-  fill: none;
-  stroke: rgba(42, 28, 19, 0.62);
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-
-.blackDogBody,
-.blackDogHead,
-.blackDogEar,
-.blackDogPaw {
-  fill: #181513;
-}
-
-.blackDogHead {
-  stroke: rgba(255, 244, 223, 0.12);
-  stroke-width: 2;
-}
-
-.blackDogEar.left {
-  fill: #25201d;
-}
-
-.blackDogMuzzle {
-  fill: #d8b083;
-}
-
-.blackDogEye {
-  fill: #3b2418;
-  stroke: #fff0d8;
-  stroke-width: 3;
-}
-
-.sweaterBody {
-  fill: #e85f98;
-}
-
-.pinkCollar {
-  stroke: #f2a4bf;
-  stroke-width: 7;
-}
-
-.sweaterStripe {
-  stroke: rgba(255, 228, 239, 0.7);
-  stroke-width: 5;
+  right: -34px;
+  bottom: -8px;
+  width: 190px;
+  height: 280px;
+  object-position: 50% 40%;
+  transform: rotate(2deg);
 }
 
 .floralRosette {
@@ -1404,9 +1095,10 @@ tbody tr:last-child td {
 
   .heroDog {
     right: 18px;
-    bottom: 10px;
-    width: 92px;
-    height: 84px;
+    top: -4px;
+    bottom: auto;
+    width: 220px;
+    height: 190px;
     opacity: 0.88;
   }
 
@@ -1496,10 +1188,12 @@ tbody tr:last-child td {
   }
 
   .heroDog {
-    right: 18px;
-    bottom: 14px;
-    width: 82px;
-    height: 74px;
+    right: -18px;
+    top: 8px;
+    bottom: auto;
+    width: 170px;
+    height: 150px;
+    opacity: 0.5;
   }
 
   .standout-panel {
@@ -1509,10 +1203,10 @@ tbody tr:last-child td {
   }
 
   .puppyMascot {
-    right: 12px;
-    bottom: 8px;
-    width: 70px;
-    height: 66px;
+    right: 6px;
+    bottom: 4px;
+    width: 106px;
+    height: 132px;
     opacity: 0.82;
   }
 
@@ -1521,10 +1215,10 @@ tbody tr:last-child td {
   }
 
   .breakdownDog {
-    right: 12px;
-    bottom: 8px;
-    width: 72px;
-    height: 82px;
+    right: 4px;
+    bottom: 4px;
+    width: 116px;
+    height: 166px;
     opacity: 0.82;
   }
 

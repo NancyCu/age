@@ -9,6 +9,7 @@ const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
 const dataFile = path.join(dataDir, "store.json");
 const staticFiles = new Set(["index.html", "app.js", "host.html", "host.js", "styles.css"]);
+const assetDir = path.join(rootDir, "public", "assets");
 
 const host = process.env.HOST || "0.0.0.0";
 const port = Number(process.env.PORT) || 3000;
@@ -28,7 +29,8 @@ const contentTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8"
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png"
 };
 
 const defaultStore = {
@@ -757,6 +759,27 @@ async function handleAdminEvents(request, response) {
 
 async function serveStatic(response, pathname) {
   const fileName = pathname === "/" ? "index.html" : pathname === "/host" ? "host.html" : pathname.replace(/^\/+/, "");
+
+  if (pathname.startsWith("/assets/")) {
+    const assetName = pathname.replace(/^\/assets\/+/, "");
+    const assetPath = path.join(assetDir, assetName);
+
+    if (!assetPath.startsWith(assetDir)) {
+      sendText(response, 404, "Not found");
+      return;
+    }
+
+    try {
+      const content = await fs.readFile(assetPath);
+      const extension = path.extname(assetName);
+      response.writeHead(200, { "Content-Type": contentTypes[extension] || "application/octet-stream" });
+      response.end(content);
+    } catch {
+      sendText(response, 404, "Not found");
+    }
+
+    return;
+  }
 
   if (!staticFiles.has(fileName)) {
     sendText(response, 404, "Not found");
