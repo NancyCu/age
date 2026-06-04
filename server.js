@@ -8,7 +8,7 @@ const os = require("os");
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
 const dataFile = path.join(dataDir, "store.json");
-const staticFiles = new Set(["index.html", "app.js", "host.html", "host.js", "styles.css"]);
+const staticFiles = new Set(["index.html", "instructions.html", "app.js", "host.html", "host.js", "styles.css"]);
 const assetDir = path.join(rootDir, "public", "assets");
 
 const host = process.env.HOST || "0.0.0.0";
@@ -758,7 +758,13 @@ async function handleAdminEvents(request, response) {
 }
 
 async function serveStatic(response, pathname) {
-  const fileName = pathname === "/" ? "index.html" : pathname === "/host" ? "host.html" : pathname.replace(/^\/+/, "");
+  const fileName = pathname === "/"
+    ? "index.html"
+    : pathname === "/host"
+      ? "host.html"
+      : pathname === "/instructions"
+        ? "instructions.html"
+        : pathname.replace(/^\/+/, "");
 
   if (pathname.startsWith("/assets/")) {
     const assetName = pathname.replace(/^\/assets\/+/, "");
