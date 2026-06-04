@@ -4,11 +4,15 @@
   "private": true,
   "description": "LAN-hosted app for collecting ages, collecting guesses, and showing admin results.",
   "scripts": {
+    "build": "node -e \"console.log('No build step required for Age Pool Tracker')\"",
     "check:firebase": "node scripts/check-firebase-setup.js",
     "start": "node server.js",
     "test": "node --test test/server.test.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.10.0"
   }
 }

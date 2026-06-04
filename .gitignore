@@ -1,7 +1,12 @@
 node_modules/
 data/store.json
+output/
 .DS_Store
 .env
 .env.local
 service-account*.json
 firebase-service-account*.json
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+apphosting.local.yaml
