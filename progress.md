@@ -6,4 +6,4 @@ Original prompt: now show me a working test. also make available on network. sho
 - Kept Playwright screenshots out of the commit scope because they are generated artifacts.
 
 TODO
-- If the admin password changes from `test-admin`, update the instructions page copy to match.
+- Admin password copy now points guests to the host instead of publishing a password.
