@@ -238,8 +238,7 @@ h2 {
 .floralRosette,
 .easterEggBear,
 .easterEggAardvark,
-.subtleShield,
-.dogMascot {
+.subtleShield {
   pointer-events: none;
   user-select: none;
 }
@@ -504,49 +503,6 @@ h2 {
   bottom: 26px;
 }
 
-.dogMascot {
-  position: absolute;
-  z-index: 5;
-  object-fit: cover;
-  filter:
-    drop-shadow(0 18px 18px rgba(74, 47, 22, 0.18))
-    saturate(1.05)
-    brightness(1.04);
-  pointer-events: none;
-  user-select: none;
-}
-
-.heroDog {
-  right: 26px;
-  top: -6px;
-  bottom: auto;
-  z-index: 3;
-  width: 286px;
-  height: 246px;
-  object-position: 50% 46%;
-  transform: rotate(1deg);
-  -webkit-mask-image: radial-gradient(ellipse at 52% 46%, #000 0 48%, rgba(0, 0, 0, 0.82) 58%, transparent 73%);
-  mask-image: radial-gradient(ellipse at 52% 46%, #000 0 48%, rgba(0, 0, 0, 0.82) 58%, transparent 73%);
-}
-
-.puppyMascot {
-  right: -10px;
-  bottom: -10px;
-  width: 196px;
-  height: 238px;
-  object-position: 46% 46%;
-  transform: rotate(-4deg);
-}
-
-.blackSweaterDog {
-  right: -34px;
-  bottom: -8px;
-  width: 190px;
-  height: 280px;
-  object-position: 50% 40%;
-  transform: rotate(2deg);
-}
-
 .floralRosette {
   position: absolute;
   z-index: 2;
@@ -573,7 +529,7 @@ h2 {
 .panel > h2,
 .panel > p,
 .panel > form,
-.panel > div:not(.dogMascot):not(.goldFiligree),
+.panel > div:not(.goldFiligree),
 .panel > span:not(.subtleShield) {
   position: relative;
   z-index: 2;
@@ -1388,20 +1344,6 @@ h2 {
   text-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
 }
 
-.heroDog {
-  right: 93px;
-  top: 7px;
-  z-index: 6;
-  width: 340px;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
-  transform: rotate(2deg);
-  -webkit-mask-image: none;
-  mask-image: none;
-  filter: drop-shadow(0 19px 17px rgba(74, 47, 22, 0.2)) saturate(1.09) brightness(1.04);
-}
-
 .heroLandscape {
   height: 190px;
   opacity: 0.5;
@@ -1733,16 +1675,6 @@ h2 {
   transform: rotate(72deg);
 }
 
-.puppyMascot {
-  right: -18px;
-  bottom: -3px;
-  z-index: 3;
-  width: 205px;
-  height: auto;
-  object-fit: contain;
-  transform: rotate(-4deg);
-}
-
 .names-panel .available-name-list {
   font-size: 1rem;
 }
@@ -1771,16 +1703,6 @@ h2 {
   color: var(--sage-dark);
   font-size: 1.25rem;
   font-weight: 800;
-}
-
-.breakdownDog {
-  right: -16px;
-  bottom: 20px;
-  z-index: 3;
-  width: 188px;
-  height: auto;
-  object-fit: contain;
-  transform: rotate(1deg);
 }
 
 .cardShield {
@@ -1981,15 +1903,6 @@ h2 {
     max-width: 420px;
   }
 
-  .heroDog {
-    right: 18px;
-    top: -4px;
-    bottom: auto;
-    width: 220px;
-    height: 190px;
-    opacity: 0.88;
-  }
-
   .heroSixty {
     right: 8%;
     top: 8px;
@@ -2000,10 +1913,6 @@ h2 {
     left: auto;
     right: 16px;
     top: 18px;
-  }
-
-  .standout-panel {
-    padding-right: 112px;
   }
 
   .instructions-shell {
@@ -2111,39 +2020,13 @@ h2 {
     opacity: 0.2;
   }
 
-  .heroDog {
-    right: -18px;
-    top: 8px;
-    bottom: auto;
-    width: 170px;
-    height: 150px;
-    opacity: 0.5;
-  }
-
   .standout-panel {
     min-height: auto;
     padding-right: 16px;
-    padding-bottom: 92px;
-  }
-
-  .puppyMascot {
-    right: 6px;
-    bottom: 4px;
-    width: 106px;
-    height: 132px;
-    opacity: 0.82;
   }
 
   .classification-panel {
-    padding-bottom: 96px;
-  }
-
-  .breakdownDog {
-    right: 4px;
-    bottom: 4px;
-    width: 116px;
-    height: 166px;
-    opacity: 0.82;
+    padding-bottom: 18px;
   }
 
   .tabs {
@@ -2229,30 +2112,9 @@ h2 {
     z-index: 5;
   }
 
-  .heroDog {
-    right: 104px;
-    top: 6px;
-    z-index: 6;
-    width: 286px;
-    clip-path: inset(0 0 34% 0);
-  }
-
   .classification-panel h2 {
     white-space: nowrap;
     font-size: clamp(2rem, 2.45vw, 2.35rem);
-  }
-
-  .puppyMascot {
-    right: -12px;
-    bottom: 0;
-    z-index: 1;
-    width: 190px;
-  }
-
-  .breakdownDog {
-    right: -34px;
-    bottom: 18px;
-    width: 188px;
   }
 }
 
@@ -2277,15 +2139,6 @@ h2 {
     width: min(100%, 420px);
     min-width: 0;
     margin-top: 22px;
-  }
-
-  .heroDog {
-    right: 16px;
-    top: 10px;
-    z-index: 4;
-    width: 210px;
-    opacity: 0.62;
-    clip-path: inset(0 0 35% 0);
   }
 
   .classification-panel h2 {
@@ -2329,13 +2182,6 @@ h2 {
     font-size: 1.75rem;
   }
 
-  .heroDog {
-    right: -2px;
-    top: 12px;
-    width: 122px;
-    opacity: 0.46;
-  }
-
   .heroLandscape {
     height: 118px;
   }
@@ -2351,31 +2197,18 @@ h2 {
 
   .standout-panel {
     padding-right: 16px;
-    padding-bottom: 126px;
-  }
-
-  .puppyMascot {
-    right: 10px;
-    bottom: 10px;
-    z-index: 1;
-    width: 96px;
+    padding-bottom: 22px;
   }
 
   .classification-panel {
     padding-right: 16px;
-    padding-bottom: 136px;
+    padding-bottom: 22px;
   }
 
   .classification-list {
     max-width: none;
   }
 
-  .breakdownDog {
-    right: -6px;
-    bottom: -18px;
-    z-index: 1;
-    width: 82px;
-  }
 }
 
 @media (max-width: 640px) {
