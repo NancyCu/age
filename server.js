@@ -4,6 +4,7 @@ const path = require("path");
 const crypto = require("crypto");
 const { execFile } = require("child_process");
 const os = require("os");
+const QRCode = require("qrcode");
 
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
@@ -61,6 +62,76 @@ function normalizeKey(name) {
 function parseNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : NaN;
+}
+
+function createHash(value) {
+  return crypto
+    .createHmac("sha256", sessionSecret)
+    .update(String(value))
+    .digest("base64url");
+}
+
+function normalizeSourceToken(value) {
+  const token = String(value || "").trim();
+  return /^[a-zA-Z0-9_-]{16,128}$/.test(token) ? token : "";
+}
+
+function parseBirthDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || "").trim());
+
+  if (!match) {
+    return null;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+    return null;
+  }
+
+  return { day, month, year };
+}
+
+function calculateAgeFromBirthDate(birthDate, now = new Date()) {
+  let age = now.getFullYear() - birthDate.year;
+  const currentMonth = now.getMonth() + 1;
+  const currentDay = now.getDate();
+
+  if (currentMonth < birthDate.month || (currentMonth === birthDate.month && currentDay < birthDate.day)) {
+    age -= 1;
+  }
+
+  return age;
+}
+
+function normalizeBirthDate(value) {
+  const birthDate = parseBirthDate(value);
+
+  if (!birthDate) {
+    return { error: "Choose a valid birth month, day, and year." };
+  }
+
+  const birthTime = Date.UTC(birthDate.year, birthDate.month - 1, birthDate.day);
+  const today = new Date();
+  const todayTime = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+
+  if (birthTime > todayTime) {
+    return { error: "Birthday cannot be in the future." };
+  }
+
+  const age = calculateAgeFromBirthDate(birthDate, today);
+
+  if (!Number.isInteger(age) || age < 0 || age > 130) {
+    return { error: "Birthday must calculate to an age from 0 to 130." };
+  }
+
+  return {
+    age,
+    birthDate: `${birthDate.year}-${String(birthDate.month).padStart(2, "0")}-${String(birthDate.day).padStart(2, "0")}`
+  };
 }
 
 function safeJsonParse(value, fallback) {
@@ -459,6 +530,48 @@ function validateNameAndValue(name, numericValue, label, maxValue) {
   };
 }
 
+function validateCreateEntryBody(body, type) {
+  const valueKey = type === "users" ? "age" : "estimatedTotalAge";
+  const label = type === "users" ? "Age" : "Estimated total age";
+  const maxValue = type === "users" ? 130 : 130000;
+  const token = normalizeSourceToken(body.sourceToken);
+
+  if (!token) {
+    return { error: "Open the guest link from this device before submitting." };
+  }
+
+  if (type === "users" && body.birthDate) {
+    const cleanName = normalizeName(body.name);
+    const birthDateResult = normalizeBirthDate(body.birthDate);
+
+    if (!cleanName) {
+      return { error: "First name is required." };
+    }
+
+    if (birthDateResult.error) {
+      return { error: birthDateResult.error };
+    }
+
+    return {
+      birthDate: birthDateResult.birthDate,
+      name: cleanName,
+      sourceTokenHash: createHash(token),
+      value: birthDateResult.age
+    };
+  }
+
+  const validated = validateNameAndValue(body.name, body[valueKey], label, maxValue);
+
+  if (validated.error) {
+    return validated;
+  }
+
+  return {
+    ...validated,
+    sourceTokenHash: createHash(token)
+  };
+}
+
 async function handlePublicSummary(response) {
   const store = await readStore();
   sendJson(response, 200, {
@@ -542,9 +655,7 @@ async function handleCreateEntry(request, response, type) {
   }
 
   const valueKey = type === "users" ? "age" : "estimatedTotalAge";
-  const label = type === "users" ? "Age" : "Estimated total age";
-  const maxValue = type === "users" ? 130 : 130000;
-  const validated = validateNameAndValue(body.name, body[valueKey], label, maxValue);
+  const validated = validateCreateEntryBody(body, type);
 
   if (validated.error) {
     sendJson(response, 400, { error: validated.error });
@@ -552,6 +663,14 @@ async function handleCreateEntry(request, response, type) {
   }
 
   const store = await readStore();
+  const tokenMatchedUser = store.users.find((entry) => entry.sourceTokenHash && entry.sourceTokenHash === validated.sourceTokenHash);
+  const tokenMatchedGuess = store.guesses.find((entry) => entry.sourceTokenHash && entry.sourceTokenHash === validated.sourceTokenHash);
+
+  if (type === "users" && tokenMatchedUser) {
+    sendJson(response, 409, { error: "This device already added an age. Ask the host to reset if you need to fix it." });
+    return;
+  }
+
   if (type === "guesses") {
     if (store.settings?.guessEnabled === false) {
       sendJson(response, 403, { error: "Guess tab is currently disabled." });
@@ -564,6 +683,16 @@ async function handleCreateEntry(request, response, type) {
       sendJson(response, 400, { error: "Invalid name. Enter a first name that already exists in the User tab." });
       return;
     }
+
+    if (tokenMatchedGuess) {
+      sendJson(response, 409, { error: "This device already submitted a guess. Ask the host to reset if you need to fix it." });
+      return;
+    }
+
+    if (tokenMatchedUser && normalizeKey(tokenMatchedUser.name) !== normalizeKey(validated.name)) {
+      sendJson(response, 400, { error: "Use the same first name you used when adding your age." });
+      return;
+    }
   }
 
   const duplicate = store[type].some((entry) => normalizeKey(entry.name) === normalizeKey(validated.name));
@@ -574,9 +703,11 @@ async function handleCreateEntry(request, response, type) {
   }
 
   store[type].push({
+    ...(validated.birthDate ? { birthDate: validated.birthDate } : {}),
     createdAt: Date.now(),
     [valueKey]: validated.value,
-    name: validated.name
+    name: validated.name,
+    sourceTokenHash: validated.sourceTokenHash
   });
 
   await writeStore(store);
@@ -586,6 +717,50 @@ async function handleCreateEntry(request, response, type) {
     summary: buildPublicSummary(store),
     totals: getTotals(store)
   });
+}
+
+function getPreferredGuestUrl(request) {
+  const hostHeader = request.headers.host || `localhost:${port}`;
+  const origin = `http://${hostHeader}`;
+  const [hostname, requestedPort] = hostHeader.split(":");
+  const isLoopback = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+
+  if (isLoopback) {
+    const [lanUrl] = getNetworkUrls(Number(requestedPort) || port);
+    if (lanUrl) {
+      return `${lanUrl}/guest`;
+    }
+  }
+
+  return `${origin}/guest`;
+}
+
+function handleGuestLink(request, response) {
+  const guestUrl = getPreferredGuestUrl(request);
+  sendJson(response, 200, {
+    guestUrl,
+    qrUrl: "/api/guest-qr.svg"
+  });
+}
+
+async function handleGuestQr(request, response) {
+  const guestUrl = getPreferredGuestUrl(request);
+  const svg = await QRCode.toString(guestUrl, {
+    color: {
+      dark: "#241915",
+      light: "#fffdf7"
+    },
+    errorCorrectionLevel: "M",
+    margin: 1,
+    type: "svg",
+    width: 320
+  });
+
+  response.writeHead(200, {
+    "Cache-Control": "no-store",
+    "Content-Type": "image/svg+xml; charset=utf-8"
+  });
+  response.end(svg);
 }
 
 async function handleAdminLogin(request, response) {
@@ -760,11 +935,13 @@ async function handleAdminEvents(request, response) {
 async function serveStatic(response, pathname) {
   const fileName = pathname === "/"
     ? "index.html"
-    : pathname === "/host"
-      ? "host.html"
-      : pathname === "/instructions"
-        ? "instructions.html"
-        : pathname.replace(/^\/+/, "");
+    : pathname === "/guest"
+      ? "index.html"
+      : pathname === "/host"
+        ? "host.html"
+        : pathname === "/instructions"
+          ? "instructions.html"
+          : pathname.replace(/^\/+/, "");
 
   if (pathname.startsWith("/assets/")) {
     const assetName = pathname.replace(/^\/assets\/+/, "");
@@ -800,14 +977,14 @@ async function serveStatic(response, pathname) {
   response.end(content);
 }
 
-function getNetworkUrls() {
+function getNetworkUrls(urlPort = port) {
   const interfaces = os.networkInterfaces();
   const urls = [];
 
   Object.values(interfaces).forEach((entries) => {
     (entries || []).forEach((entry) => {
       if (entry.family === "IPv4" && !entry.internal) {
-        urls.push(`http://${entry.address}:${port}`);
+        urls.push(`http://${entry.address}:${urlPort}`);
       }
     });
   });
@@ -827,6 +1004,16 @@ function createServer() {
 
       if (request.method === "GET" && url.pathname === "/api/summary") {
         await handlePublicSummary(response);
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/guest-link") {
+        handleGuestLink(request, response);
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/guest-qr.svg") {
+        await handleGuestQr(request, response);
         return;
       }
 

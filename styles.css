@@ -1791,6 +1791,151 @@ h2 {
   opacity: 0.32;
 }
 
+.birthday-picker {
+  display: grid;
+  grid-template-columns: 1.15fr 0.78fr 0.92fr;
+  gap: 10px;
+  margin: 0;
+  padding: 13px;
+  border: 1px solid rgba(209, 154, 52, 0.34);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.96), rgba(255, 239, 204, 0.82)),
+    repeating-linear-gradient(90deg, rgba(209, 154, 52, 0.08) 0 1px, transparent 1px 12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.birthday-picker legend {
+  grid-column: 1 / -1;
+  padding: 0 6px;
+  color: var(--orange-dark);
+  font: 900 0.82rem/1 "Manrope", sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.wheel-field {
+  display: grid;
+  gap: 6px;
+}
+
+.wheel-field span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.wheel-field select {
+  width: 100%;
+  min-height: 58px;
+  appearance: none;
+  border: 2px solid rgba(33, 23, 18, 0.14);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(45deg, transparent 50%, var(--sage-dark) 50%) calc(100% - 18px) 24px / 7px 7px no-repeat,
+    linear-gradient(135deg, var(--sage-dark) 50%, transparent 50%) calc(100% - 12px) 24px / 7px 7px no-repeat,
+    linear-gradient(180deg, #fffdf7, #fff5df);
+  color: var(--ink);
+  font: 800 16px "Manrope", sans-serif;
+  outline: none;
+  padding: 13px 32px 13px 12px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.wheel-field select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 4px rgba(201, 151, 53, 0.18);
+}
+
+.birthday-preview {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(6, 103, 118, 0.08);
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.birthday-preview.is-ready {
+  background: rgba(109, 176, 167, 0.18);
+  color: var(--sage-dark);
+}
+
+.birthday-preview.is-warning {
+  background: rgba(239, 62, 46, 0.12);
+  color: var(--orange-dark);
+}
+
+.guest-qr-card {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  max-width: 470px;
+  margin-top: 24px;
+  padding: 13px;
+  border: 1px solid rgba(209, 154, 52, 0.32);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.96), rgba(238, 248, 242, 0.9)),
+    radial-gradient(circle at 8% 18%, rgba(255, 140, 22, 0.18), transparent 9rem);
+  box-shadow: var(--shadow-soft);
+}
+
+.guest-qr-card strong,
+.host-qr-panel h2 {
+  display: block;
+  margin: 2px 0 6px;
+  color: var(--ink);
+  font: 900 1.4rem/1.05 var(--display);
+}
+
+.guest-qr-image {
+  width: 112px;
+  height: 112px;
+  border: 8px solid #fffdf7;
+  border-radius: 14px;
+  background: #fffdf7;
+  box-shadow: 0 10px 24px rgba(94, 65, 30, 0.12);
+}
+
+.guest-link-copy {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--sage-dark);
+  font-size: 0.88rem;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.guest-link-copy:hover {
+  text-decoration: underline;
+}
+
+.host-qr-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 154px;
+  gap: 16px;
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(255, 253, 247, 0.96), rgba(255, 241, 218, 0.9)),
+    repeating-linear-gradient(-35deg, rgba(209, 154, 52, 0.1) 0 10px, transparent 10px 24px);
+}
+
+.host-qr-image {
+  justify-self: end;
+  width: 154px;
+  height: 154px;
+}
+
 @keyframes winnerPop {
   from {
     opacity: 0;
@@ -2230,5 +2375,32 @@ h2 {
     bottom: -18px;
     z-index: 1;
     width: 82px;
+  }
+}
+
+@media (max-width: 640px) {
+  .birthday-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .guest-qr-card,
+  .host-qr-panel {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+
+  .guest-qr-image,
+  .host-qr-image {
+    justify-self: start;
+    width: 132px;
+    height: 132px;
+  }
+
+  .hero-qr-card {
+    max-width: none;
+  }
+
+  .wheel-field select {
+    width: 100%;
   }
 }

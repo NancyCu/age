@@ -13,6 +13,8 @@ const hostElements = {
   guessNames: document.querySelector("#hostGuessNames"),
   guessToggleButton: document.querySelector("#hostGuessToggleButton"),
   hideWinnerButton: document.querySelector("#hostHideWinnerButton"),
+  guestQrImage: document.querySelector("#hostGuestQrImage"),
+  guestQrLink: document.querySelector("#hostGuestQrLink"),
   lastUpdated: document.querySelector("#hostLastUpdated"),
   loginForm: document.querySelector("#hostLoginForm"),
   loginPanel: document.querySelector("#hostLoginPanel"),
@@ -168,6 +170,21 @@ async function refreshHostDashboard() {
   });
 }
 
+async function refreshHostGuestQr() {
+  if (!hostElements.guestQrLink || !hostElements.guestQrImage) {
+    return;
+  }
+
+  try {
+    const link = await hostRequestJson("/api/guest-link");
+    hostElements.guestQrLink.href = link.guestUrl;
+    hostElements.guestQrLink.textContent = link.guestUrl;
+    hostElements.guestQrImage.src = `${link.qrUrl}?t=${Date.now()}`;
+  } catch {
+    hostElements.guestQrLink.textContent = "Guest QR unavailable";
+  }
+}
+
 async function setHostWinnerMode(winnerMode) {
   const result = await hostRequestJson("/api/admin/winner-mode", {
     body: JSON.stringify({ winnerMode }),
@@ -265,6 +282,7 @@ hostElements.logoutButton.addEventListener("click", async () => {
 
 async function initializeHostDashboard() {
   try {
+    await refreshHostGuestQr();
     const session = await hostRequestJson("/api/admin/session");
     setHostAuthenticated(Boolean(session.authenticated));
     if (session.authenticated) {

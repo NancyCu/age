@@ -35,6 +35,14 @@
           <a class="hero-link-button" href="/instructions">How to Play</a>
           <a class="hero-link-button hero-link-button-secondary" href="/host">Host Dashboard</a>
         </div>
+        <div class="guest-qr-card hero-qr-card" aria-live="polite">
+          <img id="guestQrImage" class="guest-qr-image" src="/api/guest-qr.svg" alt="QR code to open the guest mobile game" />
+          <div>
+            <span class="section-kicker">Guest mobile link</span>
+            <strong>Scan to play</strong>
+            <a id="guestQrLink" class="guest-link-copy" href="/guest">Loading guest URL...</a>
+          </div>
+        </div>
       </div>
       <div class="hero-scoreboard heroBadge" aria-label="Party game summary">
         <span>6/6 Party Bash</span>
@@ -55,16 +63,28 @@
           <article class="panel standout-panel">
             <div class="goldFiligree cardFiligree" aria-hidden="true"></div>
             <h2>Add your age</h2>
-            <p class="summary-copy">Enter your first name and age once. Your name will unlock the guessing round.</p>
+            <p class="summary-copy">Enter your first name, then spin the birthday wheels. The app calculates your age for the host.</p>
             <form id="userForm" class="stack narrow-stack">
               <label class="field">
                 <span>First name</span>
                 <input id="userName" name="name" type="text" maxlength="50" autocomplete="given-name" autocapitalize="words" required />
               </label>
-              <label class="field">
-                <span>Age</span>
-                <input id="userAge" name="age" type="number" min="0" max="130" inputmode="numeric" required />
-              </label>
+              <fieldset class="birthday-picker">
+                <legend>Birthday</legend>
+                <label class="wheel-field">
+                  <span>Month</span>
+                  <select id="birthMonth" name="birthMonth" required></select>
+                </label>
+                <label class="wheel-field">
+                  <span>Day</span>
+                  <select id="birthDay" name="birthDay" required></select>
+                </label>
+                <label class="wheel-field">
+                  <span>Year</span>
+                  <select id="birthYear" name="birthYear" required></select>
+                </label>
+                <p id="birthdayPreview" class="birthday-preview">Pick your birthday to unlock Save age.</p>
+              </fieldset>
               <button class="primary-button" type="submit">Save age</button>
             </form>
               <img class="dogMascot puppyMascot creamPuppy" src="/assets/cream-puppy-party.png" alt="Cream puppy mascot leaning near the age form" />

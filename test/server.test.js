@@ -29,6 +29,11 @@ async function resetStore() {
   );
 }
 
+function birthDateYearsAgo(yearsAgo) {
+  const today = new Date();
+  return `${today.getFullYear() - yearsAgo}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+}
+
 test("firebase CLI parser ignores trailing status output", () => {
   const parsed = parseFirebaseCliJson(
     '{"settings":{"guessEnabled":true,"winnerMode":"real"},"users":[],"guesses":[]}\n{"status":"success"}\n',
@@ -57,10 +62,11 @@ test("user, guess, duplicate, and admin flows work", async () => {
 
   const address = server.address();
   const baseUrl = `http://127.0.0.1:${address.port}`;
+  const aliceBirthDate = birthDateYearsAgo(30);
 
   try {
     let response = await fetch(`${baseUrl}/api/users`, {
-      body: JSON.stringify({ age: 30, name: "Alice" }),
+      body: JSON.stringify({ birthDate: aliceBirthDate, name: "Alice", sourceToken: "guest-token-alice-0001" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
@@ -77,9 +83,12 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(createPayload.summary.guessEnabled, true);
     assert.deepEqual(createPayload.summary.userNames, ["Alice"]);
     assert.deepEqual(createPayload.summary.guessNames, []);
+    assert.equal(createPayload.entry.age, 30);
+    assert.equal(createPayload.entry.birthDate, aliceBirthDate);
+    assert.ok(createPayload.entry.sourceTokenHash);
 
     response = await fetch(`${baseUrl}/api/users`, {
-      body: JSON.stringify({ age: 15, name: "Mia" }),
+      body: JSON.stringify({ age: 15, name: "Mia", sourceToken: "guest-token-mia-00001" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
@@ -96,21 +105,45 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.deepEqual(createPayload.summary.userNames, ["Alice", "Mia"]);
 
     response = await fetch(`${baseUrl}/api/users`, {
-      body: JSON.stringify({ age: 71, name: "Nora" }),
+      body: JSON.stringify({ age: 71, name: "Nora", sourceToken: "guest-token-nora-0001" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
     assert.equal(response.status, 201);
 
     response = await fetch(`${baseUrl}/api/users`, {
-      body: JSON.stringify({ age: 40, name: "alice" }),
+      body: JSON.stringify({ age: 40, name: "alice", sourceToken: "guest-token-alice-dupe" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
     assert.equal(response.status, 409);
 
+    response = await fetch(`${baseUrl}/api/users`, {
+      body: JSON.stringify({ age: 40, name: "DeviceSwap", sourceToken: "guest-token-alice-0001" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 409);
+    assert.match((await response.json()).error, /already added an age/);
+
+    response = await fetch(`${baseUrl}/api/users`, {
+      body: JSON.stringify({ birthDate: "2999-01-01", name: "Future", sourceToken: "guest-token-future01" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error, "Birthday cannot be in the future.");
+
+    response = await fetch(`${baseUrl}/api/users`, {
+      body: JSON.stringify({ age: 25, name: "NoToken" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error, "Open the guest link from this device before submitting.");
+
     response = await fetch(`${baseUrl}/api/guesses`, {
-      body: JSON.stringify({ estimatedTotalAge: 41, name: "Ben" }),
+      body: JSON.stringify({ estimatedTotalAge: 41, name: "Ben", sourceToken: "guest-token-ben-00001" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
@@ -118,14 +151,14 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal((await response.json()).error, "Invalid name. Enter a first name that already exists in the User tab.");
 
     response = await fetch(`${baseUrl}/api/guesses`, {
-      body: JSON.stringify({ estimatedTotalAge: 34, name: "Ben" }),
+      body: JSON.stringify({ estimatedTotalAge: 34, name: "Ben", sourceToken: "guest-token-ben-00002" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
     assert.equal(response.status, 400);
 
     response = await fetch(`${baseUrl}/api/guesses`, {
-      body: JSON.stringify({ estimatedTotalAge: 34, name: "Alice" }),
+      body: JSON.stringify({ estimatedTotalAge: 34, name: "Alice", sourceToken: "guest-token-alice-0001" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
@@ -186,6 +219,23 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(response.status, 200);
     assert.match(await response.text(), /Host Dashboard/);
 
+    response = await fetch(`${baseUrl}/guest`);
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), /Age Pool Tracker/);
+
+    response = await fetch(`${baseUrl}/api/guest-link`);
+    assert.equal(response.status, 200);
+    const guestLink = await response.json();
+    const guestUrl = new URL(guestLink.guestUrl);
+    assert.equal(guestUrl.port, String(address.port));
+    assert.equal(guestUrl.pathname, "/guest");
+    assert.equal(guestLink.qrUrl, "/api/guest-qr.svg");
+
+    response = await fetch(`${baseUrl}/api/guest-qr.svg`);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-type"), "image/svg+xml; charset=utf-8");
+    assert.match(await response.text(), /<svg/);
+
     response = await fetch(`${baseUrl}/api/admin/events`);
     assert.equal(response.status, 401);
 
@@ -245,7 +295,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(response.status, 400);
 
     response = await fetch(`${baseUrl}/api/users`, {
-      body: JSON.stringify({ age: 131, name: "TooOld" }),
+      body: JSON.stringify({ age: 131, name: "TooOld", sourceToken: "guest-token-too-old1" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
@@ -267,7 +317,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(disabledSummary.guessEnabled, false);
 
     response = await fetch(`${baseUrl}/api/guesses`, {
-      body: JSON.stringify({ estimatedTotalAge: 120, name: "Mia" }),
+      body: JSON.stringify({ estimatedTotalAge: 120, name: "Mia", sourceToken: "guest-token-mia-00001" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
@@ -285,7 +335,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(enabledGuessTab.dashboard.guessEnabled, true);
 
     response = await fetch(`${baseUrl}/api/guesses`, {
-      body: JSON.stringify({ estimatedTotalAge: 120, name: "Mia" }),
+      body: JSON.stringify({ estimatedTotalAge: 120, name: "Mia", sourceToken: "guest-token-mia-00001" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
