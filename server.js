@@ -720,10 +720,13 @@ async function handleCreateEntry(request, response, type) {
 }
 
 function getPreferredGuestUrl(request) {
-  const hostHeader = request.headers.host || `localhost:${port}`;
-  const origin = `http://${hostHeader}`;
+  const forwardedHost = getFirstHeaderValue(request.headers["x-forwarded-host"]);
+  const forwardedProto = getFirstHeaderValue(request.headers["x-forwarded-proto"]);
+  const hostHeader = forwardedHost || request.headers.host || `localhost:${port}`;
   const [hostname, requestedPort] = hostHeader.split(":");
   const isLoopback = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  const protocol = forwardedProto || (isLoopback ? "http" : "https");
+  const origin = `${protocol}://${hostHeader}`;
 
   if (isLoopback) {
     const [lanUrl] = getNetworkUrls(Number(requestedPort) || port);
@@ -733,6 +736,12 @@ function getPreferredGuestUrl(request) {
   }
 
   return `${origin}/guest`;
+}
+
+function getFirstHeaderValue(value) {
+  return String(Array.isArray(value) ? value[0] : value || "")
+    .split(",")[0]
+    .trim();
 }
 
 function handleGuestLink(request, response) {

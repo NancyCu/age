@@ -231,6 +231,15 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(guestUrl.pathname, "/guest");
     assert.equal(guestLink.qrUrl, "/api/guest-qr.svg");
 
+    response = await fetch(`${baseUrl}/api/guest-link`, {
+      headers: {
+        "x-forwarded-host": "age-game--shawncountdown.us-central1.hosted.app",
+        "x-forwarded-proto": "https"
+      }
+    });
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).guestUrl, "https://age-game--shawncountdown.us-central1.hosted.app/guest");
+
     response = await fetch(`${baseUrl}/api/guest-qr.svg`);
     assert.equal(response.status, 200);
     assert.equal(response.headers.get("content-type"), "image/svg+xml; charset=utf-8");
