@@ -1048,6 +1048,565 @@ tbody tr:last-child td {
   width: 100%;
 }
 
+/* Reference-match polish pass for the main party dashboard. */
+:root {
+  --display: "Baloo 2", "Arial Rounded MT Bold", "Manrope", system-ui, sans-serif;
+  --radius: 10px;
+  --bg: #f5e7ce;
+  --surface: rgba(255, 252, 243, 0.93);
+  --surface-strong: #ffffff;
+  --ink: #241915;
+  --muted: #6f625b;
+  --line: rgba(128, 88, 35, 0.2);
+  --gold: #d19a34;
+  --gold-soft: #ead1a4;
+  --orange: #ff8c16;
+  --orange-dark: #ef3e2e;
+  --sage: #6db0a7;
+  --sage-dark: #066676;
+  --shadow: 0 24px 54px rgba(94, 65, 30, 0.13);
+  --shadow-soft: 0 15px 34px rgba(94, 65, 30, 0.1);
+}
+
+body {
+  background:
+    radial-gradient(circle at 17% 0%, rgba(255, 255, 255, 0.96), transparent 23rem),
+    radial-gradient(circle at 88% 6%, rgba(220, 185, 127, 0.32), transparent 20rem),
+    linear-gradient(180deg, #f7ead2 0%, #f2dfbd 100%);
+}
+
+body::before {
+  opacity: 0.44;
+  background-image:
+    radial-gradient(circle, rgba(209, 154, 52, 0.34) 0 1px, transparent 2px),
+    linear-gradient(90deg, rgba(239, 62, 46, 0.7) 0 82px, transparent 82px 100%),
+    linear-gradient(90deg, rgba(6, 103, 118, 0.45) 0 112px, transparent 112px 100%),
+    linear-gradient(90deg, rgba(95, 127, 209, 0.45) 0 130px, transparent 130px 100%);
+  background-position: 0 0, 78% 34%, 68% 39%, 87% 43%;
+  background-size: 21px 21px, 130px 10px, 150px 11px, 170px 8px;
+}
+
+.app-shell {
+  width: min(100% - 44px, 1488px);
+  padding: 24px 0 52px;
+}
+
+.hero {
+  min-height: 430px;
+  display: block;
+  padding: 56px 56px 50px;
+  border-radius: 12px;
+  background:
+    linear-gradient(90deg, rgba(255, 253, 247, 0.95), rgba(255, 250, 239, 0.88)),
+    radial-gradient(circle at 52% 35%, rgba(244, 206, 129, 0.3), transparent 21rem),
+    radial-gradient(circle at 86% 12%, rgba(244, 210, 146, 0.36), transparent 18rem);
+  box-shadow: 0 27px 56px rgba(86, 60, 28, 0.15);
+}
+
+.hero::before {
+  inset: 0;
+  width: auto;
+  height: auto;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 4% 9%, var(--gold) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 25% 8%, var(--gold) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 63% 10%, var(--gold) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 92% 18%, var(--gold) 0 1.5px, transparent 2px);
+  background-size: 62px 58px, 74px 64px, 80px 70px, 96px 72px;
+  opacity: 0.36;
+}
+
+.hero::after {
+  right: 174px;
+  bottom: 50px;
+  width: 152px;
+  height: 18px;
+  background: linear-gradient(90deg, #f04b2f, #f6b51c 48%, #008b87);
+  box-shadow:
+    64px -54px 0 -4px rgba(239, 62, 46, 0.52),
+    -104px -20px 0 -4px rgba(6, 103, 118, 0.42),
+    146px 22px 0 -6px rgba(86, 112, 207, 0.42);
+  opacity: 0.78;
+}
+
+.hero-copy-block {
+  max-width: 710px;
+}
+
+h1,
+h2,
+h3,
+.hero-scoreboard strong,
+.classification-row strong,
+.stat-panel strong,
+.host-metric-card strong,
+.host-winner-card strong {
+  font-family: var(--display);
+  letter-spacing: 0;
+}
+
+h1 {
+  max-width: 8.6ch;
+  margin-bottom: 18px;
+  font-size: clamp(5.2rem, 7.3vw, 7.7rem);
+  font-weight: 800;
+  line-height: 0.83;
+  color: #211713;
+  text-shadow: 0 3px 0 rgba(255, 255, 255, 0.55);
+}
+
+h2 {
+  margin-bottom: 8px;
+  font-size: clamp(2rem, 2.9vw, 2.55rem);
+  font-weight: 800;
+  line-height: 0.92;
+}
+
+.hero-copy {
+  max-width: 620px;
+  margin-left: 118px;
+  font-size: clamp(1.12rem, 1.55vw, 1.36rem);
+  font-weight: 900;
+  line-height: 1.48;
+  color: #6e625d;
+}
+
+.heroBadge {
+  position: absolute;
+  right: 68px;
+  bottom: 106px;
+  z-index: 5;
+  width: min(430px, 34vw);
+  min-width: 370px;
+  min-height: 118px;
+  padding: 25px 26px 23px;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(101, 63, 35, 0.2), transparent 55%),
+    linear-gradient(145deg, #342217, #1d130e 75%);
+  box-shadow: 0 18px 28px rgba(48, 28, 12, 0.23);
+}
+
+.heroBadge span {
+  color: #f7d76d;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+}
+
+.heroBadge strong {
+  font-size: clamp(2rem, 2.65vw, 2.7rem);
+  font-weight: 800;
+  line-height: 0.92;
+  color: #fff;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.28);
+}
+
+.heroDog {
+  right: 93px;
+  top: 7px;
+  z-index: 6;
+  width: 340px;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  transform: rotate(2deg);
+  -webkit-mask-image: none;
+  mask-image: none;
+  filter: drop-shadow(0 19px 17px rgba(74, 47, 22, 0.2)) saturate(1.09) brightness(1.04);
+}
+
+.heroLandscape {
+  height: 190px;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+}
+
+.heroMountain {
+  bottom: -52px;
+  width: 560px;
+  height: 150px;
+  clip-path: none;
+  background: url("/assets/gold-mountains.png") center bottom / contain no-repeat;
+}
+
+.heroMountainOne {
+  left: 28%;
+}
+
+.heroMountainTwo {
+  right: 17%;
+  width: 520px;
+  opacity: 0.5;
+}
+
+.heroSpire {
+  left: 60%;
+  bottom: 70px;
+  width: 84px;
+  height: 174px;
+  opacity: 0.31;
+  background: url("/assets/gold-church.png") center bottom / contain no-repeat;
+}
+
+.heroPalm {
+  left: 86px;
+  right: auto;
+  bottom: 94px;
+  width: 74px;
+  height: 142px;
+  opacity: 0.3;
+  background: url("/assets/gold-palm.png") center bottom / contain no-repeat;
+}
+
+.heroPalm::before,
+.goldFiligree::before,
+.goldFiligree::after {
+  display: none;
+}
+
+.heroFiligree {
+  left: 47%;
+  top: 12px;
+  width: 380px;
+  height: 194px;
+  opacity: 0.52;
+  transform: translateX(-50%);
+  background: url("/assets/gold-filigree-60.png") center / contain no-repeat;
+}
+
+.heroSixty {
+  display: none;
+}
+
+.cardFiligree {
+  background: url("/assets/gold-floral-corner.png") center / contain no-repeat;
+}
+
+.cardFiligree::before,
+.cardFiligree::after {
+  display: none;
+}
+
+.names-panel::before,
+.classification-panel::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.names-panel::before {
+  right: 12px;
+  top: 8px;
+  z-index: 1;
+  width: 116px;
+  height: 150px;
+  opacity: 0.44;
+  background: url("/assets/gold-scroll-corner.png") center / contain no-repeat;
+}
+
+.classification-panel::before {
+  right: 26px;
+  top: 18px;
+  z-index: 1;
+  width: 76px;
+  height: 150px;
+  opacity: 0.34;
+  background: url("/assets/gold-sparkles.png") center / contain no-repeat;
+}
+
+.names-panel::after {
+  background:
+    url("/assets/gold-mountains.png") center bottom / 88% auto no-repeat,
+    linear-gradient(180deg, transparent, rgba(218, 180, 116, 0.13));
+}
+
+.standout-panel::after {
+  background:
+    url("/assets/gold-bear-small.png") left 10px bottom 10px / 72px auto no-repeat,
+    url("/assets/gold-palm.png") right 155px bottom 0 / 52px auto no-repeat,
+    url("/assets/gold-mountains.png") right bottom / 54% auto no-repeat,
+    linear-gradient(180deg, transparent, rgba(218, 180, 116, 0.11));
+}
+
+.classification-panel::after {
+  background:
+    url("/assets/gold-shield.png") left 14px bottom 14px / 42px auto no-repeat,
+    url("/assets/gold-mountains.png") right bottom / 54% auto no-repeat,
+    linear-gradient(180deg, transparent, rgba(218, 180, 116, 0.11));
+}
+
+/*
+.heroSixty {
+  right: auto;
+  left: 48%;
+  top: 22px;
+  font: 800 6.9rem/1 var(--display);
+  color: rgba(209, 154, 52, 0.34);
+  transform: translateX(-50%);
+}
+*/
+
+.sparkle {
+  opacity: 0.72;
+}
+
+.sparkleOne {
+  left: 3.2%;
+  top: 31px;
+  transform: rotate(18deg) scale(1.25);
+}
+
+.sparkleTwo {
+  right: 3.6%;
+  top: 48px;
+  transform: rotate(-12deg) scale(1.05);
+}
+
+.sparkleThree {
+  left: 70%;
+  bottom: 57px;
+  transform: rotate(21deg) scale(0.74);
+}
+
+.floralRosetteOne {
+  left: 31%;
+  bottom: 42px;
+}
+
+.floralRosetteTwo {
+  right: 3%;
+  top: 86px;
+  transform: scale(1.2) rotate(18deg);
+}
+
+.easterEggBear {
+  left: 55%;
+  bottom: 70px;
+  width: 112px;
+  height: 72px;
+  opacity: 0.28;
+  border-radius: 0;
+  background: url("/assets/gold-bear.png") center / contain no-repeat;
+}
+
+.easterEggBear::before,
+.easterEggBear::after {
+  display: none;
+}
+
+.easterEggAardvark {
+  left: 31%;
+  right: auto;
+  bottom: 42px;
+  width: 124px;
+  height: 56px;
+  opacity: 0.2;
+  border-radius: 0;
+  background: url("/assets/gold-aardvark.png") center / contain no-repeat;
+}
+
+.easterEggAardvark::before,
+.easterEggAardvark::after {
+  display: none;
+}
+
+.hero .subtleShield {
+  right: 44px;
+  bottom: 142px;
+  width: 76px;
+  height: 92px;
+  opacity: 0.32;
+  border: 0;
+  border-radius: 0;
+  clip-path: none;
+  background: url("/assets/gold-shield.png") center / contain no-repeat;
+}
+
+.subtleShield::before {
+  display: none;
+}
+
+.layout {
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.tabs {
+  gap: 22px;
+  margin-left: 8px;
+}
+
+.tab-button {
+  min-width: 126px;
+  min-height: 56px;
+  padding: 13px 27px;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.tab-button.is-active,
+.tab-button:hover {
+  background: linear-gradient(135deg, #ef3f2f 0%, #ff9419 95%);
+  box-shadow: 0 17px 28px rgba(239, 78, 38, 0.22);
+}
+
+.panel {
+  min-height: 510px;
+  border-radius: 9px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(255, 247, 231, 0.91)),
+    radial-gradient(circle at 90% 7%, rgba(224, 174, 88, 0.22), transparent 15rem);
+  padding: 30px 36px;
+}
+
+.user-tab-grid,
+.guess-tab-grid {
+  grid-template-columns: minmax(430px, 1.2fr) minmax(300px, 0.82fr) minmax(360px, 1fr);
+  gap: 22px;
+}
+
+.standout-panel {
+  padding-right: 155px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(255, 247, 231, 0.91)),
+    radial-gradient(circle at 88% 18%, rgba(224, 174, 88, 0.18), transparent 15rem);
+}
+
+.standout-panel::after,
+.names-panel::after,
+.classification-panel::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  inset: auto 0 0;
+  height: 118px;
+  opacity: 0.32;
+  background:
+    linear-gradient(145deg, transparent 0 54%, rgba(178, 139, 92, 0.58) 55% 56%, transparent 57%) 58% 12px / 180px 104px no-repeat,
+    linear-gradient(145deg, transparent 0 54%, rgba(178, 139, 92, 0.42) 55% 56%, transparent 57%) 76% 36px / 210px 86px no-repeat,
+    linear-gradient(180deg, transparent, rgba(218, 180, 116, 0.2));
+}
+
+.names-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(255, 248, 234, 0.92)),
+    radial-gradient(circle at 88% 8%, rgba(209, 154, 52, 0.14), transparent 11rem);
+}
+
+.classification-panel {
+  padding-right: 172px;
+  padding-bottom: 30px;
+}
+
+.summary-copy {
+  max-width: 42ch;
+  margin-bottom: 20px;
+  color: #6f625b;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.narrow-stack {
+  max-width: 425px;
+}
+
+.field {
+  gap: 9px;
+}
+
+.field span {
+  color: #5e534d;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.field input {
+  min-height: 58px;
+  border-radius: 10px;
+  border: 2px solid rgba(32, 25, 21, 0.14);
+  box-shadow: inset 0 1px 2px rgba(40, 26, 14, 0.05);
+}
+
+.primary-button {
+  min-height: 58px;
+  border-radius: 999px;
+  margin-top: 10px;
+  background: linear-gradient(135deg, #ef3f2f 0%, #ff9419 95%);
+  box-shadow: 0 18px 28px rgba(239, 78, 38, 0.2);
+  font-size: 1rem;
+}
+
+.cardFiligree {
+  right: 10px;
+  top: 10px;
+  width: 180px;
+  height: 180px;
+  opacity: 0.34;
+  transform: rotate(72deg);
+}
+
+.puppyMascot {
+  right: -18px;
+  bottom: -3px;
+  z-index: 3;
+  width: 205px;
+  height: auto;
+  object-fit: contain;
+  transform: rotate(-4deg);
+}
+
+.names-panel .available-name-list {
+  font-size: 1rem;
+}
+
+.available-name-list {
+  font-weight: 900;
+}
+
+.classification-list {
+  max-width: 268px;
+  gap: 10px;
+}
+
+.classification-row {
+  min-height: 52px;
+  border-radius: 10px;
+  padding: 12px 17px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.classification-row span {
+  font-weight: 500;
+}
+
+.classification-row strong {
+  color: var(--sage-dark);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.breakdownDog {
+  right: -16px;
+  bottom: 20px;
+  z-index: 3;
+  width: 188px;
+  height: auto;
+  object-fit: contain;
+  transform: rotate(1deg);
+}
+
+.cardShield {
+  left: 14px;
+  right: auto;
+  top: auto;
+  bottom: 16px;
+  opacity: 0.32;
+}
+
 @keyframes winnerPop {
   from {
     opacity: 0;
@@ -1296,5 +1855,160 @@ tbody tr:last-child td {
   .host-control-grid .ghost-button,
   .host-control-grid .danger-button {
     min-height: 58px;
+  }
+}
+
+/* Final responsive fidelity corrections. */
+@media (min-width: 941px) {
+  .heroBadge {
+    z-index: 5;
+  }
+
+  .heroDog {
+    right: 104px;
+    top: 6px;
+    z-index: 6;
+    width: 286px;
+    clip-path: inset(0 0 34% 0);
+  }
+
+  .classification-panel h2 {
+    white-space: nowrap;
+    font-size: clamp(2rem, 2.45vw, 2.35rem);
+  }
+
+  .puppyMascot {
+    right: -12px;
+    bottom: 0;
+    z-index: 1;
+    width: 190px;
+  }
+
+  .breakdownDog {
+    right: -34px;
+    bottom: 18px;
+    width: 188px;
+  }
+}
+
+@media (max-width: 940px) {
+  .app-shell {
+    width: min(100% - 28px, 900px);
+  }
+
+  .hero {
+    min-height: 0;
+    padding: 30px 28px 28px;
+  }
+
+  .hero-copy {
+    margin-left: 0;
+  }
+
+  .heroBadge {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: min(100%, 420px);
+    min-width: 0;
+    margin-top: 22px;
+  }
+
+  .heroDog {
+    right: 16px;
+    top: 10px;
+    z-index: 4;
+    width: 210px;
+    opacity: 0.62;
+    clip-path: inset(0 0 35% 0);
+  }
+
+  .classification-panel h2 {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    width: min(100% - 18px, 420px);
+  }
+
+  .hero {
+    padding: 20px 18px 22px;
+  }
+
+  h1 {
+    max-width: 8.6ch;
+    font-size: clamp(3rem, 17vw, 4.2rem);
+    line-height: 0.82;
+  }
+
+  h2 {
+    font-size: 1.45rem;
+    line-height: 0.95;
+  }
+
+  .hero-copy {
+    max-width: 25ch;
+    font-size: 0.98rem;
+    line-height: 1.42;
+  }
+
+  .heroBadge {
+    margin-top: 12px;
+    padding: 18px 18px 17px;
+    min-height: 96px;
+  }
+
+  .heroBadge strong {
+    font-size: 1.75rem;
+  }
+
+  .heroDog {
+    right: -2px;
+    top: 12px;
+    width: 122px;
+    opacity: 0.46;
+  }
+
+  .heroLandscape {
+    height: 118px;
+  }
+
+  .tabs {
+    margin-left: 0;
+  }
+
+  .panel {
+    min-height: 0;
+    padding: 22px 16px;
+  }
+
+  .standout-panel {
+    padding-right: 16px;
+    padding-bottom: 126px;
+  }
+
+  .puppyMascot {
+    right: 10px;
+    bottom: 10px;
+    z-index: 1;
+    width: 96px;
+  }
+
+  .classification-panel {
+    padding-right: 16px;
+    padding-bottom: 136px;
+  }
+
+  .classification-list {
+    max-width: none;
+  }
+
+  .breakdownDog {
+    right: -6px;
+    bottom: -18px;
+    z-index: 1;
+    width: 82px;
   }
 }
