@@ -6,12 +6,26 @@
   <title>Age Pool Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,800&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <div class="app-shell">
     <header class="hero">
+      <div class="heroLandscape" aria-hidden="true">
+        <span class="heroMountain heroMountainOne"></span>
+        <span class="heroMountain heroMountainTwo"></span>
+        <span class="heroSpire"></span>
+        <span class="heroPalm"></span>
+      </div>
+      <div class="goldFiligree heroFiligree" aria-hidden="true"></div>
+      <span class="heroSixty" aria-hidden="true">60</span>
+      <span class="sparkle sparkleOne" aria-hidden="true"></span>
+      <span class="sparkle sparkleTwo" aria-hidden="true"></span>
+      <span class="sparkle sparkleThree" aria-hidden="true"></span>
+      <span class="easterEggBear" aria-hidden="true"></span>
+      <span class="easterEggAardvark" aria-hidden="true"></span>
+      <span class="subtleShield" aria-hidden="true"></span>
       <div class="hero-copy-block">
         <h1>Age Pool Tracker</h1>
         <p class="hero-copy">Guess the total age in the room. Add your age, make your best sum-of-ages guess, and wait for the Touch Down reveal.</p>
@@ -19,6 +33,19 @@
       <div class="hero-scoreboard" aria-label="Party game summary">
         <span>6/6 Party Bash</span>
         <strong>Closest guess wins</strong>
+      </div>
+      <!-- TODO: Swap this CSS mascot for the final transparent tan dog cutout when the source image is available as an asset. -->
+      <div class="dogMascot heroDog tanDog" aria-hidden="true">
+        <span class="dogEar dogEarLeft"></span>
+        <span class="dogEar dogEarRight"></span>
+        <span class="dogHead">
+          <span class="dogEye dogEyeLeft"></span>
+          <span class="dogEye dogEyeRight"></span>
+          <span class="dogNose"></span>
+          <span class="dogSmile"></span>
+        </span>
+        <span class="dogPaw dogPawLeft"></span>
+        <span class="dogPaw dogPawRight"></span>
       </div>
     </header>
 
@@ -32,6 +59,7 @@
       <section id="userTab" class="tab-panel is-active" aria-labelledby="User">
         <div class="user-tab-grid">
           <article class="panel standout-panel">
+            <div class="goldFiligree cardFiligree" aria-hidden="true"></div>
             <h2>Add your age</h2>
             <p class="summary-copy">Enter your first name and age once. Your name will unlock the guessing round.</p>
             <form id="userForm" class="stack narrow-stack">
@@ -45,6 +73,19 @@
               </label>
               <button class="primary-button" type="submit">Save age</button>
             </form>
+            <!-- TODO: Replace with a transparent cream puppy PNG/WebP when a clean cutout is provided. -->
+            <div class="dogMascot puppyMascot creamPuppy" aria-hidden="true">
+              <span class="dogEar dogEarLeft"></span>
+              <span class="dogEar dogEarRight"></span>
+              <span class="dogHead">
+                <span class="dogEye dogEyeLeft"></span>
+                <span class="dogEye dogEyeRight"></span>
+                <span class="dogNose"></span>
+                <span class="dogSmile"></span>
+              </span>
+              <span class="dogPaw dogPawLeft"></span>
+              <span class="dogPaw dogPawRight"></span>
+            </div>
           </article>
 
           <article class="panel names-panel">
@@ -53,6 +94,7 @@
           </article>
 
           <article class="panel classification-panel">
+            <span class="subtleShield cardShield" aria-hidden="true"></span>
             <h2>User breakdown</h2>
             <p class="summary-copy">A quick party snapshot by age group.</p>
             <div class="classification-list">
@@ -76,6 +118,20 @@
                 <span>Beyond Seniors (75+)</span>
                 <strong id="countBeyondSeniors">0</strong>
               </div>
+            </div>
+            <!-- TODO: Replace with final transparent black dog cutout in a pink sweater when available. -->
+            <div class="dogMascot breakdownDog blackSweaterDog" aria-hidden="true">
+              <span class="dogSweater"></span>
+              <span class="dogEar dogEarLeft"></span>
+              <span class="dogEar dogEarRight"></span>
+              <span class="dogHead">
+                <span class="dogEye dogEyeLeft"></span>
+                <span class="dogEye dogEyeRight"></span>
+                <span class="dogNose"></span>
+                <span class="dogSmile"></span>
+              </span>
+              <span class="dogPaw dogPawLeft"></span>
+              <span class="dogPaw dogPawRight"></span>
             </div>
           </article>
         </div>
