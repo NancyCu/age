@@ -9,7 +9,7 @@ const QRCode = require("qrcode");
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
 const dataFile = path.join(dataDir, "store.json");
-const staticFiles = new Set(["index.html", "instructions.html", "app.js", "host.html", "host.js", "styles.css"]);
+const staticFiles = new Set(["index.html", "instructions.html", "host-help.html", "app.js", "host.html", "host.js", "styles.css"]);
 const assetDir = path.join(rootDir, "public", "assets");
 
 const host = process.env.HOST || "0.0.0.0";
@@ -955,7 +955,9 @@ async function serveStatic(response, pathname) {
         ? "host.html"
         : pathname === "/instructions"
           ? "instructions.html"
-          : pathname.replace(/^\/+/, "");
+          : pathname === "/host-help"
+            ? "host-help.html"
+            : pathname.replace(/^\/+/, "");
 
   if (pathname.startsWith("/assets/")) {
     const assetName = pathname.replace(/^\/assets\/+/, "");

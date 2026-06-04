@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Host Help | Age Pool Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="host-body host-help-body">
+  <main class="host-help-shell">
+    <header class="host-help-hero">
+      <nav class="host-help-nav" aria-label="Host help navigation">
+        <a class="host-back-link" href="/host">Host dashboard</a>
+        <a class="host-back-link" href="/instructions">Game guide</a>
+        <a class="host-back-link" href="/">Guest game</a>
+      </nav>
+      <div class="host-help-hero-grid">
+        <div>
+          <h1>Host Dashboard Help</h1>
+          <p class="hero-copy">Use the dashboard as your private control room: watch the real age total, share the guest QR code, close guessing, and reveal or hide the winner board.</p>
+        </div>
+        <div class="host-help-mini-phone" aria-hidden="true">
+          <span class="mini-phone-status">Live updates connected</span>
+          <strong>116</strong>
+          <span>Age total</span>
+          <div class="mini-phone-buttons">
+            <i></i>
+            <i></i>
+            <i></i>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="host-help-board" aria-labelledby="visual-heading">
+      <div class="host-help-section-heading">
+        <span class="section-kicker">What you should see</span>
+        <h2 id="visual-heading">Dashboard Map</h2>
+        <p class="summary-copy">After you sign in at <span class="instruction-inline-code">/host</span>, the screen is arranged from top to bottom like this.</p>
+      </div>
+
+      <div class="host-visual-map">
+        <div class="host-visual-phone">
+          <div class="host-visual-topbar">
+            <span>Main game</span>
+            <strong>Host Dashboard</strong>
+            <em>Live updates connected</em>
+          </div>
+
+          <div class="host-visual-metrics">
+            <article>
+              <b>Age total</b>
+              <strong>116</strong>
+              <span>Private host total</span>
+            </article>
+            <article>
+              <b>Players</b>
+              <strong>4</strong>
+              <span>Guests with ages</span>
+            </article>
+            <article>
+              <b>Guesses</b>
+              <strong>3</strong>
+              <span>Submitted guesses</span>
+            </article>
+          </div>
+
+          <div class="host-visual-winner">
+            <b>Winner board</b>
+            <strong>Ready for the reveal</strong>
+            <span>Use Touch Down when the game is ready.</span>
+          </div>
+
+          <div class="host-visual-controls">
+            <span>Touch Down</span>
+            <span>Mask Winner</span>
+            <span>Hide Winner</span>
+            <span>Disable Guess Tab</span>
+            <span class="danger">Reset Game</span>
+            <span>Log out</span>
+          </div>
+
+          <div class="host-visual-qr">
+            <div>
+              <b>Scan to join</b>
+              <span id="hostHelpGuestUrl">Guest URL appears here</span>
+            </div>
+            <i></i>
+          </div>
+
+          <div class="host-visual-lists">
+            <span>Age players: Nora, Alice, Ben, Kai</span>
+            <span>Guesses submitted: Alice, Ben, Kai</span>
+          </div>
+        </div>
+
+        <ol class="host-visual-callouts" aria-label="Dashboard area explanations">
+          <li><a href="#area-status">Top status</a> confirms whether live updates are connected.</li>
+          <li><a href="#area-metrics">Metric cards</a> show the real total, players, and guesses.</li>
+          <li><a href="#area-winner">Winner board</a> previews what guests will see when revealed.</li>
+          <li><a href="#area-controls">Game controls</a> run the round.</li>
+          <li><a href="#area-qr">Guest QR</a> is where people scan to join.</li>
+          <li><a href="#area-lists">Live lists</a> show who has entered and guessed.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="host-help-grid" aria-labelledby="buttons-heading">
+      <div class="host-help-section-heading">
+        <span class="section-kicker">Every button</span>
+        <h2 id="buttons-heading">What each control does</h2>
+      </div>
+
+      <article class="host-help-control-card">
+        <span class="control-chip reveal">Touch Down</span>
+        <h3>Reveals the real winner</h3>
+        <p>Shows the closest submitted guess on the public winner board. If nobody has guessed yet, it says there is no winner yet.</p>
+      </article>
+      <article class="host-help-control-card">
+        <span class="control-chip mask">Mask Winner</span>
+        <h3>Shows the fake winner</h3>
+        <p>Displays <span class="instruction-inline-code">Teddy-Tami-Tili-Guchi-Damien</span> instead of the real closest guess. Use it as a joke or to stall before the reveal.</p>
+      </article>
+      <article class="host-help-control-card">
+        <span class="control-chip">Hide Winner</span>
+        <h3>Hides the winner board result</h3>
+        <p>Returns the board to the waiting state, so guests do not see the winner yet.</p>
+      </article>
+      <article class="host-help-control-card">
+        <span class="control-chip">Disable Guess Tab</span>
+        <h3>Closes guessing</h3>
+        <p>Turns off public guess submissions. The same button changes to <span class="instruction-inline-code">Enable Guess Tab</span> when guessing is closed.</p>
+      </article>
+      <article class="host-help-control-card">
+        <span class="control-chip danger">Reset Game</span>
+        <h3>Clears all ages and guesses</h3>
+        <p>Starts over from a blank round. The browser asks you to confirm before it clears the game.</p>
+      </article>
+      <article class="host-help-control-card">
+        <span class="control-chip">Log out</span>
+        <h3>Closes your admin session</h3>
+        <p>Hides the dashboard and returns your device to the admin sign-in screen.</p>
+      </article>
+    </section>
+
+    <section class="host-help-area-list" aria-labelledby="areas-heading">
+      <div class="host-help-section-heading">
+        <span class="section-kicker">Where to look</span>
+        <h2 id="areas-heading">Screen areas and expected states</h2>
+      </div>
+
+      <article id="area-status">
+        <h3>Top status</h3>
+        <p>You should see <span class="instruction-inline-code">Checking session...</span>, then <span class="instruction-inline-code">Live updates connected</span> after sign-in. If it says reconnecting, leave it open; it will keep trying.</p>
+      </article>
+      <article id="area-metrics">
+        <h3>Metric cards</h3>
+        <p><strong>Age total</strong> is private and should not be shown to guests. <strong>Players</strong> counts saved ages. <strong>Guesses</strong> counts saved total-age guesses.</p>
+      </article>
+      <article id="area-winner">
+        <h3>Winner board</h3>
+        <p>Before the reveal it says <span class="instruction-inline-code">Ready for the reveal</span>. After Touch Down it shows the winning name, their guess, and how far away it was.</p>
+      </article>
+      <article id="area-controls">
+        <h3>Game controls</h3>
+        <p>Use these in order during a normal round: leave guessing enabled, wait for guests, press Disable Guess Tab, then press Touch Down.</p>
+      </article>
+      <article id="area-qr">
+        <h3>Guest QR</h3>
+        <p>The QR code and link point guests to the same game URL. Keep this visible while people are joining.</p>
+      </article>
+      <article id="area-lists">
+        <h3>Live lists</h3>
+        <p>The age list tells you who has checked in. The guesses list tells you who finished the second step.</p>
+      </article>
+    </section>
+
+    <section class="host-help-flow" aria-labelledby="flow-heading">
+      <div class="host-help-section-heading">
+        <span class="section-kicker">Run of show</span>
+        <h2 id="flow-heading">The simple host flow</h2>
+      </div>
+      <ol>
+        <li>Open <span class="instruction-inline-code">/host</span> and sign in with the admin password.</li>
+        <li>Show guests the QR code so they can enter their age.</li>
+        <li>Watch <strong>Players</strong> until everyone has checked in.</li>
+        <li>Tell everyone to switch to <strong>Sum of Ages</strong> and submit one guess.</li>
+        <li>Watch <strong>Guesses</strong>, then press <strong>Disable Guess Tab</strong>.</li>
+        <li>Press <strong>Touch Down</strong> to reveal the closest guess.</li>
+        <li>Press <strong>Reset Game</strong> only when you want a brand-new round.</li>
+      </ol>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const guestUrlLabel = document.getElementById("hostHelpGuestUrl");
+      guestUrlLabel.textContent = window.location.origin + "/";
+    }());
+  </script>
+</body>
+</html>
