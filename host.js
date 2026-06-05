@@ -9,10 +9,8 @@ const hostElements = {
   ageTotal: document.querySelector("#hostAgeTotal"),
   connectionStatus: document.querySelector("#hostConnectionStatus"),
   dashboard: document.querySelector("#hostDashboard"),
-  guessCount: document.querySelector("#hostGuessCount"),
   guessNames: document.querySelector("#hostGuessNames"),
   guessToggleButton: document.querySelector("#hostGuessToggleButton"),
-  hideWinnerButton: document.querySelector("#hostHideWinnerButton"),
   guestQrImage: document.querySelector("#hostGuestQrImage"),
   guestQrLink: document.querySelector("#hostGuestQrLink"),
   lastUpdated: document.querySelector("#hostLastUpdated"),
@@ -20,11 +18,14 @@ const hostElements = {
   loginPanel: document.querySelector("#hostLoginPanel"),
   logoutButton: document.querySelector("#hostLogoutButton"),
   maskWinnerButton: document.querySelector("#hostMaskWinnerButton"),
+  needGuessCount: document.querySelector("#hostNeedGuessCount"),
+  needGuessNames: document.querySelector("#hostNeedGuessNames"),
   password: document.querySelector("#hostPassword"),
+  posterGuestLink: document.querySelector("#hostPosterGuestLink"),
+  posterQrImage: document.querySelector("#hostPosterQrImage"),
+  printQrButton: document.querySelector("#hostPrintQrButton"),
   playerCount: document.querySelector("#hostPlayerCount"),
   resetButton: document.querySelector("#hostResetButton"),
-  touchDownButton: document.querySelector("#hostTouchDownButton"),
-  userNames: document.querySelector("#hostUserNames"),
   winnerMeta: document.querySelector("#hostWinnerMeta"),
   winnerName: document.querySelector("#hostWinnerName")
 };
@@ -90,13 +91,13 @@ function renderHostWinner(dashboard) {
 
   if (hostState.winnerMode === "fake") {
     hostElements.winnerName.textContent = fakeWinnerName;
-    hostElements.winnerMeta.textContent = "Mask Winner is live on the board.";
+    hostElements.winnerMeta.textContent = "The board is masked with a decoy name.";
     return;
   }
 
   if (hostState.winnerMode === "hidden") {
     hostElements.winnerName.textContent = "Ready for the reveal";
-    hostElements.winnerMeta.textContent = "Use Touch Down when the game is ready.";
+    hostElements.winnerMeta.textContent = "Use Mask Winner to tease the room, then show the real winner.";
     return;
   }
 
@@ -107,7 +108,7 @@ function renderHostWinner(dashboard) {
   }
 
   hostElements.winnerName.textContent = nearestGuess.name;
-  hostElements.winnerMeta.textContent = `Guessed ${nearestGuess.estimatedTotalAge}. Difference: ${nearestGuess.difference}.`;
+  hostElements.winnerMeta.textContent = "Real winner is showing. Guess numbers stay hidden on this host screen.";
 }
 
 function renderHostDashboard(payload) {
@@ -118,14 +119,14 @@ function renderHostDashboard(payload) {
   hostState.winnerMode = dashboard.winnerMode || "hidden";
   hostElements.ageTotal.textContent = String(dashboard.accumulatedAge ?? 0);
   hostElements.playerCount.textContent = String(summary.userCount ?? 0);
-  hostElements.guessCount.textContent = String(summary.guessCount ?? 0);
+  hostElements.needGuessCount.textContent = String((summary.availableGuessNames || []).length);
   hostElements.guessToggleButton.textContent = hostState.guessEnabled ? "Disable Guess Tab" : "Enable Guess Tab";
-  hostElements.touchDownButton.classList.toggle("is-selected", hostState.winnerMode === "real");
   hostElements.maskWinnerButton.classList.toggle("is-selected", hostState.winnerMode === "fake");
-  hostElements.hideWinnerButton.classList.toggle("is-selected", hostState.winnerMode === "hidden");
+  hostElements.maskWinnerButton.textContent = hostState.winnerMode === "fake" ? "Show Real Winner" : "Mask Winner";
+  hostElements.maskWinnerButton.setAttribute("aria-pressed", String(hostState.winnerMode === "fake"));
 
   renderHostWinner(dashboard);
-  renderHostNameList(hostElements.userNames, summary.userNames || [], "No age entries yet.");
+  renderHostNameList(hostElements.needGuessNames, summary.availableGuessNames || [], "Everyone has submitted a guess.");
   renderHostNameList(hostElements.guessNames, summary.guessNames || [], "No guesses submitted yet.");
 
   const updatedAt = payload.updatedAt ? new Date(payload.updatedAt) : new Date();
@@ -180,8 +181,11 @@ async function refreshHostGuestQr() {
     hostElements.guestQrLink.href = link.guestUrl;
     hostElements.guestQrLink.textContent = link.guestUrl;
     hostElements.guestQrImage.src = `${link.qrUrl}?t=${Date.now()}`;
+    hostElements.posterGuestLink.textContent = link.guestUrl;
+    hostElements.posterQrImage.src = `${link.qrUrl}?t=${Date.now()}`;
   } catch {
     hostElements.guestQrLink.textContent = "Guest QR unavailable";
+    hostElements.posterGuestLink.textContent = "Guest QR unavailable";
   }
 }
 
@@ -213,25 +217,9 @@ hostElements.loginForm.addEventListener("submit", async (event) => {
   }
 });
 
-hostElements.touchDownButton.addEventListener("click", async () => {
-  try {
-    await setHostWinnerMode("real");
-  } catch (error) {
-    alert(error.message);
-  }
-});
-
 hostElements.maskWinnerButton.addEventListener("click", async () => {
   try {
-    await setHostWinnerMode("fake");
-  } catch (error) {
-    alert(error.message);
-  }
-});
-
-hostElements.hideWinnerButton.addEventListener("click", async () => {
-  try {
-    await setHostWinnerMode("hidden");
+    await setHostWinnerMode(hostState.winnerMode === "fake" ? "real" : "fake");
   } catch (error) {
     alert(error.message);
   }
@@ -254,9 +242,15 @@ hostElements.guessToggleButton.addEventListener("click", async () => {
 });
 
 hostElements.resetButton.addEventListener("click", async () => {
-  const confirmed = window.confirm("Reset all ages and guesses?");
+  const confirmed = window.confirm("Are you sure you want to reset all ages and guesses?");
 
   if (!confirmed) {
+    return;
+  }
+
+  const reallyConfirmed = window.confirm("Are you really, really sure? This clears the whole game.");
+
+  if (!reallyConfirmed) {
     return;
   }
 
@@ -270,6 +264,10 @@ hostElements.resetButton.addEventListener("click", async () => {
   } catch (error) {
     alert(error.message);
   }
+});
+
+hostElements.printQrButton.addEventListener("click", () => {
+  window.print();
 });
 
 hostElements.logoutButton.addEventListener("click", async () => {

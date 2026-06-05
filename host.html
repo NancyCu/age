@@ -45,10 +45,10 @@
           <strong id="hostPlayerCount">0</strong>
           <span class="hint-text">Guests with ages.</span>
         </article>
-        <article class="panel host-metric-card">
-          <span class="stat-label">Guesses</span>
-          <strong id="hostGuessCount">0</strong>
-          <span class="hint-text">Submitted total guesses.</span>
+        <article class="panel host-metric-card host-reminder-card">
+          <span class="stat-label">Reminder list</span>
+          <strong id="hostNeedGuessCount">0</strong>
+          <span class="hint-text">Guests who still need to guess.</span>
         </article>
       </div>
 
@@ -61,9 +61,7 @@
       <section class="panel host-controls">
         <h2>Game controls</h2>
         <div class="host-control-grid">
-          <button id="hostTouchDownButton" class="ghost-button reveal-button" type="button">Touch Down</button>
           <button id="hostMaskWinnerButton" class="ghost-button mask-button" type="button">Mask Winner</button>
-          <button id="hostHideWinnerButton" class="ghost-button" type="button">Hide Winner</button>
           <button id="hostGuessToggleButton" class="ghost-button" type="button">Disable Guess Tab</button>
           <button id="hostResetButton" class="danger-button" type="button">Reset Game</button>
           <button id="hostLogoutButton" class="ghost-button" type="button">Log out</button>
@@ -74,16 +72,40 @@
         <div>
           <span class="section-kicker">Guest check-in</span>
           <h2>Scan to join</h2>
-          <p class="summary-copy">Point guests here for the mobile birthday wheels and guessing flow.</p>
+          <p class="summary-copy">Put this QR code where guests can scan it, check in, and play.</p>
           <a id="hostGuestQrLink" class="guest-link-copy" href="/guest">Loading guest URL...</a>
+          <button id="hostPrintQrButton" class="primary-button host-print-button" type="button">Print QR Poster</button>
         </div>
         <img id="hostGuestQrImage" class="guest-qr-image host-qr-image" src="/api/guest-qr.svg" alt="QR code for guests to join the game" />
       </section>
 
+      <section id="hostQrPoster" class="host-qr-poster" aria-label="Printable guest QR poster">
+        <div class="poster-confetti" aria-hidden="true"></div>
+        <header class="poster-header">
+          <div>
+            <span>Party game</span>
+            <h2>Guess the Years</h2>
+            <p>Scan this code to check in with your name and age.</p>
+          </div>
+          <img class="poster-dog" src="/assets/tan-dog-hero-cutout.png" alt="" />
+        </header>
+        <div class="poster-qr-wrap">
+          <img id="hostPosterQrImage" class="poster-qr-image" src="/api/guest-qr.svg" alt="Large QR code for guests to join the game" />
+        </div>
+        <div class="poster-steps">
+          <strong>1. Scan</strong>
+          <strong>2. Enter name and age</strong>
+          <strong>3. Guess the total</strong>
+        </div>
+        <p id="hostPosterGuestLink" class="poster-link">Loading guest URL...</p>
+      </section>
+
       <section class="host-lists">
         <article class="panel">
-          <span class="section-kicker">Age players</span>
-          <p id="hostUserNames" class="available-name-list">No age entries yet.</p>
+          <span class="section-kicker">Still need guesses</span>
+          <h2>Guess reminders</h2>
+          <p class="summary-copy">Names shown here have checked in but have not submitted a total-age guess yet.</p>
+          <p id="hostNeedGuessNames" class="available-name-list">No reminders yet.</p>
         </article>
         <article class="panel">
           <span class="section-kicker">Guesses submitted</span>

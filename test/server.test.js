@@ -221,7 +221,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
 
     response = await fetch(`${baseUrl}/guest`);
     assert.equal(response.status, 200);
-    assert.match(await response.text(), /Age Pool Tracker/);
+    assert.match(await response.text(), /Guess the Years/);
 
     response = await fetch(`${baseUrl}/api/guest-link`);
     assert.equal(response.status, 200);

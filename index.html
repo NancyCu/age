@@ -2,260 +2,77 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Age Pool Tracker</title>
-  <meta name="description" content="A playful party game where guests add their age, guess the total, and wait for the big winner reveal." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Guess the Years</title>
+  <meta name="description" content="Check in for the party age game with your name and age." />
   <link rel="canonical" href="https://age-game-party.web.app/" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Age Pool Tracker" />
-  <meta property="og:title" content="Age Pool Tracker Party Game" />
-  <meta property="og:description" content="Guess the total age in the room, save your age, and see who wins the party reveal." />
+  <meta property="og:site_name" content="Guess the Years" />
+  <meta property="og:title" content="Guess the Years" />
+  <meta property="og:description" content="Check in with your name and age for the party game." />
   <meta property="og:url" content="https://age-game-party.web.app/" />
   <meta property="og:image" content="https://age-game--shawncountdown.us-central1.hosted.app/assets/age-game-party-share.png" />
   <meta property="og:image:secure_url" content="https://age-game--shawncountdown.us-central1.hosted.app/assets/age-game-party-share.png" />
   <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="941" />
   <meta property="og:image:height" content="1672" />
-  <meta property="og:image:alt" content="A gold and navy 60th birthday party poster for the Age Pool Tracker game preview." />
+  <meta property="og:image:alt" content="A gold party poster for the Guess the Years game preview." />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Age Pool Tracker Party Game" />
-  <meta name="twitter:description" content="Guess the total age in the room, save your age, and see who wins the party reveal." />
+  <meta name="twitter:title" content="Guess the Years" />
+  <meta name="twitter:description" content="Check in with your name and age for the party game." />
   <meta name="twitter:image" content="https://age-game--shawncountdown.us-central1.hosted.app/assets/age-game-party-share.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Manrope:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
-<body>
-  <div class="app-shell">
-    <header class="hero">
-      <div class="heroLandscape" aria-hidden="true">
-        <span class="heroMountain heroMountainOne"></span>
-        <span class="heroMountain heroMountainTwo"></span>
-        <span class="heroSpire"></span>
-        <span class="heroPalm"></span>
-      </div>
-      <div class="goldFiligree heroFiligree" aria-hidden="true"></div>
-      <span class="heroSixty subtleSixty" aria-hidden="true">60</span>
-      <span class="sparkle sparkleOne" aria-hidden="true"></span>
-      <span class="sparkle sparkleTwo" aria-hidden="true"></span>
-      <span class="sparkle sparkleThree" aria-hidden="true"></span>
-      <span class="easterEggBear" aria-hidden="true"></span>
-      <span class="easterEggAardvark" aria-hidden="true"></span>
-      <span class="subtleShield" aria-hidden="true"></span>
-      <span class="floralRosette floralRosetteOne" aria-hidden="true"></span>
-      <span class="floralRosette floralRosetteTwo" aria-hidden="true"></span>
-      <div class="hero-copy-block">
-        <h1>Age Pool Tracker</h1>
-        <p class="hero-copy">Guess the total age in the room. Add your age, make your best sum-of-ages guess, and wait for the Touch Down reveal.</p>
-        <div class="hero-actions">
-          <a class="hero-link-button" href="/instructions">How to Play</a>
-          <a class="hero-link-button hero-link-button-secondary" href="/host">Host Dashboard</a>
+<body class="checkin-page">
+  <main class="checkin-shell" aria-labelledby="checkinTitle">
+    <section class="checkin-card">
+      <div class="checkin-ornament checkin-ornament-left" aria-hidden="true"></div>
+      <div class="checkin-ornament checkin-ornament-right" aria-hidden="true"></div>
+
+      <header class="checkin-hero">
+        <span class="checkin-balloon" aria-hidden="true"></span>
+        <div>
+          <h1 id="checkinTitle">Guess the Years</h1>
+          <p>Step 1: Check in with your name and age.</p>
         </div>
-        <div class="guest-qr-card hero-qr-card" aria-live="polite">
-          <img id="guestQrImage" class="guest-qr-image" src="/api/guest-qr.svg" alt="QR code to open the guest mobile game" />
-          <div>
-            <span class="section-kicker">Guest mobile link</span>
-            <strong>Scan to play</strong>
-            <a id="guestQrLink" class="guest-link-copy" href="/guest">Loading guest URL...</a>
-          </div>
-        </div>
-      </div>
-      <div class="hero-scoreboard heroBadge" aria-label="Party game summary">
-        <span>6/6 Party Bash</span>
-        <strong>Closest guess wins</strong>
-      </div>
-    </header>
+        <span class="checkin-party-hat" aria-hidden="true"></span>
+      </header>
 
-    <main class="layout">
-      <nav class="tabs" aria-label="Main tabs">
-        <button class="tab-button is-active" data-tab-target="userTab" type="button">My Age</button>
-        <button class="tab-button" data-tab-target="guessTab" type="button">Sum of Ages</button>
-        <button class="tab-button" data-tab-target="adminTab" type="button">Admin</button>
-      </nav>
+      <form id="userForm" class="checkin-form" autocomplete="on">
+        <label class="checkin-name-field" for="userName">
+          <span>Name</span>
+          <input id="userName" name="name" type="text" maxlength="50" placeholder="Sam N." autocomplete="given-name" autocapitalize="words" required />
+        </label>
 
-      <section id="userTab" class="tab-panel is-active" aria-labelledby="User">
-        <div class="user-tab-grid">
-          <article class="panel standout-panel">
-            <div class="goldFiligree cardFiligree" aria-hidden="true"></div>
-            <h2>Add your age</h2>
-            <p class="summary-copy">Enter your first name, then spin the birthday wheels. The app calculates your age for the host.</p>
-            <form id="userForm" class="stack narrow-stack">
-              <label class="field">
-                <span>First name</span>
-                <input id="userName" name="name" type="text" maxlength="50" autocomplete="given-name" autocapitalize="words" required />
-              </label>
-              <fieldset class="birthday-picker">
-                <legend>Birthday</legend>
-                <label class="wheel-field">
-                  <span>Month</span>
-                  <select id="birthMonth" name="birthMonth" required></select>
-                </label>
-                <label class="wheel-field">
-                  <span>Day</span>
-                  <select id="birthDay" name="birthDay" required></select>
-                </label>
-                <label class="wheel-field">
-                  <span>Year</span>
-                  <select id="birthYear" name="birthYear" required></select>
-                </label>
-                <p id="birthdayPreview" class="birthday-preview">Pick your birthday to unlock Save age.</p>
-              </fieldset>
-              <button class="primary-button" type="submit">Save age</button>
-            </form>
-          </article>
-
-          <article class="panel names-panel">
-            <h2>Age players</h2>
-            <p id="userNamesList" class="available-name-list">No age entries yet.</p>
-          </article>
-
-          <article class="panel classification-panel">
-            <span class="subtleShield cardShield" aria-hidden="true"></span>
-            <h2>User breakdown</h2>
-            <p class="summary-copy">A quick party snapshot by age group.</p>
-            <div class="classification-list">
-              <div class="classification-row">
-                <span>Minors (0-17)</span>
-                <strong id="countMinors">0</strong>
-              </div>
-              <div class="classification-row">
-                <span>Young Adults (18-25)</span>
-                <strong id="countYoungAdults">0</strong>
-              </div>
-              <div class="classification-row">
-                <span>Adults (26-64)</span>
-                <strong id="countAdults">0</strong>
-              </div>
-              <div class="classification-row">
-                <span>Seniors (65-74)</span>
-                <strong id="countSeniors">0</strong>
-              </div>
-              <div class="classification-row">
-                <span>Beyond Seniors (75+)</span>
-                <strong id="countBeyondSeniors">0</strong>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section id="guessTab" class="tab-panel" aria-labelledby="Guess">
-        <div class="guess-tab-grid">
-          <article class="panel standout-panel alt-panel">
-            <h2>Guess the total</h2>
-            <p class="summary-copy">Use the same first name you entered on the My Age tab.</p>
-            <form id="guessForm" class="stack narrow-stack">
-              <label class="field">
-                <span>First name</span>
-                <input id="guessName" name="name" type="text" maxlength="50" autocomplete="given-name" autocapitalize="words" required />
-              </label>
-              <label class="field">
-                <span>Your total-age guess</span>
-                <input id="guessAge" name="estimatedTotalAge" type="number" min="0" max="130000" inputmode="numeric" required />
-              </label>
-              <button class="primary-button alt-button" type="submit">Save guess</button>
-            </form>
-          </article>
-
-          <article class="panel names-panel">
-            <h2>Still need guesses</h2>
-            <p id="guessAvailableNamesList" class="available-name-list">No available names yet.</p>
-          </article>
-
-          <article class="panel names-panel">
-            <h2>Guesses submitted</h2>
-            <p id="guessSubmittedNamesList" class="available-name-list">No guesses submitted yet.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="adminTab" class="tab-panel" aria-labelledby="Admin">
-        <div id="adminLoginPanel" class="panel admin-login">
-          <p class="section-kicker">Admin Access</p>
-          <h2>Sign in to view results</h2>
-          <p class="summary-copy"><a class="inline-host-link" href="/host">Open the mobile host dashboard</a> for Android-friendly live controls.</p>
-          <form id="adminLoginForm" class="stack narrow-stack">
-            <label class="field">
-              <span>Password</span>
-              <input id="adminPassword" name="password" type="password" autocomplete="current-password" required />
-            </label>
-            <button class="primary-button" type="submit">Log in</button>
-          </form>
+        <div class="checkin-age-area">
+          <label class="checkin-age-label" for="userAge">Age</label>
+          <input id="userAge" name="age" class="checkin-age-display" type="text" inputmode="none" autocomplete="off" aria-describedby="ageHelp" readonly required />
+          <p id="ageHelp" class="checkin-help">Enter your age only.</p>
         </div>
 
-        <div id="adminDashboard" class="admin-dashboard hidden">
-          <div class="admin-topbar">
-            <div>
-              <p class="section-kicker">Admin Dashboard</p>
-              <h2>Game controls and reveal board</h2>
-              <a class="inline-host-link" href="/host">Open mobile host dashboard</a>
-            </div>
-            <div class="admin-actions">
-              <button id="adminRevealWinnerButton" class="ghost-button reveal-button" type="button">Touch Down</button>
-              <button id="adminMaskWinnerButton" class="ghost-button mask-button" type="button">Mask Winner</button>
-              <button id="adminHideWinnerButton" class="ghost-button" type="button">Hide Winner</button>
-              <button id="adminGuessToggleButton" class="ghost-button" type="button">Disable Guess Tab</button>
-              <button id="adminClearButton" class="danger-button" type="button">Reset</button>
-              <button id="adminLogoutButton" class="ghost-button" type="button">Log out</button>
-            </div>
-          </div>
-
-          <div class="stats-row">
-            <article class="panel stat-panel">
-              <span class="stat-label">Sum of ages</span>
-              <strong id="adminAccumulatedAge">0</strong>
-              <span class="hint-text">Private host total.</span>
-            </article>
-            <article class="panel stat-panel winner-panel">
-              <span class="stat-label winner-label">Winner board</span>
-              <strong id="nearestGuessName" class="is-hidden-winner">Ready for the reveal</strong>
-              <span id="nearestGuessMeta" class="hint-text">Use Touch Down to reveal the real closest guess.</span>
-            </article>
-          </div>
-
-          <div class="panel-grid admin-grid">
-            <article class="panel">
-              <div class="table-header">
-                <div>
-                  <p class="section-kicker">Guests who entered age</p>
-                </div>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                    </tr>
-                  </thead>
-                  <tbody id="adminUsersTableBody"></tbody>
-                </table>
-              </div>
-            </article>
-
-            <article class="panel">
-              <div class="table-header">
-                <div>
-                  <p class="section-kicker">Guest guesses</p>
-                </div>
-              </div>
-              <div class="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Total-age guess</th>
-                    </tr>
-                  </thead>
-                  <tbody id="adminGuessesTableBody"></tbody>
-                </table>
-              </div>
-            </article>
-          </div>
+        <div class="checkin-keypad" aria-label="Age keypad">
+          <button type="button" data-age-key="1">1</button>
+          <button type="button" data-age-key="2">2</button>
+          <button type="button" data-age-key="3">3</button>
+          <button type="button" data-age-key="4">4</button>
+          <button type="button" data-age-key="5">5</button>
+          <button type="button" data-age-key="6">6</button>
+          <button type="button" data-age-key="7">7</button>
+          <button type="button" data-age-key="8">8</button>
+          <button type="button" data-age-key="9">9</button>
+          <button type="button" data-age-action="backspace" aria-label="Delete last digit">⌫</button>
+          <button type="button" data-age-key="0">0</button>
+          <button class="checkin-key-confirm" type="button" data-age-action="confirm" aria-label="Confirm age">✓</button>
         </div>
-      </section>
-    </main>
-  </div>
+
+        <button id="saveAgeButton" class="checkin-save-button" type="submit">Save My Age</button>
+        <p id="checkinStatus" class="checkin-status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
 
   <script src="/app.js" defer></script>
 </body>

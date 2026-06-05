@@ -1188,6 +1188,10 @@ tbody tr:last-child td {
   width: 100%;
 }
 
+.host-reminder-card strong {
+  color: var(--orange-dark);
+}
+
 /* Reference-match polish pass for the main party dashboard. */
 :root {
   --display: "Baloo 2", "Arial Rounded MT Bold", "Manrope", system-ui, sans-serif;
@@ -1844,18 +1848,40 @@ h2 {
 
 .host-qr-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 154px;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 18px;
+  text-align: center;
   align-items: center;
+  max-width: 640px;
+  margin: 0 auto;
   background:
     linear-gradient(135deg, rgba(255, 253, 247, 0.96), rgba(255, 241, 218, 0.9)),
     repeating-linear-gradient(-35deg, rgba(209, 154, 52, 0.1) 0 10px, transparent 10px 24px);
 }
 
 .host-qr-image {
-  justify-self: end;
-  width: 154px;
-  height: 154px;
+  justify-self: center;
+  width: min(260px, 72vw);
+  height: min(260px, 72vw);
+  border-width: 12px;
+  border-radius: 20px;
+}
+
+.host-print-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 320px);
+  margin-top: 14px;
+}
+
+.host-qr-poster {
+  display: none;
+}
+
+.poster-link {
+  overflow-wrap: anywhere;
 }
 
 @keyframes winnerPop {
@@ -1887,6 +1913,455 @@ h2 {
     animation-duration: 1ms !important;
     scroll-behavior: auto !important;
     transition-duration: 1ms !important;
+  }
+}
+
+body.checkin-page {
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.96), transparent 24rem),
+    radial-gradient(circle at 16% 10%, rgba(255, 210, 105, 0.48), transparent 18rem),
+    radial-gradient(circle at 90% 16%, rgba(255, 130, 39, 0.22), transparent 16rem),
+    linear-gradient(180deg, #fffaf2 0%, #fff7eb 52%, #fffdf8 100%);
+}
+
+.checkin-page::before {
+  opacity: 0.32;
+}
+
+.checkin-shell {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100dvh;
+  padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+}
+
+.checkin-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(960px, 100%);
+  height: min(100%, 1240px);
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(10px, 1.7vh, 18px);
+  color: #21150f;
+}
+
+.checkin-card::before,
+.checkin-card::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 180px;
+  height: 180px;
+  opacity: 0.22;
+  pointer-events: none;
+  background: url("/assets/gold-floral-corner.png") center / contain no-repeat;
+}
+
+.checkin-card::before {
+  left: -62px;
+  bottom: 16%;
+  transform: rotate(90deg);
+}
+
+.checkin-card::after {
+  right: -62px;
+  bottom: 16%;
+  transform: scaleX(-1);
+}
+
+.checkin-hero,
+.checkin-form {
+  position: relative;
+  z-index: 1;
+}
+
+.checkin-hero {
+  display: grid;
+  grid-template-columns: clamp(42px, 8vw, 86px) minmax(0, 1fr) clamp(42px, 8vw, 86px);
+  align-items: center;
+  min-height: clamp(94px, 15vh, 154px);
+  padding: clamp(12px, 2vh, 28px) clamp(14px, 3vw, 34px);
+  border: 1px solid rgba(184, 79, 36, 0.18);
+  border-radius: clamp(28px, 7vw, 58px);
+  background:
+    radial-gradient(circle at 43% 50%, rgba(255, 245, 190, 0.82), transparent 18rem),
+    linear-gradient(135deg, #ffb72d 0%, #ffcf64 42%, #ff8f20 100%);
+  box-shadow: 0 18px 36px rgba(184, 79, 36, 0.18), inset 0 0 0 9px rgba(255, 238, 150, 0.42);
+  text-align: center;
+}
+
+.checkin-hero h1 {
+  max-width: none;
+  margin: 0;
+  font-family: "Baloo 2", "Manrope", sans-serif;
+  font-size: clamp(2.6rem, 8.8vw, 6rem);
+  font-weight: 800;
+  line-height: 0.9;
+  text-shadow: 0 4px 0 rgba(255, 218, 107, 0.66), 0 9px 18px rgba(72, 37, 8, 0.16);
+}
+
+.checkin-hero p {
+  margin: clamp(2px, 0.8vh, 8px) 0 0;
+  font-size: clamp(1rem, 3vw, 2rem);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.checkin-balloon,
+.checkin-party-hat {
+  position: relative;
+  display: block;
+  justify-self: center;
+  width: clamp(34px, 7vw, 70px);
+  height: clamp(46px, 9vw, 92px);
+  opacity: 0.82;
+}
+
+.checkin-balloon {
+  border-radius: 50% 50% 45% 45%;
+  background:
+    radial-gradient(circle at 68% 22%, rgba(255, 255, 255, 0.9) 0 8%, transparent 9%),
+    linear-gradient(145deg, #fff8cf, #fff2a8);
+  box-shadow: inset -8px -12px 0 rgba(218, 154, 39, 0.15);
+}
+
+.checkin-balloon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 92%;
+  width: 2px;
+  height: clamp(24px, 4vw, 44px);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  transform: translateX(-50%) rotate(7deg);
+}
+
+.checkin-party-hat {
+  background:
+    linear-gradient(115deg, transparent 0 31%, rgba(255, 255, 255, 0.58) 32% 42%, transparent 43% 100%),
+    repeating-linear-gradient(20deg, rgba(255, 255, 255, 0.62) 0 10px, transparent 10px 22px),
+    linear-gradient(135deg, #fff1a5, #ff9a21);
+  clip-path: polygon(24% 8%, 96% 48%, 12% 96%);
+  transform: rotate(8deg);
+}
+
+.checkin-form {
+  display: grid;
+  grid-template-rows: auto auto auto auto minmax(18px, auto);
+  gap: clamp(7px, 1.2vh, 18px);
+  align-content: start;
+  min-height: 0;
+  padding: clamp(12px, 2.1vh, 30px) clamp(8px, 4vw, 58px) 0;
+}
+
+.checkin-name-field,
+.checkin-age-area {
+  display: grid;
+  gap: clamp(6px, 1vh, 12px);
+  text-align: center;
+}
+
+.checkin-name-field span,
+.checkin-age-label {
+  font-family: "Baloo 2", "Manrope", sans-serif;
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-weight: 800;
+  line-height: 0.92;
+}
+
+.checkin-name-field input {
+  width: min(760px, 100%);
+  min-height: clamp(58px, 8vh, 92px);
+  margin: 0 auto;
+  border: 2px solid rgba(201, 151, 53, 0.28);
+  border-radius: clamp(20px, 4vw, 34px);
+  background: rgba(255, 255, 255, 0.82);
+  color: #21150f;
+  font: 800 clamp(1.65rem, 5vw, 3.1rem) "Manrope", sans-serif;
+  outline: none;
+  padding: 0 clamp(18px, 4vw, 34px);
+  box-shadow: inset 0 2px 12px rgba(105, 70, 28, 0.05);
+}
+
+.checkin-name-field input:focus,
+.checkin-age-display:focus {
+  border-color: #ff8d1d;
+  box-shadow: 0 0 0 5px rgba(255, 143, 32, 0.16);
+}
+
+.checkin-age-display {
+  width: min(680px, 100%);
+  height: clamp(96px, 19vh, 220px);
+  margin: 0 auto;
+  border: 2px solid #ff8d1d;
+  border-radius: clamp(20px, 4vw, 34px);
+  background: rgba(255, 255, 255, 0.74);
+  color: rgba(33, 21, 15, 0.82);
+  font: 900 clamp(5.2rem, 19vh, 13rem) / 0.9 "Manrope", sans-serif;
+  text-align: center;
+  outline: none;
+  text-shadow: 0 4px 12px rgba(105, 70, 28, 0.1);
+}
+
+.checkin-age-display::placeholder {
+  color: rgba(33, 21, 15, 0.2);
+}
+
+.checkin-help {
+  margin: 0;
+  color: #6d6259;
+  font-size: clamp(0.95rem, 2.4vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.checkin-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(6px, 1vh, 12px);
+  width: min(860px, 100%);
+  margin: 0 auto;
+}
+
+.checkin-keypad button {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: clamp(48px, 8.2vh, 78px);
+  border: 1px solid rgba(201, 151, 53, 0.24);
+  border-radius: clamp(14px, 3vw, 24px);
+  background: rgba(255, 255, 255, 0.78);
+  color: #21150f;
+  cursor: pointer;
+  font: 900 clamp(1.7rem, 5vh, 3.8rem) / 1 "Manrope", sans-serif;
+  box-shadow: 0 5px 14px rgba(105, 70, 28, 0.1);
+  touch-action: manipulation;
+}
+
+.checkin-keypad button:active {
+  transform: translateY(1px);
+}
+
+.checkin-keypad .checkin-key-confirm {
+  background: linear-gradient(135deg, #ff6a21, #ff9f1c);
+  color: #fffaf0;
+  font-size: clamp(1.9rem, 5vh, 4rem);
+}
+
+.checkin-save-button {
+  width: min(880px, 100%);
+  min-height: clamp(58px, 9vh, 96px);
+  margin: 0 auto;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff6423, #ff9f18);
+  color: #fffaf4;
+  cursor: pointer;
+  font: 900 clamp(1.8rem, 5vw, 4rem) / 1 "Baloo 2", "Manrope", sans-serif;
+  box-shadow: 0 16px 26px rgba(184, 79, 36, 0.22);
+  touch-action: manipulation;
+}
+
+.checkin-save-button:disabled {
+  cursor: progress;
+  opacity: 0.72;
+}
+
+.checkin-status {
+  min-height: 1.2em;
+  margin: 0;
+  color: #6d6259;
+  font-size: clamp(0.9rem, 2.4vw, 1.15rem);
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.checkin-status[data-tone="success"] {
+  color: #3f6447;
+}
+
+.checkin-status[data-tone="warning"] {
+  color: #a33d1d;
+}
+
+@media (max-width: 700px) {
+  .checkin-card {
+    padding-inline: 2px;
+  }
+
+  .checkin-hero {
+    min-height: 132px;
+    padding: 12px 14px;
+  }
+
+  .checkin-hero h1 {
+    font-size: clamp(2.1rem, 9vw, 3.1rem);
+  }
+
+  .checkin-hero p {
+    font-size: clamp(0.9rem, 3.8vw, 1.1rem);
+  }
+
+  .checkin-balloon,
+  .checkin-party-hat {
+    width: 36px;
+    height: 52px;
+  }
+
+  .checkin-card::before,
+  .checkin-card::after {
+    width: 128px;
+    height: 128px;
+    opacity: 0.18;
+  }
+
+  .checkin-form {
+    gap: 7px;
+    grid-template-rows: auto auto auto auto 16px;
+    padding-inline: 6px;
+    padding-top: 10px;
+  }
+
+  .checkin-name-field,
+  .checkin-age-area {
+    gap: 6px;
+  }
+
+  .checkin-name-field span,
+  .checkin-age-label {
+    font-size: clamp(1.65rem, 7vw, 2.35rem);
+  }
+
+  .checkin-name-field input {
+    min-height: 60px;
+    font-size: clamp(1.45rem, 6vw, 2rem);
+  }
+
+  .checkin-age-display {
+    height: clamp(120px, 17vh, 150px);
+    font-size: clamp(5rem, 16vh, 8rem);
+  }
+
+  .checkin-help {
+    font-size: 0.92rem;
+  }
+
+  .checkin-keypad {
+    gap: 7px;
+  }
+
+  .checkin-keypad button {
+    height: clamp(56px, 7.4vh, 72px);
+    font-size: clamp(2rem, 6vh, 3rem);
+  }
+
+  .checkin-save-button {
+    min-height: clamp(62px, 8vh, 74px);
+    font-size: clamp(1.9rem, 8vw, 2.8rem);
+  }
+
+  .checkin-status {
+    font-size: 0.86rem;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 920px) {
+  .checkin-card {
+    width: min(840px, 100%);
+    padding-block: 8px;
+  }
+
+  .checkin-hero {
+    min-height: 106px;
+    padding-block: 12px;
+  }
+
+  .checkin-hero h1 {
+    font-size: clamp(3.2rem, 6vh, 4.3rem);
+  }
+
+  .checkin-hero p {
+    font-size: clamp(1.05rem, 2.4vh, 1.45rem);
+  }
+
+  .checkin-balloon,
+  .checkin-party-hat {
+    width: 48px;
+    height: 64px;
+  }
+
+  .checkin-form {
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  .checkin-name-field,
+  .checkin-age-area {
+    gap: 7px;
+  }
+
+  .checkin-name-field span,
+  .checkin-age-label {
+    font-size: 2.45rem;
+  }
+
+  .checkin-name-field input {
+    min-height: 58px;
+    font-size: 2rem;
+  }
+
+  .checkin-age-display {
+    height: 128px;
+    font-size: 7.8rem;
+  }
+
+  .checkin-help {
+    font-size: 1.05rem;
+  }
+
+  .checkin-keypad {
+    gap: 8px;
+  }
+
+  .checkin-keypad button {
+    height: 52px;
+    font-size: 2.15rem;
+  }
+
+  .checkin-save-button {
+    min-height: 62px;
+    font-size: 2.55rem;
+  }
+}
+
+@media (max-height: 760px) {
+  .checkin-hero {
+    grid-template-columns: 0 minmax(0, 1fr) 0;
+  }
+
+  .checkin-balloon,
+  .checkin-party-hat,
+  .checkin-card::before,
+  .checkin-card::after {
+    display: none;
+  }
+
+  .checkin-form {
+    gap: 6px;
+  }
+
+  .checkin-name-field span,
+  .checkin-age-label {
+    font-size: clamp(1.35rem, 4vh, 2.1rem);
   }
 }
 
@@ -2219,14 +2694,19 @@ h2 {
   .guest-qr-card,
   .host-qr-panel {
     grid-template-columns: 1fr;
-    text-align: left;
+    text-align: center;
   }
 
-  .guest-qr-image,
-  .host-qr-image {
+  .guest-qr-image {
     justify-self: start;
     width: 132px;
     height: 132px;
+  }
+
+  .host-qr-image {
+    justify-self: center;
+    width: min(240px, 74vw);
+    height: min(240px, 74vw);
   }
 
   .hero-qr-card {
@@ -2235,6 +2715,155 @@ h2 {
 
   .wheel-field select {
     width: 100%;
+  }
+}
+
+@page {
+  size: letter;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    width: 8.5in;
+    height: 11in;
+    margin: 0;
+    background: #fff8e9 !important;
+    overflow: hidden;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .host-qr-poster,
+  .host-qr-poster * {
+    visibility: visible !important;
+  }
+
+  .host-qr-poster {
+    position: fixed;
+    inset: 0;
+    display: grid !important;
+    grid-template-rows: auto 1fr auto auto;
+    align-items: center;
+    width: 8.5in;
+    height: 11in;
+    padding: 0.42in 0.55in;
+    border: 0.08in solid #f3c15d;
+    background:
+      radial-gradient(circle at 18% 11%, rgba(255, 194, 65, 0.48), transparent 1.8in),
+      radial-gradient(circle at 84% 13%, rgba(255, 140, 22, 0.28), transparent 1.6in),
+      radial-gradient(circle at 50% 102%, rgba(109, 176, 167, 0.26), transparent 2.2in),
+      linear-gradient(180deg, #fffaf0 0%, #fff3df 100%);
+    color: #241915;
+    font-family: "Manrope", system-ui, sans-serif;
+  }
+
+  .poster-confetti {
+    position: absolute;
+    inset: 0.18in;
+    border: 0.02in solid rgba(209, 154, 52, 0.28);
+    border-radius: 0.25in;
+    background:
+      url("/assets/gold-sparkles.png") 0.2in 0.18in / 1.1in auto no-repeat,
+      url("/assets/gold-floral-corner.png") left bottom / 1.45in auto no-repeat,
+      url("/assets/gold-floral-corner.png") right bottom / 1.45in auto no-repeat;
+    opacity: 0.34;
+  }
+
+  .poster-header {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 1.55in;
+    gap: 0.28in;
+    align-items: center;
+    min-height: 1.75in;
+    padding: 0.24in 0.3in;
+    border-radius: 0.32in;
+    background:
+      radial-gradient(circle at 45% 50%, rgba(255, 238, 156, 0.76), transparent 2.2in),
+      linear-gradient(135deg, #ffb72d 0%, #ffcf64 42%, #ff8f20 100%);
+    box-shadow: inset 0 0 0 0.08in rgba(255, 238, 150, 0.5);
+  }
+
+  .poster-header span {
+    color: rgba(36, 25, 21, 0.74);
+    font-size: 0.18in;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .poster-header h2 {
+    margin: 0.05in 0;
+    font: 900 0.68in/0.9 "Baloo 2", "Manrope", sans-serif;
+  }
+
+  .poster-header p {
+    margin: 0;
+    font-size: 0.22in;
+    font-weight: 900;
+    line-height: 1.16;
+  }
+
+  .poster-dog {
+    width: 1.5in;
+    height: 1.5in;
+    object-fit: contain;
+    filter: drop-shadow(0 0.08in 0.12in rgba(105, 70, 28, 0.18));
+  }
+
+  .poster-qr-wrap {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    margin: 0.25in auto 0.16in;
+    padding: 0.16in;
+    border-radius: 0.3in;
+    background: #ffffff;
+    box-shadow: 0 0.14in 0.28in rgba(105, 70, 28, 0.18);
+  }
+
+  .poster-qr-image {
+    width: 5.25in;
+    height: 5.25in;
+    border: 0.18in solid #ffffff;
+    background: #ffffff;
+  }
+
+  .poster-steps {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.12in;
+    margin: 0.08in 0 0.2in;
+  }
+
+  .poster-steps strong {
+    min-height: 0.62in;
+    padding: 0.12in;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.82);
+    color: #241915;
+    font-size: 0.18in;
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  .poster-link {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    color: #356b73;
+    font-size: 0.18in;
+    font-weight: 900;
+    line-height: 1.2;
+    text-align: center;
   }
 }
 
