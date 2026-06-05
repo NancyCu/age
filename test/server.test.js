@@ -245,6 +245,20 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(response.headers.get("content-type"), "image/svg+xml; charset=utf-8");
     assert.match(await response.text(), /<svg/);
 
+    response = await fetch(`${baseUrl}/qr-poster`);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-type"), "text/html; charset=utf-8");
+    const posterHtml = await response.text();
+    assert.match(posterHtml, /Guest QR Poster/);
+    assert.match(posterHtml, /class="poster-qr-image"/);
+    assert.match(posterHtml, /id="posterPrintButton"/);
+    assert.match(posterHtml, /data-auto-print="false"/);
+    assert.match(posterHtml, new RegExp(`${guestUrl.origin.replaceAll(".", "\\.")}/guest`));
+
+    response = await fetch(`${baseUrl}/qr-poster?print=1`);
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), /data-auto-print="true"/);
+
     response = await fetch(`${baseUrl}/api/admin/events`);
     assert.equal(response.status, 401);
 

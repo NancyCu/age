@@ -147,6 +147,25 @@ function pulseHostButton(button) {
   button.classList.add("is-pulsing");
 }
 
+function printHostQrPoster() {
+  const posterUrl = `/qr-poster?print=1&t=${Date.now()}`;
+  const shouldUseCurrentTab = window.matchMedia("(max-width: 700px)").matches
+    || /iP(?:hone|ad|od)/.test(navigator.userAgent);
+
+  if (shouldUseCurrentTab) {
+    window.location.href = posterUrl;
+    return;
+  }
+
+  const printWindow = window.open(posterUrl, "_blank");
+
+  if (printWindow) {
+    printWindow.focus();
+  } else {
+    window.location.href = posterUrl;
+  }
+}
+
 function disconnectHostEvents() {
   if (hostState.eventSource) {
     hostState.eventSource.close();
@@ -281,9 +300,7 @@ hostElements.resetButton.addEventListener("click", async () => {
   }
 });
 
-hostElements.printQrButton.addEventListener("click", () => {
-  window.print();
-});
+hostElements.printQrButton.addEventListener("click", printHostQrPoster);
 
 hostElements.logoutButton.addEventListener("click", async () => {
   try {

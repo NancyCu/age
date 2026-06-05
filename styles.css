@@ -1080,6 +1080,7 @@ tbody tr:last-child td {
 }
 
 .host-body {
+  min-height: 100svh;
   background:
     radial-gradient(circle at 10% 8%, rgba(8, 126, 132, 0.24), transparent 16rem),
     radial-gradient(circle at 90% 12%, rgba(232, 87, 63, 0.24), transparent 14rem),
@@ -1882,6 +1883,120 @@ h2 {
 
 .poster-link {
   overflow-wrap: anywhere;
+}
+
+@media (min-width: 1024px) {
+  .host-shell {
+    width: min(1680px, calc(100% - 32px));
+    min-height: 100svh;
+    padding: 16px 0 22px;
+  }
+
+  .host-header {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    padding: 14px 18px;
+  }
+
+  .host-header h1 {
+    max-width: none;
+    margin-bottom: 2px;
+    font-size: clamp(2rem, 3.1vw, 3.45rem);
+  }
+
+  .host-header .hero-copy {
+    max-width: none;
+    font-size: 0.98rem;
+  }
+
+  .host-status {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .host-dashboard {
+    grid-template-columns: minmax(0, 1.8fr) minmax(340px, 0.7fr);
+    grid-template-rows: auto auto minmax(0, 1fr) min-content;
+    grid-template-areas:
+      "metrics qr"
+      "winner controls"
+      "lists lists"
+      "updated updated";
+    align-items: stretch;
+    min-height: calc(100svh - 154px);
+  }
+
+  .host-dashboard .panel {
+    min-height: 0;
+    padding: 22px;
+  }
+
+  .host-card-grid {
+    grid-area: metrics;
+  }
+
+  .host-winner-card {
+    grid-area: winner;
+  }
+
+  .host-controls {
+    grid-area: controls;
+  }
+
+  .host-qr-panel {
+    grid-area: qr;
+    grid-template-columns: minmax(0, 1fr) clamp(140px, 12vw, 180px);
+    align-content: center;
+    justify-items: start;
+    max-width: none;
+    margin: 0;
+    text-align: left;
+  }
+
+  .host-lists {
+    grid-area: lists;
+    grid-template-columns: 1fr;
+  }
+
+  .host-last-updated {
+    grid-area: updated;
+  }
+
+  .host-metric-card {
+    min-height: clamp(128px, 16vh, 176px);
+  }
+
+  .host-winner-card {
+    min-height: clamp(150px, 19vh, 220px);
+  }
+
+  .host-control-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .host-control-grid .ghost-button,
+  .host-control-grid .danger-button {
+    min-height: clamp(54px, 7vh, 72px);
+  }
+
+  .host-qr-image {
+    justify-self: end;
+    width: clamp(140px, 12vw, 180px);
+    height: clamp(140px, 12vw, 180px);
+    border-width: 10px;
+  }
+}
+
+@media (min-width: 1280px) and (min-height: 820px) {
+  .host-dashboard {
+    grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.55fr);
+  }
+
+  .host-lists {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @keyframes winnerPop {

@@ -765,6 +765,15 @@ function getFirstHeaderValue(value) {
     .trim();
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function handleGuestLink(request, response) {
   const guestUrl = getPreferredGuestUrl(request);
   sendJson(response, 200, {
@@ -791,6 +800,315 @@ async function handleGuestQr(request, response) {
     "Content-Type": "image/svg+xml; charset=utf-8"
   });
   response.end(svg);
+}
+
+function handleQrPoster(request, response) {
+  const guestUrl = getPreferredGuestUrl(request);
+  const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
+  const shouldAutoPrint = url.searchParams.get("print") === "1";
+
+  response.writeHead(200, {
+    "Cache-Control": "no-store",
+    "Content-Type": "text/html; charset=utf-8"
+  });
+  response.end(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guest QR Poster</title>
+  <style>
+    @page { size: letter; margin: 0; }
+    * { box-sizing: border-box; }
+    html,
+    body {
+      width: 8.5in;
+      min-height: 11in;
+      margin: 0;
+      background: #fff8e9;
+      color: #241915;
+      font-family: Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body { display: grid; place-items: stretch; }
+    .poster {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
+      align-items: center;
+      width: 8.5in;
+      min-height: 11in;
+      padding: 0.42in 0.55in;
+      overflow: hidden;
+      border: 0.08in solid #f3c15d;
+      background:
+        radial-gradient(circle at 18% 11%, rgba(255, 194, 65, 0.48), transparent 1.8in),
+        radial-gradient(circle at 84% 13%, rgba(255, 140, 22, 0.28), transparent 1.6in),
+        radial-gradient(circle at 50% 102%, rgba(109, 176, 167, 0.26), transparent 2.2in),
+        linear-gradient(180deg, #fffaf0 0%, #fff3df 100%);
+    }
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 0.18in;
+      border: 0.02in solid rgba(209, 154, 52, 0.28);
+      border-radius: 0.25in;
+      background:
+        url("/assets/gold-sparkles.png") 0.2in 0.18in / 1.1in auto no-repeat,
+        url("/assets/gold-floral-corner.png") left bottom / 1.45in auto no-repeat,
+        url("/assets/gold-floral-corner.png") right bottom / 1.45in auto no-repeat;
+      opacity: 0.34;
+    }
+    .poster-header {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 1.55in;
+      gap: 0.28in;
+      align-items: center;
+      min-height: 1.75in;
+      padding: 0.24in 0.3in;
+      border-radius: 0.32in;
+      background:
+        radial-gradient(circle at 45% 50%, rgba(255, 238, 156, 0.76), transparent 2.2in),
+        linear-gradient(135deg, #ffb72d 0%, #ffcf64 42%, #ff8f20 100%);
+      box-shadow: inset 0 0 0 0.08in rgba(255, 238, 150, 0.5);
+    }
+    .poster-header span {
+      color: rgba(36, 25, 21, 0.74);
+      font-size: 0.18in;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .poster-header h1 {
+      margin: 0.05in 0;
+      font-size: 0.68in;
+      line-height: 0.9;
+    }
+    .poster-header p {
+      margin: 0;
+      font-size: 0.22in;
+      font-weight: 900;
+      line-height: 1.16;
+    }
+    .poster-dog {
+      width: 1.5in;
+      height: 1.5in;
+      object-fit: contain;
+      filter: drop-shadow(0 0.08in 0.12in rgba(105, 70, 28, 0.18));
+    }
+    .poster-qr-wrap {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: fit-content;
+      margin: 0.25in auto 0.16in;
+      padding: 0.16in;
+      border-radius: 0.3in;
+      background: #ffffff;
+      box-shadow: 0 0.14in 0.28in rgba(105, 70, 28, 0.18);
+    }
+    .poster-qr-image {
+      display: block;
+      width: 5.25in;
+      height: 5.25in;
+      border: 0.18in solid #ffffff;
+      background: #ffffff;
+    }
+    .poster-steps {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.12in;
+      margin: 0.08in 0 0.2in;
+    }
+    .poster-steps strong {
+      display: grid;
+      place-items: center;
+      min-height: 0.62in;
+      padding: 0.12in;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      font-size: 0.18in;
+      line-height: 1.1;
+      text-align: center;
+    }
+    .poster-link {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      color: #356b73;
+      font-size: 0.18in;
+      font-weight: 900;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+      text-align: center;
+    }
+    .poster-actions,
+    .print-help { display: none; }
+    @media print {
+      .poster-actions,
+      .print-help {
+        display: none !important;
+      }
+    }
+    @media screen {
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+      }
+      body { padding: 14px; }
+      .poster {
+        width: min(100%, 8.5in);
+        min-height: auto;
+        aspect-ratio: 8.5 / 11;
+        margin: 0 auto;
+        padding: clamp(18px, 4vw, 40px) clamp(18px, 5vw, 53px);
+        border-width: 8px;
+      }
+      .poster-header {
+        grid-template-columns: minmax(0, 1fr) clamp(62px, 18vw, 149px);
+        gap: clamp(10px, 3vw, 27px);
+        min-height: 0;
+        padding: clamp(10px, 3vw, 23px);
+        border-radius: clamp(18px, 5vw, 31px);
+      }
+      .poster-header span {
+        font-size: clamp(0.62rem, 2.1vw, 1.08rem);
+      }
+      .poster-header h1 {
+        font-size: clamp(2rem, 9vw, 4.05rem);
+      }
+      .poster-header p {
+        font-size: clamp(0.8rem, 3vw, 1.32rem);
+      }
+      .poster-dog {
+        width: clamp(62px, 18vw, 144px);
+        height: clamp(62px, 18vw, 144px);
+      }
+      .poster-qr-wrap {
+        margin: clamp(12px, 3vw, 24px) auto clamp(8px, 2vw, 15px);
+        padding: clamp(8px, 2.4vw, 15px);
+        border-radius: clamp(18px, 5vw, 29px);
+      }
+      .poster-qr-image {
+        width: min(62vw, 5.25in, calc(100vw - 84px));
+        height: min(62vw, 5.25in, calc(100vw - 84px));
+        border-width: clamp(8px, 2.2vw, 17px);
+      }
+      .poster-steps {
+        gap: clamp(6px, 2vw, 12px);
+        margin: clamp(6px, 1.6vw, 8px) 0 clamp(10px, 2.6vw, 19px);
+      }
+      .poster-steps strong {
+        min-height: clamp(40px, 11vw, 60px);
+        padding: clamp(6px, 2vw, 12px);
+        font-size: clamp(0.66rem, 2.5vw, 1.08rem);
+      }
+      .poster-link {
+        font-size: clamp(0.68rem, 2.6vw, 1.08rem);
+      }
+      .print-help {
+        display: block;
+        max-width: 8.5in;
+        margin: 10px auto 0;
+        color: #6f625b;
+        font-weight: 800;
+        text-align: center;
+      }
+      .poster-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        max-width: 8.5in;
+        margin: 14px auto 0;
+      }
+      .poster-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 48px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ef3e2e, #ff8c16);
+        color: #fffaf0;
+        cursor: pointer;
+        font: 900 0.95rem Manrope, system-ui, sans-serif;
+        text-decoration: none;
+        box-shadow: 0 12px 22px rgba(184, 79, 36, 0.2);
+      }
+      .poster-action-secondary {
+        background: rgba(255, 253, 247, 0.92);
+        color: #066676;
+        box-shadow: inset 0 0 0 1px rgba(42, 28, 19, 0.12);
+      }
+    }
+  </style>
+</head>
+<body data-auto-print="${shouldAutoPrint ? "true" : "false"}">
+  <main class="poster">
+    <header class="poster-header">
+      <div>
+        <span>Party game</span>
+        <h1>Guess the Years</h1>
+        <p>Scan this code to check in with your name and age.</p>
+      </div>
+      <img class="poster-dog" src="/assets/tan-dog-hero-cutout.png" alt="" />
+    </header>
+    <div class="poster-qr-wrap">
+      <img class="poster-qr-image" src="/api/guest-qr.svg" alt="QR code for guests to join the game" />
+    </div>
+    <div class="poster-steps">
+      <strong>1. Scan</strong>
+      <strong>2. Enter name and age</strong>
+      <strong>3. Guess the total</strong>
+    </div>
+    <p class="poster-link">${escapeHtml(guestUrl)}</p>
+  </main>
+  <div class="poster-actions" aria-label="Poster actions">
+    <button id="posterPrintButton" class="poster-action" type="button">Print QR Poster</button>
+    <a class="poster-action poster-action-secondary" href="/host">Back to dashboard</a>
+  </div>
+  <p class="print-help">If the print sheet does not open automatically, tap Print QR Poster here.</p>
+  <script>
+    async function waitForImages() {
+      const images = Array.from(document.images);
+      await Promise.all(images.map((image) => {
+        if (image.decode) {
+          return image.decode().catch(() => undefined);
+        }
+        if (image.complete) {
+          return Promise.resolve();
+        }
+        return new Promise((resolve) => {
+          image.addEventListener("load", resolve, { once: true });
+          image.addEventListener("error", resolve, { once: true });
+        });
+      }));
+    }
+
+    function printPoster() {
+      window.print();
+    }
+
+    document.querySelector("#posterPrintButton").addEventListener("click", printPoster);
+
+    window.addEventListener("load", async () => {
+      if (document.body.dataset.autoPrint !== "true") {
+        return;
+      }
+      await waitForImages();
+      setTimeout(printPoster, 150);
+    });
+  </script>
+</body>
+</html>`);
 }
 
 async function handleAdminLogin(request, response) {
@@ -1076,6 +1394,11 @@ function createServer() {
 
       if (request.method === "GET" && url.pathname === "/api/guest-qr.svg") {
         await handleGuestQr(request, response);
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/qr-poster") {
+        handleQrPoster(request, response);
         return;
       }
 
