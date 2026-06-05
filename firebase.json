@@ -26,8 +26,13 @@
     ],
     "redirects": [
       {
-        "source": "**",
+        "source": "/",
         "destination": "https://age-game--shawncountdown.us-central1.hosted.app",
+        "type": 302
+      },
+      {
+        "source": "/:path*",
+        "destination": "https://age-game--shawncountdown.us-central1.hosted.app/:path",
         "type": 302
       }
     ]
