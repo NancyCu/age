@@ -825,7 +825,7 @@ function handleQrPoster(request, response) {
       width: 8.5in;
       min-height: 11in;
       margin: 0;
-      background: #fff8e9;
+      background: #ffffff;
       color: #241915;
       font-family: Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       -webkit-print-color-adjust: exact;
@@ -841,42 +841,35 @@ function handleQrPoster(request, response) {
       min-height: 11in;
       padding: 0.42in 0.55in;
       overflow: hidden;
-      border: 0.08in solid #f3c15d;
-      background:
-        radial-gradient(circle at 18% 11%, rgba(255, 194, 65, 0.48), transparent 1.8in),
-        radial-gradient(circle at 84% 13%, rgba(255, 140, 22, 0.28), transparent 1.6in),
-        radial-gradient(circle at 50% 102%, rgba(109, 176, 167, 0.26), transparent 2.2in),
-        linear-gradient(180deg, #fffaf0 0%, #fff3df 100%);
+      border: 0.07in solid #f0b13a;
+      background: #ffffff;
     }
     .poster::before {
       content: "";
       position: absolute;
-      inset: 0.18in;
-      border: 0.02in solid rgba(209, 154, 52, 0.28);
+      inset: 0.16in;
+      border: 0.02in solid rgba(209, 154, 52, 0.42);
       border-radius: 0.25in;
       background:
-        url("/assets/gold-sparkles.png") 0.2in 0.18in / 1.1in auto no-repeat,
-        url("/assets/gold-floral-corner.png") left bottom / 1.45in auto no-repeat,
-        url("/assets/gold-floral-corner.png") right bottom / 1.45in auto no-repeat;
-      opacity: 0.34;
+        url("/assets/gold-filigree-60.png") right 0.24in top 0.16in / 1.7in auto no-repeat,
+        url("/assets/gold-bars.png") left 0.22in top 0.24in / 1.05in auto no-repeat,
+        url("/assets/gold-flourish-line.png") center bottom 0.2in / 3.2in auto no-repeat;
+      opacity: 0.72;
     }
     .poster-header {
       position: relative;
       z-index: 1;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 1.55in;
+      grid-template-columns: minmax(0, 1fr) 1.45in;
       gap: 0.28in;
       align-items: center;
-      min-height: 1.75in;
-      padding: 0.24in 0.3in;
-      border-radius: 0.32in;
-      background:
-        radial-gradient(circle at 45% 50%, rgba(255, 238, 156, 0.76), transparent 2.2in),
-        linear-gradient(135deg, #ffb72d 0%, #ffcf64 42%, #ff8f20 100%);
-      box-shadow: inset 0 0 0 0.08in rgba(255, 238, 150, 0.5);
+      min-height: 1.48in;
+      padding: 0.12in 0.22in 0.18in;
+      border-top: 0.06in solid #ef3e2e;
+      border-bottom: 0.03in solid rgba(6, 102, 118, 0.5);
     }
     .poster-header span {
-      color: rgba(36, 25, 21, 0.74);
+      color: #066676;
       font-size: 0.18in;
       font-weight: 900;
       letter-spacing: 0.08em;
@@ -884,20 +877,65 @@ function handleQrPoster(request, response) {
     }
     .poster-header h1 {
       margin: 0.05in 0;
+      color: #241915;
       font-size: 0.68in;
       line-height: 0.9;
     }
     .poster-header p {
       margin: 0;
+      color: #ef3e2e;
       font-size: 0.22in;
       font-weight: 900;
       line-height: 1.16;
     }
-    .poster-dog {
-      width: 1.5in;
-      height: 1.5in;
-      object-fit: contain;
-      filter: drop-shadow(0 0.08in 0.12in rgba(105, 70, 28, 0.18));
+    .poster-age-mark {
+      display: grid;
+      place-items: center;
+      justify-self: end;
+      width: 1.38in;
+      height: 1.38in;
+      border: 0.03in solid #f0b13a;
+      border-radius: 999px;
+      color: #ef3e2e;
+      font-size: 0.66in;
+      font-weight: 900;
+      line-height: 1;
+      text-align: center;
+    }
+    .poster-age-mark small {
+      display: block;
+      color: #066676;
+      font-size: 0.15in;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .poster-year-row {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.14in;
+      margin-top: 0.14in;
+    }
+    .poster-year-row span {
+      display: grid;
+      place-items: center;
+      min-height: 0.42in;
+      border: 0.02in solid currentColor;
+      border-radius: 999px;
+      font-size: 0.16in;
+      font-weight: 900;
+      line-height: 1.1;
+      text-align: center;
+    }
+    .poster-year-row span:nth-child(1) {
+      color: #ef3e2e;
+    }
+    .poster-year-row span:nth-child(2) {
+      color: #066676;
+    }
+    .poster-year-row span:nth-child(3) {
+      color: #c99735;
     }
     .poster-qr-wrap {
       position: relative;
@@ -905,11 +943,12 @@ function handleQrPoster(request, response) {
       display: grid;
       place-items: center;
       width: fit-content;
-      margin: 0.25in auto 0.16in;
+      margin: 0.22in auto 0.14in;
       padding: 0.16in;
       border-radius: 0.3in;
       background: #ffffff;
-      box-shadow: 0 0.14in 0.28in rgba(105, 70, 28, 0.18);
+      border: 0.04in solid #066676;
+      box-shadow: 0 0.1in 0 rgba(239, 62, 46, 0.16);
     }
     .poster-qr-image {
       display: block;
@@ -932,10 +971,20 @@ function handleQrPoster(request, response) {
       min-height: 0.62in;
       padding: 0.12in;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.82);
+      border: 0.02in solid currentColor;
+      background: #ffffff;
       font-size: 0.18in;
       line-height: 1.1;
       text-align: center;
+    }
+    .poster-steps strong:nth-child(1) {
+      color: #ef3e2e;
+    }
+    .poster-steps strong:nth-child(2) {
+      color: #066676;
+    }
+    .poster-steps strong:nth-child(3) {
+      color: #c99735;
     }
     .poster-link {
       position: relative;
@@ -976,7 +1025,6 @@ function handleQrPoster(request, response) {
         gap: clamp(10px, 3vw, 27px);
         min-height: 0;
         padding: clamp(10px, 3vw, 23px);
-        border-radius: clamp(18px, 5vw, 31px);
       }
       .poster-header span {
         font-size: clamp(0.62rem, 2.1vw, 1.08rem);
@@ -987,9 +1035,22 @@ function handleQrPoster(request, response) {
       .poster-header p {
         font-size: clamp(0.8rem, 3vw, 1.32rem);
       }
-      .poster-dog {
+      .poster-age-mark {
         width: clamp(62px, 18vw, 144px);
         height: clamp(62px, 18vw, 144px);
+        font-size: clamp(2rem, 9vw, 3.96rem);
+      }
+      .poster-age-mark small {
+        font-size: clamp(0.48rem, 2vw, 0.9rem);
+      }
+      .poster-year-row {
+        gap: clamp(6px, 2vw, 13px);
+        margin-top: clamp(8px, 2vw, 13px);
+      }
+      .poster-year-row span {
+        min-height: clamp(34px, 9vw, 40px);
+        padding: 4px 7px;
+        font-size: clamp(0.58rem, 2.4vw, 0.96rem);
       }
       .poster-qr-wrap {
         margin: clamp(12px, 3vw, 24px) auto clamp(8px, 2vw, 15px);
@@ -1059,8 +1120,13 @@ function handleQrPoster(request, response) {
         <h1>Guess the Years</h1>
         <p>Scan this code to check in with your name and age.</p>
       </div>
-      <img class="poster-dog" src="/assets/tan-dog-hero-cutout.png" alt="" />
+      <div class="poster-age-mark" aria-hidden="true">60<small>years</small></div>
     </header>
+    <div class="poster-year-row" aria-hidden="true">
+      <span>Years lived</span>
+      <span>Ages added</span>
+      <span>Total guessed</span>
+    </div>
     <div class="poster-qr-wrap">
       <img class="poster-qr-image" src="/api/guest-qr.svg" alt="QR code for guests to join the game" />
     </div>

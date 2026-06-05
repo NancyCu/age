@@ -251,9 +251,13 @@ test("user, guess, duplicate, and admin flows work", async () => {
     const posterHtml = await response.text();
     assert.match(posterHtml, /Guest QR Poster/);
     assert.match(posterHtml, /class="poster-qr-image"/);
+    assert.match(posterHtml, /poster-age-mark/);
+    assert.match(posterHtml, /Years lived/);
+    assert.match(posterHtml, /background: #ffffff/);
     assert.match(posterHtml, /id="posterPrintButton"/);
     assert.match(posterHtml, /data-auto-print="false"/);
     assert.match(posterHtml, new RegExp(`${guestUrl.origin.replaceAll(".", "\\.")}/guest`));
+    assert.doesNotMatch(posterHtml, /tan-dog/);
 
     response = await fetch(`${baseUrl}/qr-poster?print=1`);
     assert.equal(response.status, 200);
