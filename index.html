@@ -41,36 +41,59 @@
         <span class="checkin-party-hat" aria-hidden="true"></span>
       </header>
 
-      <form id="userForm" class="checkin-form" autocomplete="on">
-        <label class="checkin-name-field" for="userName">
-          <span>Name</span>
-          <input id="userName" name="name" type="text" maxlength="50" placeholder="Sam N." autocomplete="given-name" autocapitalize="words" required />
-        </label>
+      <nav class="checkin-tabs" aria-label="Game sections">
+        <button class="checkin-tab is-active" type="button" data-checkin-view="checkinPanel">Check In</button>
+        <button class="checkin-tab" type="button" data-checkin-view="guestsPanel">Guests</button>
+        <a class="checkin-tab checkin-tab-link" href="/host">Admin</a>
+      </nav>
 
-        <div class="checkin-age-area">
-          <label class="checkin-age-label" for="userAge">Age</label>
-          <input id="userAge" name="age" class="checkin-age-display" type="text" inputmode="none" autocomplete="off" aria-describedby="ageHelp" readonly required />
-          <p id="ageHelp" class="checkin-help">Enter your age only.</p>
-        </div>
+      <section id="checkinPanel" class="checkin-view is-active">
+        <form id="userForm" class="checkin-form" autocomplete="on">
+          <label class="checkin-name-field" for="userName">
+            <span>Name</span>
+            <input id="userName" name="name" type="text" maxlength="50" placeholder="Sam N." autocomplete="given-name" autocapitalize="words" required />
+          </label>
 
-        <div class="checkin-keypad" aria-label="Age keypad">
-          <button type="button" data-age-key="1">1</button>
-          <button type="button" data-age-key="2">2</button>
-          <button type="button" data-age-key="3">3</button>
-          <button type="button" data-age-key="4">4</button>
-          <button type="button" data-age-key="5">5</button>
-          <button type="button" data-age-key="6">6</button>
-          <button type="button" data-age-key="7">7</button>
-          <button type="button" data-age-key="8">8</button>
-          <button type="button" data-age-key="9">9</button>
-          <button type="button" data-age-action="backspace" aria-label="Delete last digit">⌫</button>
-          <button type="button" data-age-key="0">0</button>
-          <button class="checkin-key-confirm" type="button" data-age-action="confirm" aria-label="Confirm age">✓</button>
-        </div>
+          <div class="checkin-age-area">
+            <label class="checkin-age-label" for="userAge">Age</label>
+            <input id="userAge" name="age" class="checkin-age-display" type="text" inputmode="none" autocomplete="off" aria-describedby="ageHelp" readonly required />
+            <p id="ageHelp" class="checkin-help">Enter your age only.</p>
+          </div>
 
-        <button id="saveAgeButton" class="checkin-save-button" type="submit">Save My Age</button>
-        <p id="checkinStatus" class="checkin-status" aria-live="polite"></p>
-      </form>
+          <div class="checkin-keypad" aria-label="Age keypad">
+            <button type="button" data-age-key="1">1</button>
+            <button type="button" data-age-key="2">2</button>
+            <button type="button" data-age-key="3">3</button>
+            <button type="button" data-age-key="4">4</button>
+            <button type="button" data-age-key="5">5</button>
+            <button type="button" data-age-key="6">6</button>
+            <button type="button" data-age-key="7">7</button>
+            <button type="button" data-age-key="8">8</button>
+            <button type="button" data-age-key="9">9</button>
+            <button type="button" data-age-action="backspace" aria-label="Delete last digit">⌫</button>
+            <button type="button" data-age-key="0">0</button>
+            <button class="checkin-key-confirm" type="button" data-age-action="confirm" aria-label="Confirm age">✓</button>
+          </div>
+
+          <button id="saveAgeButton" class="checkin-save-button" type="submit">Save My Age</button>
+          <p id="checkinStatus" class="checkin-status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section id="guestsPanel" class="checkin-view">
+        <form id="guestGuessForm" class="guest-guess-form" autocomplete="on">
+          <label class="guest-guess-field" for="guestGuessName">
+            <span>Name</span>
+            <input id="guestGuessName" name="name" type="text" maxlength="50" placeholder="Sam N." autocomplete="given-name" autocapitalize="words" required />
+          </label>
+          <label class="guest-guess-field" for="guestTotalGuess">
+            <span>Total Guess</span>
+            <input id="guestTotalGuess" name="estimatedTotalAge" type="number" min="0" max="130000" inputmode="numeric" placeholder="300" required />
+          </label>
+          <button id="saveGuessButton" class="checkin-save-button guest-save-button" type="submit">Save Guess</button>
+          <p id="guestGuessStatus" class="checkin-status" aria-live="polite"></p>
+        </form>
+      </section>
     </section>
   </main>
 

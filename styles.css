@@ -3473,3 +3473,375 @@ body.checkin-page {
     height: clamp(42px, 6.2svh, 54px);
   }
 }
+
+/* Responsive check-in app: low-scroll, not fixed. Handles portrait, landscape, and desktop. */
+body.checkin-page {
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.checkin-page .checkin-shell {
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  min-height: 100dvh;
+  height: auto;
+  padding: clamp(10px, 2.2dvh, 22px) clamp(10px, 2vw, 24px) clamp(18px, 3dvh, 32px);
+}
+
+.checkin-page .checkin-card {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: clamp(8px, 1.4dvh, 14px);
+  align-content: start;
+  width: min(940px, 100%);
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  padding: 0;
+}
+
+.checkin-page .checkin-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(86px, 13dvh, 138px);
+  padding: clamp(10px, 2dvh, 22px) clamp(14px, 3vw, 30px);
+}
+
+.checkin-page .checkin-hero > div {
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+}
+
+.checkin-page .checkin-hero h1 {
+  max-width: none;
+  margin: 0;
+  font-size: clamp(2.2rem, 6.4vw, 5rem);
+  line-height: 0.92;
+  white-space: nowrap;
+}
+
+.checkin-page .checkin-hero p {
+  max-width: none;
+  margin: 4px 0 0;
+  font-size: clamp(0.86rem, 2.3vw, 1.45rem);
+  line-height: 1.08;
+  white-space: nowrap;
+}
+
+.checkin-page .checkin-balloon,
+.checkin-page .checkin-party-hat {
+  display: none;
+}
+
+.checkin-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(6px, 1.4vw, 12px);
+  width: 100%;
+}
+
+.checkin-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: clamp(44px, 7dvh, 62px);
+  border: 1px solid rgba(201, 151, 53, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #241915;
+  cursor: pointer;
+  font: 900 clamp(0.96rem, 2.1vw, 1.3rem) / 1 "Manrope", sans-serif;
+  text-decoration: none;
+  touch-action: manipulation;
+  box-shadow: 0 8px 18px rgba(105, 70, 28, 0.09);
+}
+
+.checkin-tab.is-active,
+.checkin-tab-link {
+  background: linear-gradient(135deg, #ff6a21, #ff9f1c);
+  color: #fffaf0;
+  box-shadow: 0 12px 24px rgba(184, 79, 36, 0.18);
+}
+
+.checkin-view {
+  display: none;
+}
+
+.checkin-view.is-active {
+  display: block;
+}
+
+.checkin-page .checkin-form {
+  display: grid;
+  grid-template-areas:
+    "name"
+    "age"
+    "keypad"
+    "save"
+    "status";
+  gap: clamp(5px, 1dvh, 10px);
+  align-content: start;
+  width: 100%;
+  padding: 0 clamp(4px, 1.4vw, 12px);
+}
+
+.checkin-page .checkin-name-field {
+  grid-area: name;
+}
+
+.checkin-page .checkin-age-area {
+  grid-area: age;
+}
+
+.checkin-page .checkin-keypad {
+  grid-area: keypad;
+}
+
+.checkin-page .checkin-save-button {
+  grid-area: save;
+}
+
+.checkin-page .checkin-status {
+  grid-area: status;
+}
+
+.checkin-page .checkin-name-field,
+.checkin-page .checkin-age-area {
+  gap: clamp(4px, 0.8dvh, 8px);
+}
+
+.checkin-page .checkin-name-field span,
+.checkin-page .checkin-age-label {
+  font-size: clamp(1.45rem, 5.6vw, 2.55rem);
+}
+
+.checkin-page .checkin-name-field input {
+  width: min(760px, 100%);
+  min-height: clamp(48px, 7.8dvh, 74px);
+  border-radius: clamp(18px, 4vw, 30px);
+  font-size: clamp(1.4rem, 5.2vw, 2.55rem);
+}
+
+.checkin-page .checkin-age-display {
+  width: min(720px, 100%);
+  height: clamp(82px, 15dvh, 156px);
+  border-radius: clamp(18px, 4vw, 30px);
+  font-size: clamp(4rem, 13dvh, 8.6rem);
+}
+
+.checkin-page .checkin-help {
+  font-size: clamp(0.78rem, 2.5vw, 1.05rem);
+}
+
+.checkin-page .checkin-keypad {
+  width: min(760px, 100%);
+  gap: clamp(5px, 1dvh, 9px);
+}
+
+.checkin-page .checkin-keypad button {
+  height: clamp(44px, 7.3dvh, 72px);
+  border-radius: clamp(14px, 3vw, 22px);
+  font-size: clamp(1.9rem, 5.8dvh, 3.5rem);
+}
+
+.checkin-page .checkin-save-button {
+  width: min(760px, 100%);
+  min-height: clamp(50px, 7.8dvh, 76px);
+  font-size: clamp(1.7rem, 6vw, 3rem);
+}
+
+.guest-guess-form {
+  display: grid;
+  gap: clamp(10px, 2dvh, 16px);
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: clamp(12px, 2.2dvh, 22px);
+  border: 1px solid rgba(201, 151, 53, 0.24);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12px 24px rgba(105, 70, 28, 0.1);
+}
+
+.guest-guess-field {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.guest-guess-field span {
+  font: 900 clamp(1.3rem, 4.8vw, 2rem) / 1 "Baloo 2", "Manrope", sans-serif;
+}
+
+.guest-guess-field input {
+  width: 100%;
+  min-height: clamp(54px, 8dvh, 76px);
+  border: 2px solid rgba(201, 151, 53, 0.28);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #21150f;
+  font: 900 clamp(1.45rem, 5vw, 2.35rem) "Manrope", sans-serif;
+  outline: none;
+  padding: 0 18px;
+}
+
+.guest-save-button {
+  justify-self: center;
+}
+
+@media (min-width: 860px) {
+  .checkin-page .checkin-shell {
+    padding-block: 14px 18px;
+  }
+
+  .checkin-page .checkin-card {
+    width: min(860px, 100%);
+    gap: 8px;
+  }
+
+  .checkin-page .checkin-hero {
+    min-height: 110px;
+    padding-block: 14px;
+  }
+
+  .checkin-page .checkin-hero h1 {
+    font-size: clamp(3rem, 4.2vw, 4.25rem);
+  }
+
+  .checkin-page .checkin-hero p {
+    font-size: clamp(1rem, 1.55vw, 1.25rem);
+  }
+
+  .checkin-tab {
+    min-height: 50px;
+    font-size: 1.08rem;
+  }
+
+  .checkin-page .checkin-form {
+    gap: 7px;
+  }
+
+  .checkin-page .checkin-name-field,
+  .checkin-page .checkin-age-area {
+    gap: 5px;
+  }
+
+  .checkin-page .checkin-name-field span,
+  .checkin-page .checkin-age-label {
+    font-size: 2rem;
+  }
+
+  .checkin-page .checkin-name-field input {
+    min-height: 58px;
+    font-size: 1.9rem;
+  }
+
+  .checkin-page .checkin-age-display {
+    height: 124px;
+    font-size: 6.2rem;
+  }
+
+  .checkin-page .checkin-keypad {
+    gap: 7px;
+  }
+
+  .checkin-page .checkin-keypad button {
+    height: 58px;
+    font-size: 2.55rem;
+  }
+
+  .checkin-page .checkin-save-button {
+    min-height: 60px;
+    font-size: 2.35rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 760px) {
+  .checkin-page .checkin-shell {
+    padding-block: 8px 14px;
+  }
+
+  .checkin-page .checkin-card {
+    width: min(1120px, 100%);
+    gap: 8px;
+  }
+
+  .checkin-page .checkin-hero {
+    min-height: 62px;
+    padding-block: 8px;
+    border-radius: 22px;
+  }
+
+  .checkin-page .checkin-hero h1 {
+    font-size: clamp(1.8rem, 4.6dvh, 2.55rem);
+  }
+
+  .checkin-page .checkin-hero p {
+    font-size: clamp(0.72rem, 2.2dvh, 0.95rem);
+  }
+
+  .checkin-tab {
+    min-height: 38px;
+    font-size: 0.9rem;
+  }
+
+  .checkin-page .checkin-form {
+    grid-template-columns: minmax(260px, 0.95fr) minmax(330px, 1.05fr);
+    grid-template-areas:
+      "name keypad"
+      "age keypad"
+      "save keypad"
+      "status keypad";
+    column-gap: 16px;
+    row-gap: 5px;
+    align-items: start;
+    width: min(980px, 100%);
+    margin: 0 auto;
+  }
+
+  .checkin-page .checkin-name-field span,
+  .checkin-page .checkin-age-label {
+    font-size: clamp(1.25rem, 4.4dvh, 1.8rem);
+  }
+
+  .checkin-page .checkin-name-field input {
+    min-height: clamp(42px, 9dvh, 58px);
+    font-size: clamp(1.25rem, 4.5dvh, 1.9rem);
+  }
+
+  .checkin-page .checkin-age-display {
+    height: clamp(72px, 18dvh, 112px);
+    font-size: clamp(3.8rem, 15dvh, 6.4rem);
+  }
+
+  .checkin-page .checkin-keypad {
+    align-self: stretch;
+    width: 100%;
+  }
+
+  .checkin-page .checkin-keypad button {
+    height: clamp(38px, 10dvh, 58px);
+    font-size: clamp(1.6rem, 7dvh, 2.6rem);
+  }
+
+  .checkin-page .checkin-save-button {
+    min-height: clamp(42px, 9dvh, 58px);
+    font-size: clamp(1.45rem, 5.2dvh, 2.2rem);
+  }
+
+  .guest-guess-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+    width: min(900px, 100%);
+    padding: 12px;
+  }
+
+  .guest-guess-form .checkin-status,
+  .guest-guess-form .guest-save-button {
+    grid-column: 1 / -1;
+  }
+}

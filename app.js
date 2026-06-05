@@ -1,10 +1,15 @@
 const elements = {
   ageInput: document.querySelector("#userAge"),
   form: document.querySelector("#userForm"),
+  guessForm: document.querySelector("#guestGuessForm"),
+  guessStatus: document.querySelector("#guestGuessStatus"),
   keypad: document.querySelector(".checkin-keypad"),
   nameInput: document.querySelector("#userName"),
   saveButton: document.querySelector("#saveAgeButton"),
-  status: document.querySelector("#checkinStatus")
+  saveGuessButton: document.querySelector("#saveGuessButton"),
+  status: document.querySelector("#checkinStatus"),
+  tabs: document.querySelectorAll("[data-checkin-view]"),
+  views: document.querySelectorAll(".checkin-view")
 };
 
 function getGuestToken() {
@@ -47,9 +52,29 @@ function setStatus(message, tone = "neutral") {
   elements.status.dataset.tone = tone;
 }
 
+function setGuessStatus(message, tone = "neutral") {
+  elements.guessStatus.textContent = message;
+  elements.guessStatus.dataset.tone = tone;
+}
+
 function setSubmitting(isSubmitting) {
   elements.saveButton.disabled = isSubmitting;
   elements.saveButton.textContent = isSubmitting ? "Saving..." : "Save My Age";
+}
+
+function setGuessSubmitting(isSubmitting) {
+  elements.saveGuessButton.disabled = isSubmitting;
+  elements.saveGuessButton.textContent = isSubmitting ? "Saving..." : "Save Guess";
+}
+
+function activateView(viewId) {
+  elements.tabs.forEach((tab) => {
+    tab.classList.toggle("is-active", tab.dataset.checkinView === viewId);
+  });
+
+  elements.views.forEach((view) => {
+    view.classList.toggle("is-active", view.id === viewId);
+  });
 }
 
 function getAgeValue() {
@@ -108,6 +133,12 @@ elements.keypad.addEventListener("click", (event) => {
   }
 });
 
+elements.tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    activateView(tab.dataset.checkinView);
+  });
+});
+
 elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -144,5 +175,44 @@ elements.form.addEventListener("submit", async (event) => {
     setStatus(error.message, "warning");
   } finally {
     setSubmitting(false);
+  }
+});
+
+elements.guessForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(elements.guessForm);
+  const name = String(formData.get("name") || "").trim();
+  const estimatedTotalAge = Number(formData.get("estimatedTotalAge"));
+
+  if (!name) {
+    setGuessStatus("Enter the same name you used for check-in.", "warning");
+    return;
+  }
+
+  if (!Number.isInteger(estimatedTotalAge) || estimatedTotalAge < 0 || estimatedTotalAge > 130000) {
+    setGuessStatus("Enter a whole-number total guess.", "warning");
+    return;
+  }
+
+  setGuessSubmitting(true);
+  setGuessStatus("Saving your guess...", "neutral");
+
+  try {
+    await requestJson("/api/guesses", {
+      body: JSON.stringify({
+        estimatedTotalAge,
+        name,
+        sourceToken: guestToken
+      }),
+      method: "POST"
+    });
+
+    elements.guessForm.reset();
+    setGuessStatus("Your guess is saved.", "success");
+  } catch (error) {
+    setGuessStatus(error.message, "warning");
+  } finally {
+    setGuessSubmitting(false);
   }
 });
