@@ -25,6 +25,7 @@ const firebaseGameId = process.env.FIREBASE_GAME_ID || "age-pool-tracker";
 const firebaseDatabaseURL = process.env.FIREBASE_DATABASE_URL || "https://shawncountdown-default-rtdb.firebaseio.com";
 const firebaseDataRoot = process.env.FIREBASE_DATA_ROOT || "ageGames";
 const liveClients = new Set();
+const publicLiveClients = new Set();
 let storeAdapterPromise = null;
 
 const contentTypes = {
@@ -629,7 +630,7 @@ async function buildLivePayload() {
 }
 
 async function broadcastLiveUpdate() {
-  if (!liveClients.size) {
+  if (!liveClients.size && !publicLiveClients.size) {
     return;
   }
 
@@ -640,6 +641,16 @@ async function broadcastLiveUpdate() {
         writeSse(client, payload);
       } catch {
         liveClients.delete(client);
+      }
+    });
+    publicLiveClients.forEach((client) => {
+      try {
+        writeSse(client, {
+          summary: payload.summary,
+          updatedAt: payload.updatedAt
+        });
+      } catch {
+        publicLiveClients.delete(client);
       }
     });
   } catch {
@@ -682,6 +693,11 @@ async function handleCreateEntry(request, response, type) {
 
     if (!matchingUser) {
       sendJson(response, 400, { error: "Invalid name. Enter a first name that already exists in the User tab." });
+      return;
+    }
+
+    if (!tokenMatchedUser) {
+      sendJson(response, 400, { error: "Check in with your age before making a guess." });
       return;
     }
 
@@ -946,6 +962,31 @@ async function handleAdminEvents(request, response) {
   writeSse(response, await buildLivePayload());
 }
 
+async function handlePublicEvents(request, response) {
+  response.writeHead(200, {
+    "Cache-Control": "no-store",
+    "Connection": "keep-alive",
+    "Content-Type": "text/event-stream; charset=utf-8"
+  });
+  response.write(": connected\n\n");
+  publicLiveClients.add(response);
+
+  const heartbeat = setInterval(() => {
+    response.write(": heartbeat\n\n");
+  }, 25000);
+
+  request.on("close", () => {
+    clearInterval(heartbeat);
+    publicLiveClients.delete(response);
+  });
+
+  const payload = await buildLivePayload();
+  writeSse(response, {
+    summary: payload.summary,
+    updatedAt: payload.updatedAt
+  });
+}
+
 async function serveStatic(response, pathname) {
   const fileName = pathname === "/"
     ? "index.html"
@@ -1020,6 +1061,11 @@ function createServer() {
 
       if (request.method === "GET" && url.pathname === "/api/summary") {
         await handlePublicSummary(response);
+        return;
+      }
+
+      if (request.method === "GET" && url.pathname === "/api/events") {
+        await handlePublicEvents(request, response);
         return;
       }
 

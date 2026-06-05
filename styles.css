@@ -3568,6 +3568,40 @@ body.checkin-page {
   box-shadow: 0 12px 24px rgba(184, 79, 36, 0.18);
 }
 
+.checkin-tab.is-live-enabled:not(.is-active):not(.checkin-tab-link) {
+  border-color: rgba(255, 140, 37, 0.5);
+  color: #8e3c16;
+}
+
+.checkin-tab.is-disabled {
+  background: rgba(228, 224, 215, 0.72);
+  color: rgba(62, 52, 45, 0.42);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.checkin-tab.is-pulsing,
+.ghost-button.is-pulsing {
+  animation: buttonPulse 780ms ease-out;
+}
+
+@keyframes buttonPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 121, 35, 0.42);
+  }
+
+  45% {
+    transform: scale(1.035);
+    box-shadow: 0 0 0 10px rgba(255, 121, 35, 0.16);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 121, 35, 0);
+  }
+}
+
 .checkin-view {
   display: none;
 }
@@ -3655,42 +3689,120 @@ body.checkin-page {
   font-size: clamp(1.7rem, 6vw, 3rem);
 }
 
-.guest-guess-form {
+.guess-form {
   display: grid;
-  gap: clamp(10px, 2dvh, 16px);
-  width: min(760px, 100%);
-  margin: 0 auto;
-  padding: clamp(12px, 2.2dvh, 22px);
-  border: 1px solid rgba(201, 151, 53, 0.24);
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 12px 24px rgba(105, 70, 28, 0.1);
-}
-
-.guest-guess-field {
-  display: grid;
-  gap: 8px;
-  text-align: center;
-}
-
-.guest-guess-field span {
-  font: 900 clamp(1.3rem, 4.8vw, 2rem) / 1 "Baloo 2", "Manrope", sans-serif;
-}
-
-.guest-guess-field input {
+  grid-template-areas:
+    "name"
+    "total"
+    "keypad"
+    "save"
+    "status";
+  gap: clamp(5px, 1dvh, 10px);
+  align-content: start;
   width: 100%;
-  min-height: clamp(54px, 8dvh, 76px);
-  border: 2px solid rgba(201, 151, 53, 0.28);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.86);
-  color: #21150f;
-  font: 900 clamp(1.45rem, 5vw, 2.35rem) "Manrope", sans-serif;
-  outline: none;
-  padding: 0 18px;
+  margin: 0 auto;
+  padding: 0 clamp(4px, 1.4vw, 12px);
+}
+
+.guess-name-field {
+  grid-area: name;
+}
+
+.guess-total-area {
+  grid-area: total;
+}
+
+.guess-keypad {
+  grid-area: keypad;
 }
 
 .guest-save-button {
-  justify-self: center;
+  grid-area: save;
+}
+
+.guess-form .checkin-status {
+  grid-area: status;
+}
+
+.guess-name-field,
+.guess-total-area {
+  display: grid;
+  justify-items: center;
+  gap: clamp(4px, 0.8dvh, 8px);
+  text-align: center;
+}
+
+.guess-name-field span,
+.guess-total-label {
+  color: #241915;
+  font: 900 clamp(1.45rem, 5.6vw, 2.55rem) / 0.95 "Baloo 2", "Manrope", sans-serif;
+}
+
+.guess-name-field select,
+.guess-total-display {
+  width: min(760px, 100%);
+  border: 2px solid rgba(201, 151, 53, 0.28);
+  border-radius: clamp(18px, 4vw, 30px);
+  background: rgba(255, 255, 255, 0.9);
+  color: #21150f;
+  outline: none;
+  box-shadow: inset 0 2px 8px rgba(132, 91, 38, 0.05);
+}
+
+.guess-name-field select {
+  min-height: clamp(48px, 7.8dvh, 74px);
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #f37c2f 50%),
+    linear-gradient(135deg, #f37c2f 50%, transparent 50%);
+  background-position:
+    calc(100% - 28px) 50%,
+    calc(100% - 18px) 50%;
+  background-repeat: no-repeat;
+  background-size: 10px 10px;
+  font: 900 clamp(1.25rem, 4.8vw, 2.2rem) "Manrope", sans-serif;
+  padding: 0 48px 0 20px;
+}
+
+.guess-total-display {
+  height: clamp(82px, 15dvh, 156px);
+  border-color: rgba(248, 126, 44, 0.88);
+  color: rgba(33, 21, 15, 0.76);
+  font: 900 clamp(4rem, 13dvh, 8.6rem) / 1 "Manrope", sans-serif;
+  text-align: center;
+}
+
+.guess-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(760px, 100%);
+  gap: clamp(5px, 1dvh, 9px);
+  margin: 0 auto;
+}
+
+.guess-keypad button {
+  height: clamp(44px, 7.3dvh, 72px);
+  border: 1px solid rgba(201, 151, 53, 0.23);
+  border-radius: clamp(14px, 3vw, 22px);
+  background: rgba(255, 255, 255, 0.92);
+  color: #241915;
+  cursor: pointer;
+  font: 900 clamp(1.9rem, 5.8dvh, 3.5rem) / 1 "Manrope", sans-serif;
+  box-shadow: 0 7px 16px rgba(105, 70, 28, 0.08);
+}
+
+.guess-keypad button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.guess-keypad.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.ghost-button.is-disabled-toggle {
+  background: rgba(226, 224, 216, 0.88);
+  color: rgba(37, 63, 68, 0.58);
 }
 
 @media (min-width: 860px) {
@@ -3725,31 +3837,43 @@ body.checkin-page {
     gap: 7px;
   }
 
+  .guess-form {
+    gap: 7px;
+  }
+
   .checkin-page .checkin-name-field,
-  .checkin-page .checkin-age-area {
+  .checkin-page .checkin-age-area,
+  .guess-name-field,
+  .guess-total-area {
     gap: 5px;
   }
 
   .checkin-page .checkin-name-field span,
-  .checkin-page .checkin-age-label {
+  .checkin-page .checkin-age-label,
+  .guess-name-field span,
+  .guess-total-label {
     font-size: 2rem;
   }
 
-  .checkin-page .checkin-name-field input {
+  .checkin-page .checkin-name-field input,
+  .guess-name-field select {
     min-height: 58px;
     font-size: 1.9rem;
   }
 
-  .checkin-page .checkin-age-display {
+  .checkin-page .checkin-age-display,
+  .guess-total-display {
     height: 124px;
     font-size: 6.2rem;
   }
 
-  .checkin-page .checkin-keypad {
+  .checkin-page .checkin-keypad,
+  .guess-keypad {
     gap: 7px;
   }
 
-  .checkin-page .checkin-keypad button {
+  .checkin-page .checkin-keypad button,
+  .guess-keypad button {
     height: 58px;
     font-size: 2.55rem;
   }
@@ -3789,7 +3913,8 @@ body.checkin-page {
     font-size: 0.9rem;
   }
 
-  .checkin-page .checkin-form {
+  .checkin-page .checkin-form,
+  .guess-form {
     grid-template-columns: minmax(260px, 0.95fr) minmax(330px, 1.05fr);
     grid-template-areas:
       "name keypad"
@@ -3803,27 +3928,41 @@ body.checkin-page {
     margin: 0 auto;
   }
 
+  .guess-form {
+    grid-template-areas:
+      "name keypad"
+      "total keypad"
+      "save keypad"
+      "status keypad";
+  }
+
   .checkin-page .checkin-name-field span,
-  .checkin-page .checkin-age-label {
+  .checkin-page .checkin-age-label,
+  .guess-name-field span,
+  .guess-total-label {
     font-size: clamp(1.25rem, 4.4dvh, 1.8rem);
   }
 
-  .checkin-page .checkin-name-field input {
+  .checkin-page .checkin-name-field input,
+  .guess-name-field select {
     min-height: clamp(42px, 9dvh, 58px);
     font-size: clamp(1.25rem, 4.5dvh, 1.9rem);
   }
 
-  .checkin-page .checkin-age-display {
+  .checkin-page .checkin-age-display,
+  .guess-total-display {
     height: clamp(72px, 18dvh, 112px);
     font-size: clamp(3.8rem, 15dvh, 6.4rem);
   }
 
-  .checkin-page .checkin-keypad {
+  .checkin-page .checkin-keypad,
+  .guess-keypad {
     align-self: stretch;
     width: 100%;
   }
 
-  .checkin-page .checkin-keypad button {
+  .checkin-page .checkin-keypad button,
+  .guess-keypad button {
     height: clamp(38px, 10dvh, 58px);
     font-size: clamp(1.6rem, 7dvh, 2.6rem);
   }
@@ -3833,15 +3972,4 @@ body.checkin-page {
     font-size: clamp(1.45rem, 5.2dvh, 2.2rem);
   }
 
-  .guest-guess-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: end;
-    width: min(900px, 100%);
-    padding: 12px;
-  }
-
-  .guest-guess-form .checkin-status,
-  .guest-guess-form .guest-save-button {
-    grid-column: 1 / -1;
-  }
 }

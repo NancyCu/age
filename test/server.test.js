@@ -344,6 +344,14 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(enabledGuessTab.dashboard.guessEnabled, true);
 
     response = await fetch(`${baseUrl}/api/guesses`, {
+      body: JSON.stringify({ estimatedTotalAge: 118, name: "Mia", sourceToken: "guest-token-random-0001" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error, "Check in with your age before making a guess.");
+
+    response = await fetch(`${baseUrl}/api/guesses`, {
       body: JSON.stringify({ estimatedTotalAge: 120, name: "Mia", sourceToken: "guest-token-mia-00001" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"

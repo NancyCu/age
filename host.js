@@ -114,6 +114,7 @@ function renderHostWinner(dashboard) {
 function renderHostDashboard(payload) {
   const dashboard = payload.dashboard || {};
   const summary = payload.summary || {};
+  const previousGuessEnabled = hostState.guessEnabled;
 
   hostState.guessEnabled = dashboard.guessEnabled !== false;
   hostState.winnerMode = dashboard.winnerMode || "hidden";
@@ -121,6 +122,12 @@ function renderHostDashboard(payload) {
   hostElements.playerCount.textContent = String(summary.userCount ?? 0);
   hostElements.needGuessCount.textContent = String((summary.availableGuessNames || []).length);
   hostElements.guessToggleButton.textContent = hostState.guessEnabled ? "Disable Guess Tab" : "Enable Guess Tab";
+  hostElements.guessToggleButton.classList.toggle("is-selected", hostState.guessEnabled);
+  hostElements.guessToggleButton.classList.toggle("is-disabled-toggle", !hostState.guessEnabled);
+  hostElements.guessToggleButton.setAttribute("aria-pressed", String(hostState.guessEnabled));
+  if (previousGuessEnabled !== hostState.guessEnabled) {
+    pulseHostButton(hostElements.guessToggleButton);
+  }
   hostElements.maskWinnerButton.classList.toggle("is-selected", hostState.winnerMode === "fake");
   hostElements.maskWinnerButton.textContent = hostState.winnerMode === "fake" ? "Show Real Winner" : "Mask Winner";
   hostElements.maskWinnerButton.setAttribute("aria-pressed", String(hostState.winnerMode === "fake"));
@@ -132,6 +139,12 @@ function renderHostDashboard(payload) {
   const updatedAt = payload.updatedAt ? new Date(payload.updatedAt) : new Date();
   const backendLabel = payload.backend === "firebase" ? "Firebase" : "local data";
   hostElements.lastUpdated.textContent = `Live from ${backendLabel}. Updated ${updatedAt.toLocaleTimeString()}.`;
+}
+
+function pulseHostButton(button) {
+  button.classList.remove("is-pulsing");
+  void button.offsetWidth;
+  button.classList.add("is-pulsing");
 }
 
 function disconnectHostEvents() {
@@ -218,6 +231,7 @@ hostElements.loginForm.addEventListener("submit", async (event) => {
 });
 
 hostElements.maskWinnerButton.addEventListener("click", async () => {
+  pulseHostButton(hostElements.maskWinnerButton);
   try {
     await setHostWinnerMode(hostState.winnerMode === "fake" ? "real" : "fake");
   } catch (error) {
@@ -226,6 +240,7 @@ hostElements.maskWinnerButton.addEventListener("click", async () => {
 });
 
 hostElements.guessToggleButton.addEventListener("click", async () => {
+  pulseHostButton(hostElements.guessToggleButton);
   try {
     const result = await hostRequestJson("/api/admin/guess-tab", {
       body: JSON.stringify({ enabled: !hostState.guessEnabled }),

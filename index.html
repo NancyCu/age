@@ -43,7 +43,7 @@
 
       <nav class="checkin-tabs" aria-label="Game sections">
         <button class="checkin-tab is-active" type="button" data-checkin-view="checkinPanel">Check In</button>
-        <button class="checkin-tab" type="button" data-checkin-view="guestsPanel">Guests</button>
+        <button class="checkin-tab" type="button" data-checkin-view="guestsPanel">Make Guess</button>
         <a class="checkin-tab checkin-tab-link" href="/host">Admin</a>
       </nav>
 
@@ -81,15 +81,35 @@
       </section>
 
       <section id="guestsPanel" class="checkin-view">
-        <form id="guestGuessForm" class="guest-guess-form" autocomplete="on">
-          <label class="guest-guess-field" for="guestGuessName">
+        <form id="guestGuessForm" class="guess-form" autocomplete="off">
+          <label class="guess-name-field" for="guestGuessName">
             <span>Name</span>
-            <input id="guestGuessName" name="name" type="text" maxlength="50" placeholder="Sam N." autocomplete="given-name" autocapitalize="words" required />
+            <select id="guestGuessName" name="name" required>
+              <option value="">Choose your name</option>
+            </select>
           </label>
-          <label class="guest-guess-field" for="guestTotalGuess">
-            <span>Total Guess</span>
-            <input id="guestTotalGuess" name="estimatedTotalAge" type="number" min="0" max="130000" inputmode="numeric" placeholder="300" required />
-          </label>
+
+          <div class="guess-total-area">
+            <label class="guess-total-label" for="guestTotalGuess">Total Guess</label>
+            <input id="guestTotalGuess" name="estimatedTotalAge" class="guess-total-display" type="text" inputmode="none" autocomplete="off" aria-describedby="guessHelp" readonly required />
+            <p id="guessHelp" class="checkin-help">Guess the total age in the room.</p>
+          </div>
+
+          <div class="guess-keypad" aria-label="Total guess keypad">
+            <button type="button" data-guess-key="1">1</button>
+            <button type="button" data-guess-key="2">2</button>
+            <button type="button" data-guess-key="3">3</button>
+            <button type="button" data-guess-key="4">4</button>
+            <button type="button" data-guess-key="5">5</button>
+            <button type="button" data-guess-key="6">6</button>
+            <button type="button" data-guess-key="7">7</button>
+            <button type="button" data-guess-key="8">8</button>
+            <button type="button" data-guess-key="9">9</button>
+            <button type="button" data-guess-action="backspace" aria-label="Delete last digit">⌫</button>
+            <button type="button" data-guess-key="0">0</button>
+            <button class="checkin-key-confirm" type="button" data-guess-action="confirm" aria-label="Confirm total guess">✓</button>
+          </div>
+
           <button id="saveGuessButton" class="checkin-save-button guest-save-button" type="submit">Save Guess</button>
           <p id="guestGuessStatus" class="checkin-status" aria-live="polite"></p>
         </form>
