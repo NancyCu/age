@@ -3354,18 +3354,25 @@ body.checkin-page {
   }
 
   .checkin-page .checkin-hero {
-    display: grid;
-    grid-template-columns: 34px minmax(0, 1fr) 34px;
-    min-height: 94px;
-    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 86px;
+    padding: 10px 14px;
     border-radius: 28px;
     box-shadow: 0 12px 22px rgba(184, 79, 36, 0.14), inset 0 0 0 5px rgba(255, 238, 150, 0.34);
+  }
+
+  .checkin-page .checkin-hero > div {
+    width: 100%;
+    min-width: 0;
+    text-align: center;
   }
 
   .checkin-page .checkin-hero h1 {
     max-width: none;
     margin: 0;
-    font-size: clamp(2.1rem, 8.8vw, 2.65rem);
+    font-size: clamp(2rem, 7.8vw, 2.55rem);
     line-height: 0.92;
     white-space: nowrap;
   }
@@ -3373,15 +3380,14 @@ body.checkin-page {
   .checkin-page .checkin-hero p {
     max-width: none;
     margin: 3px 0 0;
-    font-size: clamp(0.78rem, 3.3vw, 0.98rem);
+    font-size: clamp(0.76rem, 2.9vw, 0.92rem);
     line-height: 1.08;
+    white-space: nowrap;
   }
 
   .checkin-page .checkin-balloon,
   .checkin-page .checkin-party-hat {
-    display: block;
-    width: 28px;
-    height: 40px;
+    display: none;
   }
 
   .checkin-page .checkin-form {
@@ -3457,15 +3463,6 @@ body.checkin-page {
 
   .checkin-page .checkin-hero p {
     font-size: 0.74rem;
-  }
-
-  .checkin-page .checkin-balloon,
-  .checkin-page .checkin-party-hat {
-    display: none;
-  }
-
-  .checkin-page .checkin-hero {
-    grid-template-columns: 0 minmax(0, 1fr) 0;
   }
 
   .checkin-page .checkin-age-display {
