@@ -11,6 +11,9 @@ const elements = {
   saveButton: document.querySelector("#saveAgeButton"),
   saveGuessButton: document.querySelector("#saveGuessButton"),
   status: document.querySelector("#checkinStatus"),
+  successClose: document.querySelector("#checkinSuccessClose"),
+  successDialog: document.querySelector("#checkinSuccessDialog"),
+  successMessage: document.querySelector("#checkinSuccessMessage"),
   tabs: document.querySelectorAll("[data-checkin-view]"),
   views: document.querySelectorAll(".checkin-view")
 };
@@ -35,6 +38,7 @@ const guestToken = getGuestToken();
 const checkedInNameStorageKey = "agePoolCheckedInName";
 const state = {
   checkedInName: window.localStorage.getItem(checkedInNameStorageKey) || "",
+  checkinSubmitting: false,
   guessEnabled: true,
   summaryPollId: null
 };
@@ -67,6 +71,7 @@ function setGuessStatus(message, tone = "neutral") {
 }
 
 function setSubmitting(isSubmitting) {
+  state.checkinSubmitting = isSubmitting;
   elements.saveButton.disabled = isSubmitting;
   elements.saveButton.textContent = isSubmitting ? "Saving..." : "Save My Age";
 }
@@ -211,12 +216,21 @@ function deleteAgeDigit() {
 }
 
 function confirmAge() {
-  if (!elements.ageInput.value) {
-    setStatus("Enter your age first.", "warning");
-    return;
+  if (typeof elements.form.requestSubmit === "function") {
+    elements.form.requestSubmit();
+  } else {
+    elements.saveButton.click();
   }
+}
 
-  elements.saveButton.focus();
+function showCheckinSuccess(name) {
+  elements.successMessage.textContent = `${name} is checked in.`;
+  elements.successDialog.hidden = false;
+  elements.successClose.focus();
+}
+
+function hideCheckinSuccess() {
+  elements.successDialog.hidden = true;
 }
 
 elements.keypad.addEventListener("click", (event) => {
@@ -248,8 +262,26 @@ elements.tabs.forEach((tab) => {
   });
 });
 
+elements.successClose.addEventListener("click", hideCheckinSuccess);
+
+elements.successDialog.addEventListener("click", (event) => {
+  if (event.target === elements.successDialog) {
+    hideCheckinSuccess();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !elements.successDialog.hidden) {
+    hideCheckinSuccess();
+  }
+});
+
 elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
+
+  if (state.checkinSubmitting) {
+    return;
+  }
 
   const name = elements.nameInput.value.trim();
   const age = getAgeValue();
@@ -294,6 +326,7 @@ elements.form.addEventListener("submit", async (event) => {
     window.localStorage.setItem(checkedInNameStorageKey, name);
     elements.form.reset();
     setStatus("You are checked in. Thank you.", "success");
+    showCheckinSuccess(name);
     await refreshSummary();
   } catch (error) {
     setStatus(error.message, "warning");

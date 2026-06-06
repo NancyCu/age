@@ -34,34 +34,30 @@
     </section>
 
     <section id="hostDashboard" class="host-dashboard hidden" aria-live="polite">
-      <div class="host-card-grid">
-        <article class="panel host-metric-card">
-          <span class="stat-label">Age total</span>
-          <strong id="hostAgeTotal">0</strong>
-          <span class="hint-text">Private host total.</span>
-        </article>
-        <article class="panel host-metric-card">
-          <span class="stat-label">Players</span>
-          <strong id="hostPlayerCount">0</strong>
-          <span class="hint-text">Guests with ages.</span>
-        </article>
-        <article class="panel host-metric-card host-reminder-card">
-          <span class="stat-label">Reminder list</span>
-          <strong id="hostNeedGuessCount">0</strong>
-          <span class="hint-text">Guests who still need to guess.</span>
-        </article>
-      </div>
-
       <article class="panel winner-panel host-winner-card">
         <span class="stat-label winner-label">Winner board</span>
         <strong id="hostWinnerName" class="is-hidden-winner">Ready for the reveal</strong>
         <span id="hostWinnerMeta" class="hint-text">Live winner status will appear here.</span>
+        <div id="hostWinnerStats" class="host-winner-stats" aria-label="Winner age totals">
+          <div>
+            <span>Winner guess</span>
+            <strong id="hostWinnerGuess">--</strong>
+          </div>
+          <div>
+            <span>Correct total</span>
+            <strong id="hostCorrectTotal">--</strong>
+          </div>
+          <div>
+            <span>Difference</span>
+            <strong id="hostWinnerDifference">--</strong>
+          </div>
+        </div>
       </article>
 
       <section class="panel host-controls">
         <h2>Game controls</h2>
         <div class="host-control-grid">
-          <button id="hostMaskWinnerButton" class="ghost-button mask-button" type="button">Mask Winner</button>
+          <button id="hostMaskWinnerButton" class="ghost-button mask-button" type="button">Show Win Data</button>
           <button id="hostGuessToggleButton" class="ghost-button" type="button">Disable Guess Tab</button>
           <button id="hostResetButton" class="danger-button" type="button">Reset Game</button>
           <button id="hostLogoutButton" class="ghost-button" type="button">Log out</button>
@@ -106,15 +102,25 @@
       </section>
 
       <section class="host-lists">
-        <article class="panel">
-          <span class="section-kicker">Still need guesses</span>
-          <h2>Guess reminders</h2>
-          <p class="summary-copy">Names shown here have checked in but have not submitted a total-age guess yet.</p>
-          <p id="hostNeedGuessNames" class="available-name-list">No reminders yet.</p>
+        <article class="panel host-people-list-card">
+          <span class="section-kicker">Checked in</span>
+          <div class="host-list-heading">
+            <h2>Need Guess</h2>
+            <span id="hostWaitingBadge" class="host-list-badge">0</span>
+          </div>
+          <div id="hostNeedGuessNames" class="host-person-list" aria-label="People who still need to guess">
+            No reminders yet.
+          </div>
         </article>
-        <article class="panel">
+        <article class="panel host-people-list-card">
           <span class="section-kicker">Guesses submitted</span>
-          <p id="hostGuessNames" class="available-name-list">No guesses submitted yet.</p>
+          <div class="host-list-heading">
+            <h2>Guessed</h2>
+            <span id="hostGuessedBadge" class="host-list-badge">0</span>
+          </div>
+          <div id="hostGuessNames" class="host-person-list" aria-label="People who submitted guesses">
+            No guesses submitted yet.
+          </div>
         </article>
       </section>
 

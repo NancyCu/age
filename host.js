@@ -6,9 +6,10 @@ const hostState = {
 };
 
 const hostElements = {
-  ageTotal: document.querySelector("#hostAgeTotal"),
   connectionStatus: document.querySelector("#hostConnectionStatus"),
+  correctTotal: document.querySelector("#hostCorrectTotal"),
   dashboard: document.querySelector("#hostDashboard"),
+  guessedBadge: document.querySelector("#hostGuessedBadge"),
   guessNames: document.querySelector("#hostGuessNames"),
   guessToggleButton: document.querySelector("#hostGuessToggleButton"),
   guestQrImage: document.querySelector("#hostGuestQrImage"),
@@ -18,14 +19,15 @@ const hostElements = {
   loginPanel: document.querySelector("#hostLoginPanel"),
   logoutButton: document.querySelector("#hostLogoutButton"),
   maskWinnerButton: document.querySelector("#hostMaskWinnerButton"),
-  needGuessCount: document.querySelector("#hostNeedGuessCount"),
   needGuessNames: document.querySelector("#hostNeedGuessNames"),
   password: document.querySelector("#hostPassword"),
   posterGuestLink: document.querySelector("#hostPosterGuestLink"),
   posterQrImage: document.querySelector("#hostPosterQrImage"),
   printQrButton: document.querySelector("#hostPrintQrButton"),
-  playerCount: document.querySelector("#hostPlayerCount"),
   resetButton: document.querySelector("#hostResetButton"),
+  waitingBadge: document.querySelector("#hostWaitingBadge"),
+  winnerDifference: document.querySelector("#hostWinnerDifference"),
+  winnerGuess: document.querySelector("#hostWinnerGuess"),
   winnerMeta: document.querySelector("#hostWinnerMeta"),
   winnerName: document.querySelector("#hostWinnerName")
 };
@@ -71,9 +73,11 @@ function setHostAuthenticated(authenticated) {
 function renderHostNameList(container, names, emptyMessage) {
   if (!names.length) {
     container.textContent = emptyMessage;
+    container.classList.add("is-empty");
     return;
   }
 
+  container.classList.remove("is-empty");
   container.innerHTML = names
     .map((name, index) => {
       const comma = index < names.length - 1 ? '<span class="name-comma">, </span>' : "";
@@ -82,33 +86,88 @@ function renderHostNameList(container, names, emptyMessage) {
     .join("");
 }
 
+function renderHostWaitingList(container, names, emptyMessage) {
+  if (!names.length) {
+    container.textContent = emptyMessage;
+    container.classList.add("is-empty");
+    return;
+  }
+
+  container.classList.remove("is-empty");
+  container.innerHTML = names
+    .map((name) => `
+      <div class="host-person-row">
+        <span class="host-person-avatar" aria-hidden="true">${escapeHostHtml(name.charAt(0) || "?")}</span>
+        <span class="host-person-name">${escapeHostHtml(name)}</span>
+      </div>
+    `)
+    .join("");
+}
+
+function renderHostGuessList(container, guesses, emptyMessage) {
+  if (!guesses.length) {
+    container.textContent = emptyMessage;
+    container.classList.add("is-empty");
+    return;
+  }
+
+  container.classList.remove("is-empty");
+  container.innerHTML = guesses
+    .map((guess) => {
+      const name = normalizeHostDisplayName(guess.name);
+      const value = Number(guess.estimatedTotalAge);
+      const visibleValue = Number.isFinite(value) ? value : "-";
+      const winDataVisible = hostState.winnerMode === "real";
+      const valueLabel = winDataVisible ? visibleValue : "Hidden";
+      const valueClass = winDataVisible ? "" : " is-masked";
+
+      return `
+        <div class="host-person-row host-guess-row">
+          <span class="host-person-avatar" aria-hidden="true">${escapeHostHtml(name.charAt(0) || "?")}</span>
+          <span class="host-person-name">${escapeHostHtml(name)}</span>
+          <span class="host-guess-value${valueClass}">${escapeHostHtml(valueLabel)}</span>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function normalizeHostDisplayName(name) {
+  return String(name || "Guest").trim() || "Guest";
+}
+
 function renderHostWinner(dashboard) {
   const nearestGuess = dashboard.nearestGuess || null;
-  const fakeWinnerName = dashboard.fakeWinnerName || "Teddy-Tami-Tili-Guchi-Damien";
+  const winDataVisible = hostState.winnerMode === "real";
 
   hostElements.winnerName.classList.remove("is-real-winner", "is-fake-winner", "is-hidden-winner");
-  hostElements.winnerName.classList.add(`is-${hostState.winnerMode}-winner`);
-
-  if (hostState.winnerMode === "fake") {
-    hostElements.winnerName.textContent = fakeWinnerName;
-    hostElements.winnerMeta.textContent = "The board is masked with a decoy name.";
-    return;
-  }
-
-  if (hostState.winnerMode === "hidden") {
-    hostElements.winnerName.textContent = "Ready for the reveal";
-    hostElements.winnerMeta.textContent = "Use Mask Winner to tease the room, then show the real winner.";
-    return;
-  }
+  hostElements.winnerName.classList.add(winDataVisible ? "is-real-winner" : "is-hidden-winner");
 
   if (!nearestGuess) {
-    hostElements.winnerName.textContent = "No winner yet";
+    hostElements.winnerName.textContent = winDataVisible ? "No winner yet" : "Ready for the reveal";
     hostElements.winnerMeta.textContent = "Waiting for guest guesses.";
+    hostElements.winnerGuess.textContent = "--";
+    hostElements.correctTotal.textContent = String(dashboard.accumulatedAge ?? 0);
+    hostElements.winnerDifference.textContent = "--";
+    return;
+  }
+
+  const guessedTotal = Number(nearestGuess.estimatedTotalAge);
+  const correctTotal = Number(dashboard.accumulatedAge ?? 0);
+  const difference = Number(nearestGuess.difference);
+
+  hostElements.winnerGuess.textContent = winDataVisible && Number.isFinite(guessedTotal) ? String(guessedTotal) : "--";
+  hostElements.correctTotal.textContent = winDataVisible && Number.isFinite(correctTotal) ? String(correctTotal) : "--";
+  hostElements.winnerDifference.textContent = winDataVisible && Number.isFinite(difference) ? String(difference) : "--";
+
+  if (!winDataVisible) {
+    hostElements.winnerName.textContent = "Ready for the reveal";
+    hostElements.winnerMeta.textContent = "Use Show Win Data to reveal the winner, guesses, correct total, and difference.";
     return;
   }
 
   hostElements.winnerName.textContent = nearestGuess.name;
-  hostElements.winnerMeta.textContent = "Real winner is showing. Guess numbers stay hidden on this host screen.";
+  hostElements.winnerMeta.textContent = "Winner data is showing. Guessed totals are visible for the reveal.";
 }
 
 function renderHostDashboard(payload) {
@@ -118,9 +177,8 @@ function renderHostDashboard(payload) {
 
   hostState.guessEnabled = dashboard.guessEnabled !== false;
   hostState.winnerMode = dashboard.winnerMode || "hidden";
-  hostElements.ageTotal.textContent = String(dashboard.accumulatedAge ?? 0);
-  hostElements.playerCount.textContent = String(summary.userCount ?? 0);
-  hostElements.needGuessCount.textContent = String((summary.availableGuessNames || []).length);
+  hostElements.waitingBadge.textContent = String((summary.availableGuessNames || []).length);
+  hostElements.guessedBadge.textContent = String((dashboard.guesses || []).length);
   hostElements.guessToggleButton.textContent = hostState.guessEnabled ? "Disable Guess Tab" : "Enable Guess Tab";
   hostElements.guessToggleButton.classList.toggle("is-selected", hostState.guessEnabled);
   hostElements.guessToggleButton.classList.toggle("is-disabled-toggle", !hostState.guessEnabled);
@@ -128,13 +186,13 @@ function renderHostDashboard(payload) {
   if (previousGuessEnabled !== hostState.guessEnabled) {
     pulseHostButton(hostElements.guessToggleButton);
   }
-  hostElements.maskWinnerButton.classList.toggle("is-selected", hostState.winnerMode === "fake");
-  hostElements.maskWinnerButton.textContent = hostState.winnerMode === "fake" ? "Show Real Winner" : "Mask Winner";
-  hostElements.maskWinnerButton.setAttribute("aria-pressed", String(hostState.winnerMode === "fake"));
+  hostElements.maskWinnerButton.classList.toggle("is-selected", hostState.winnerMode === "real");
+  hostElements.maskWinnerButton.textContent = hostState.winnerMode === "real" ? "Hide Win Data" : "Show Win Data";
+  hostElements.maskWinnerButton.setAttribute("aria-pressed", String(hostState.winnerMode === "real"));
 
   renderHostWinner(dashboard);
-  renderHostNameList(hostElements.needGuessNames, summary.availableGuessNames || [], "Everyone has submitted a guess.");
-  renderHostNameList(hostElements.guessNames, summary.guessNames || [], "No guesses submitted yet.");
+  renderHostWaitingList(hostElements.needGuessNames, summary.availableGuessNames || [], "Everyone has submitted a guess.");
+  renderHostGuessList(hostElements.guessNames, dashboard.guesses || [], "No guesses submitted yet.");
 
   const updatedAt = payload.updatedAt ? new Date(payload.updatedAt) : new Date();
   const backendLabel = payload.backend === "firebase" ? "Firebase" : "local data";
@@ -252,7 +310,7 @@ hostElements.loginForm.addEventListener("submit", async (event) => {
 hostElements.maskWinnerButton.addEventListener("click", async () => {
   pulseHostButton(hostElements.maskWinnerButton);
   try {
-    await setHostWinnerMode(hostState.winnerMode === "fake" ? "real" : "fake");
+    await setHostWinnerMode(hostState.winnerMode === "real" ? "hidden" : "real");
   } catch (error) {
     alert(error.message);
   }

@@ -743,7 +743,7 @@ async function handleCreateEntry(request, response, type) {
     if (duplicateUser) {
       const suggestions = buildNameSuggestions(validated.name, store.users);
       sendJson(response, 409, {
-        error: `That name is already taken. Try ${formatSuggestionList(suggestions)}.`,
+        error: `That name is already taken. Enter another name or try ${formatSuggestionList(suggestions)}.`,
         suggestions
       });
       return;
@@ -854,23 +854,25 @@ function handleQrPoster(request, response) {
     html,
     body {
       width: 8.5in;
-      min-height: 11in;
+      height: 11in;
       margin: 0;
       background: #ffffff;
       color: #241915;
       font-family: Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+      overflow: hidden;
     }
     body { display: grid; place-items: stretch; }
     .poster {
       position: relative;
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto auto;
+      grid-template-rows: auto auto minmax(0, 1fr) auto auto;
       align-items: center;
       width: 8.5in;
-      min-height: 11in;
-      padding: 0.42in 0.55in;
+      height: 11in;
+      max-height: 11in;
+      padding: 0.34in 0.48in;
       overflow: hidden;
       border: 0.07in solid #f0b13a;
       background: #ffffff;
@@ -974,8 +976,9 @@ function handleQrPoster(request, response) {
       display: grid;
       place-items: center;
       width: fit-content;
-      margin: 0.22in auto 0.14in;
-      padding: 0.16in;
+      align-self: center;
+      margin: 0.16in auto 0.1in;
+      padding: 0.12in;
       border-radius: 0.3in;
       background: #ffffff;
       border: 0.04in solid #066676;
@@ -983,9 +986,9 @@ function handleQrPoster(request, response) {
     }
     .poster-qr-image {
       display: block;
-      width: 5.25in;
-      height: 5.25in;
-      border: 0.18in solid #ffffff;
+      width: 5in;
+      height: 5in;
+      border: 0.14in solid #ffffff;
       background: #ffffff;
     }
     .poster-steps {
@@ -994,7 +997,7 @@ function handleQrPoster(request, response) {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.12in;
-      margin: 0.08in 0 0.2in;
+      margin: 0.06in 0 0.14in;
     }
     .poster-steps strong {
       display: grid;

@@ -275,6 +275,10 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.match(posterHtml, /poster-age-mark/);
     assert.match(posterHtml, /Years lived/);
     assert.match(posterHtml, /background: #ffffff/);
+    assert.match(posterHtml, /height: 11in/);
+    assert.match(posterHtml, /max-height: 11in/);
+    assert.match(posterHtml, /width: 5in/);
+    assert.doesNotMatch(posterHtml, /min-height: 11in/);
     assert.match(posterHtml, /id="posterPrintButton"/);
     assert.match(posterHtml, /data-auto-print="false"/);
     assert.match(posterHtml, new RegExp(`${guestUrl.origin.replaceAll(".", "\\.")}/guest`));

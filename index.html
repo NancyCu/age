@@ -51,7 +51,7 @@
         <form id="userForm" class="checkin-form" autocomplete="on" novalidate>
           <label class="checkin-name-field" for="userName">
             <span>Name</span>
-            <input id="userName" name="name" type="text" maxlength="50" placeholder="Sam N." autocomplete="given-name" autocapitalize="words" required />
+            <input id="userName" name="name" type="text" maxlength="50" placeholder="Name" autocomplete="given-name" autocapitalize="words" required />
           </label>
 
           <div class="checkin-age-area">
@@ -116,6 +116,15 @@
       </section>
     </section>
   </main>
+
+  <div id="checkinSuccessDialog" class="checkin-success-dialog" role="dialog" aria-modal="true" aria-labelledby="checkinSuccessTitle" hidden>
+    <div class="checkin-success-card">
+      <p class="checkin-success-kicker">Check-in complete</p>
+      <h2 id="checkinSuccessTitle">Name entered!</h2>
+      <p id="checkinSuccessMessage">You are checked in.</p>
+      <button id="checkinSuccessClose" class="checkin-success-button" type="button">OK</button>
+    </div>
+  </div>
 
   <script src="/app.js" defer></script>
 </body>

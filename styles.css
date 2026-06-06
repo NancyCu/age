@@ -799,6 +799,114 @@ h2 {
   color: var(--muted);
 }
 
+.host-people-list-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.host-list-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.host-list-heading h2 {
+  margin: 0;
+}
+
+.host-list-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(63, 100, 71, 0.2);
+  border-radius: 999px;
+  background: rgba(237, 244, 230, 0.9);
+  color: var(--teal-dark);
+  font-weight: 1000;
+}
+
+.host-guess-visibility-button {
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.host-person-list {
+  display: grid;
+  gap: 8px;
+  min-height: 42px;
+  margin: 0;
+}
+
+.host-person-list.is-empty {
+  align-content: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.host-person-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 8px;
+  border: 1px solid rgba(128, 88, 35, 0.13);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.host-guess-row {
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+}
+
+.host-person-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--orange), var(--gold-soft));
+  color: #fffaf0;
+  font-size: 0.9rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.host-person-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 1000;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.host-guess-value {
+  min-width: 58px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(63, 100, 71, 0.12);
+  color: var(--teal-dark);
+  font-size: 0.9rem;
+  font-weight: 1000;
+  text-align: center;
+}
+
+.host-guess-value.is-masked {
+  background: rgba(42, 28, 19, 0.08);
+  color: var(--muted);
+}
+
 .inline-host-link {
   color: var(--teal-dark);
   font-weight: 900;
@@ -1957,7 +2065,7 @@ h2 {
 
   .host-lists {
     grid-area: lists;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .host-last-updated {
@@ -2310,6 +2418,69 @@ body.checkin-page {
 
 .checkin-status[data-tone="warning"] {
   color: #a33d1d;
+}
+
+.checkin-success-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(36, 25, 21, 0.48);
+}
+
+.checkin-success-dialog[hidden] {
+  display: none;
+}
+
+.checkin-success-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  width: min(560px, 100%);
+  padding: clamp(28px, 8vw, 54px) clamp(22px, 7vw, 46px);
+  border: 4px solid rgba(255, 158, 28, 0.95);
+  border-radius: 28px;
+  background: #fffaf0;
+  color: #241915;
+  box-shadow: 0 28px 70px rgba(36, 25, 21, 0.34);
+  text-align: center;
+}
+
+.checkin-success-kicker {
+  margin: 0;
+  color: #7c4b20;
+  font: 900 clamp(0.95rem, 3vw, 1.25rem) / 1 "Manrope", sans-serif;
+  text-transform: uppercase;
+}
+
+.checkin-success-card h2 {
+  margin: 0;
+  color: #21150f;
+  font: 900 clamp(3rem, 13vw, 5.8rem) / 0.9 "Baloo 2", "Manrope", sans-serif;
+}
+
+.checkin-success-card p {
+  margin: 0;
+}
+
+.checkin-success-card #checkinSuccessMessage {
+  color: #3f6447;
+  font: 900 clamp(1.35rem, 5vw, 2.3rem) / 1.05 "Baloo 2", "Manrope", sans-serif;
+}
+
+.checkin-success-button {
+  min-width: min(280px, 100%);
+  min-height: 64px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff6423, #ff9f18);
+  color: #fffaf4;
+  cursor: pointer;
+  font: 900 2rem / 1 "Baloo 2", "Manrope", sans-serif;
+  box-shadow: 0 14px 24px rgba(184, 79, 36, 0.22);
 }
 
 @media (max-width: 700px) {
@@ -2865,11 +3036,14 @@ body.checkin-page {
     position: fixed;
     inset: 0;
     display: grid !important;
-    grid-template-rows: auto 1fr auto auto;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
     align-items: center;
+    box-sizing: border-box;
     width: 8.5in;
     height: 11in;
-    padding: 0.42in 0.55in;
+    max-height: 11in;
+    padding: 0.34in 0.48in;
+    overflow: hidden;
     border: 0.07in solid #f0b13a;
     background: #ffffff;
     color: #241915;
@@ -2983,8 +3157,9 @@ body.checkin-page {
     z-index: 1;
     display: grid;
     place-items: center;
-    margin: 0.25in auto 0.16in;
-    padding: 0.16in;
+    align-self: center;
+    margin: 0.16in auto 0.1in;
+    padding: 0.12in;
     border-radius: 0.3in;
     background: #ffffff;
     border: 0.04in solid #066676;
@@ -2992,9 +3167,9 @@ body.checkin-page {
   }
 
   .poster-qr-image {
-    width: 5.25in;
-    height: 5.25in;
-    border: 0.18in solid #ffffff;
+    width: 5in;
+    height: 5in;
+    border: 0.14in solid #ffffff;
     background: #ffffff;
   }
 
@@ -3004,7 +3179,7 @@ body.checkin-page {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.12in;
-    margin: 0.08in 0 0.2in;
+    margin: 0.06in 0 0.14in;
   }
 
   .poster-steps strong {
@@ -4143,4 +4318,340 @@ body.checkin-page {
     font-size: clamp(1.45rem, 5.2dvh, 2.2rem);
   }
 
+}
+
+/* Host party-screen layout: list-first, compact controls, reveal data at bottom. */
+.host-shell {
+  width: min(1380px, calc(100% - 20px));
+  padding: 10px 0 18px;
+}
+
+.host-header {
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 10px 14px;
+}
+
+.host-header h1 {
+  max-width: none;
+  margin-bottom: 0;
+  font-size: clamp(2rem, 4.3vw, 3.9rem);
+  line-height: 0.9;
+}
+
+.host-header .hero-copy {
+  margin-top: 2px;
+  font-size: clamp(0.84rem, 1.35vw, 1rem);
+}
+
+.host-dashboard {
+  display: grid;
+  grid-template-areas:
+    "lists"
+    "controls"
+    "qr"
+    "winner"
+    "updated";
+  gap: 10px;
+}
+
+.host-lists {
+  grid-area: lists;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.host-people-list-card {
+  min-height: 0;
+  padding: clamp(14px, 1.7vw, 22px);
+}
+
+.host-list-heading h2 {
+  font-size: clamp(2rem, 4vw, 3.6rem);
+}
+
+.host-list-badge {
+  min-width: clamp(42px, 4vw, 56px);
+  height: clamp(42px, 4vw, 56px);
+  font-size: clamp(1.05rem, 2vw, 1.45rem);
+}
+
+.host-person-list {
+  gap: clamp(8px, 1.2vh, 12px);
+  overflow: auto;
+}
+
+.host-person-row {
+  grid-template-columns: clamp(42px, 4.2vw, 56px) minmax(0, 1fr);
+  min-height: clamp(58px, 7.4vh, 78px);
+  padding: clamp(7px, 1vh, 10px) clamp(9px, 1.1vw, 14px);
+}
+
+.host-guess-row {
+  grid-template-columns: clamp(42px, 4.2vw, 56px) minmax(0, 1fr) auto;
+}
+
+.host-person-avatar {
+  width: clamp(42px, 4.2vw, 56px);
+  height: clamp(42px, 4.2vw, 56px);
+  font-size: clamp(1rem, 1.9vw, 1.5rem);
+}
+
+.host-person-name {
+  font-size: clamp(1.35rem, 2.5vw, 2.2rem);
+}
+
+.host-guess-value {
+  min-width: clamp(92px, 9vw, 132px);
+  padding: 8px 14px;
+  font-size: clamp(1.05rem, 2.25vw, 1.8rem);
+}
+
+.host-guess-value.is-masked {
+  color: rgba(47, 42, 37, 0.7);
+}
+
+.host-controls {
+  grid-area: controls;
+}
+
+.host-controls h2 {
+  margin-bottom: 10px;
+  font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+}
+
+.host-control-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.host-control-grid .ghost-button,
+.host-control-grid .danger-button {
+  min-height: clamp(54px, 7vh, 70px);
+  font-size: clamp(1rem, 1.6vw, 1.35rem);
+}
+
+.host-qr-panel {
+  grid-area: qr;
+  grid-template-columns: minmax(0, 1fr) clamp(108px, 10vw, 144px);
+  justify-items: start;
+  gap: 12px;
+  max-width: none;
+  margin: 0;
+  padding: 16px;
+  text-align: left;
+}
+
+.host-qr-panel .summary-copy {
+  display: none;
+}
+
+.host-qr-panel h2 {
+  font-size: clamp(1.45rem, 2.4vw, 2.2rem);
+}
+
+.host-qr-image {
+  justify-self: end;
+  width: clamp(108px, 10vw, 144px);
+  height: clamp(108px, 10vw, 144px);
+  border-width: 8px;
+}
+
+.host-print-button {
+  width: auto;
+  min-height: 42px;
+  margin-top: 10px;
+  padding-inline: 18px;
+}
+
+.host-winner-card {
+  grid-area: winner;
+  min-height: 0;
+  padding: clamp(14px, 1.7vw, 22px);
+  align-content: center;
+}
+
+.host-winner-card strong {
+  font-size: clamp(2.7rem, 6.5vw, 5.4rem);
+}
+
+.host-winner-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.host-winner-stats div {
+  min-width: 0;
+  padding: clamp(10px, 1.4vw, 16px);
+  border: 1px solid rgba(128, 88, 35, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.host-winner-stats span {
+  display: block;
+  color: var(--muted);
+  font-size: clamp(0.72rem, 1.2vw, 0.92rem);
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.host-winner-stats strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 0.95;
+}
+
+.host-last-updated {
+  grid-area: updated;
+  font-size: 0.92rem;
+}
+
+@media (min-width: 1024px) {
+  .host-dashboard {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.32fr);
+    grid-template-rows: minmax(0, 1fr) auto auto min-content;
+    grid-template-areas:
+      "lists controls"
+      "lists qr"
+      "winner winner"
+      "updated updated";
+    min-height: calc(100svh - 92px);
+  }
+
+  .host-lists {
+    min-height: 0;
+  }
+
+  .host-people-list-card {
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 760px) and (min-width: 900px) {
+  .host-shell {
+    padding: 4px 0 4px;
+  }
+
+  .host-header {
+    margin-bottom: 6px;
+    padding: 8px 12px;
+  }
+
+  .host-header h1 {
+    font-size: clamp(1.65rem, 5vh, 2.55rem);
+  }
+
+  .host-header .hero-copy {
+    display: none;
+  }
+
+  .host-dashboard {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.28fr);
+    grid-template-rows: minmax(0, 1fr) clamp(178px, 26vh, 210px) min-content;
+    grid-template-areas:
+      "lists controls"
+      "winner qr"
+      "updated updated";
+    min-height: calc(100svh - 84px);
+  }
+
+  .host-qr-panel {
+    display: grid;
+    align-content: center;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .host-qr-panel h2 {
+    margin-bottom: 4px;
+    font-size: clamp(1.15rem, 3vh, 1.6rem);
+  }
+
+  .host-qr-image {
+    width: clamp(72px, 13vh, 98px);
+    height: clamp(72px, 13vh, 98px);
+    border-width: 6px;
+  }
+
+  .host-print-button {
+    width: min(100%, 164px);
+    min-height: 36px;
+    margin-top: 6px;
+    padding-inline: 12px;
+    font-size: clamp(0.72rem, 1.6vh, 0.88rem);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .host-control-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .host-control-grid .ghost-button,
+  .host-control-grid .danger-button {
+    min-height: clamp(44px, 8vh, 58px);
+  }
+
+  .host-winner-card {
+    gap: 4px;
+    grid-template-columns: minmax(260px, 0.5fr) minmax(0, 1fr);
+    grid-template-areas:
+      "label stats"
+      "name stats"
+      "meta stats";
+    align-items: center;
+  }
+
+  .host-winner-card .winner-label {
+    grid-area: label;
+  }
+
+  .host-winner-card strong {
+    grid-area: name;
+    font-size: clamp(3rem, 10vh, 5.4rem);
+  }
+
+  .host-winner-card .hint-text {
+    grid-area: meta;
+    font-size: 0.86rem;
+  }
+
+  .host-winner-stats {
+    grid-area: stats;
+    gap: 6px;
+    margin-top: 0;
+  }
+
+  .host-winner-stats div {
+    padding: 10px;
+  }
+
+  .host-winner-stats span {
+    font-size: 0.72rem;
+  }
+
+  .host-winner-stats strong {
+    font-size: clamp(2rem, 6vh, 3.2rem);
+  }
+}
+
+@media (max-width: 760px) {
+  .host-header,
+  .host-lists,
+  .host-winner-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .host-list-heading h2 {
+    font-size: clamp(1.9rem, 10vw, 3rem);
+  }
 }
