@@ -48,7 +48,7 @@
       </nav>
 
       <section id="checkinPanel" class="checkin-view is-active">
-        <form id="userForm" class="checkin-form" autocomplete="on">
+        <form id="userForm" class="checkin-form" autocomplete="on" novalidate>
           <label class="checkin-name-field" for="userName">
             <span>Name</span>
             <input id="userName" name="name" type="text" maxlength="50" placeholder="Sam N." autocomplete="given-name" autocapitalize="words" required />
@@ -81,7 +81,7 @@
       </section>
 
       <section id="guestsPanel" class="checkin-view">
-        <form id="guestGuessForm" class="guess-form" autocomplete="off">
+        <form id="guestGuessForm" class="guess-form" autocomplete="off" novalidate>
           <label class="guess-name-field" for="guestGuessName">
             <span>Name</span>
             <select id="guestGuessName" name="name" required>

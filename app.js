@@ -253,10 +253,22 @@ elements.form.addEventListener("submit", async (event) => {
 
   const name = elements.nameInput.value.trim();
   const age = getAgeValue();
+  const hasAge = elements.ageInput.value.trim() !== "";
+
+  if (!name && !hasAge) {
+    setStatus("Enter your name and age before saving.", "warning");
+    elements.nameInput.focus();
+    return;
+  }
 
   if (!name) {
-    setStatus("Enter your name.", "warning");
+    setStatus("Enter your name before saving.", "warning");
     elements.nameInput.focus();
+    return;
+  }
+
+  if (!hasAge) {
+    setStatus("Enter your age before saving.", "warning");
     return;
   }
 

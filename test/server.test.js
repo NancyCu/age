@@ -112,19 +112,40 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(response.status, 201);
 
     response = await fetch(`${baseUrl}/api/users`, {
+      body: JSON.stringify({ age: 33, name: "Nik", sourceToken: "guest-token-alice-0001" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 201);
+    createPayload = await response.json();
+    assert.deepEqual(createPayload.summary.availableGuessNames, ["Alice", "Mia", "Nik", "Nora"]);
+    assert.deepEqual(createPayload.summary.userNames, ["Alice", "Mia", "Nik", "Nora"]);
+
+    response = await fetch(`${baseUrl}/api/users`, {
       body: JSON.stringify({ age: 40, name: "alice", sourceToken: "guest-token-alice-dupe" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
     assert.equal(response.status, 409);
+    const duplicateNamePayload = await response.json();
+    assert.match(duplicateNamePayload.error, /That name is already taken/);
+    assert.deepEqual(duplicateNamePayload.suggestions, ["alice 2", "alice A", "alice Jr"]);
 
     response = await fetch(`${baseUrl}/api/users`, {
-      body: JSON.stringify({ age: 40, name: "DeviceSwap", sourceToken: "guest-token-alice-0001" }),
+      body: JSON.stringify({ age: 22, sourceToken: "guest-token-noname01" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
-    assert.equal(response.status, 409);
-    assert.match((await response.json()).error, /already added an age/);
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error, "First name is required.");
+
+    response = await fetch(`${baseUrl}/api/users`, {
+      body: JSON.stringify({ name: "NoAge", sourceToken: "guest-token-noage001" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error, "Age must be a whole number from 0 to 130.");
 
     response = await fetch(`${baseUrl}/api/users`, {
       body: JSON.stringify({ birthDate: "2999-01-01", name: "Future", sourceToken: "guest-token-future01" }),
@@ -164,26 +185,26 @@ test("user, guess, duplicate, and admin flows work", async () => {
     });
     assert.equal(response.status, 201);
     createPayload = await response.json();
-    assert.deepEqual(createPayload.summary.availableGuessNames, ["Mia", "Nora"]);
+    assert.deepEqual(createPayload.summary.availableGuessNames, ["Mia", "Nik", "Nora"]);
 
     response = await fetch(`${baseUrl}/api/summary`);
     const summary = await response.json();
     assert.deepEqual(summary, {
       ageClassifications: {
-        adults: 1,
+        adults: 2,
         beyondSeniors: 0,
         minors: 1,
         seniors: 1,
         youngAdults: 0
       },
-      availableGuessNames: ["Mia", "Nora"],
+      availableGuessNames: ["Mia", "Nik", "Nora"],
       guessEnabled: true,
       guessCount: 1,
       guessNames: ["Alice"],
       guessTotal: 34,
-      userCount: 3,
-      userNames: ["Alice", "Mia", "Nora"],
-      userTotal: 116
+      userCount: 4,
+      userNames: ["Alice", "Mia", "Nik", "Nora"],
+      userTotal: 149
     });
 
     response = await fetch(`${baseUrl}/api/admin/dashboard`);
@@ -205,7 +226,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(response.status, 200);
 
     const dashboard = await response.json();
-    assert.equal(dashboard.accumulatedAge, 116);
+    assert.equal(dashboard.accumulatedAge, 149);
     assert.equal(dashboard.guessEnabled, true);
     assert.equal(dashboard.guessTotal, 34);
     assert.equal(dashboard.winnerMode, "hidden");
@@ -213,7 +234,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(dashboard.users[0].name, "Nora");
     assert.equal(dashboard.guesses[0].name, "Alice");
     assert.equal(dashboard.nearestGuess.name, "Alice");
-    assert.equal(dashboard.nearestGuess.difference, 82);
+    assert.equal(dashboard.nearestGuess.difference, 115);
 
     response = await fetch(`${baseUrl}/host`);
     assert.equal(response.status, 200);
@@ -366,15 +387,15 @@ test("user, guess, duplicate, and admin flows work", async () => {
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
-    assert.equal(response.status, 400);
-    assert.equal((await response.json()).error, "Check in with your age before making a guess.");
+    assert.equal(response.status, 201);
 
     response = await fetch(`${baseUrl}/api/guesses`, {
       body: JSON.stringify({ estimatedTotalAge: 120, name: "Mia", sourceToken: "guest-token-mia-00001" }),
       headers: { "Content-Type": "application/json" },
       method: "POST"
     });
-    assert.equal(response.status, 201);
+    assert.equal(response.status, 409);
+    assert.equal((await response.json()).error, "That name already submitted a guess. Choose your own name from the list.");
 
     response = await fetch(`${baseUrl}/api/admin/clear`, {
       headers: { Cookie: cookie, "Content-Type": "application/json" },

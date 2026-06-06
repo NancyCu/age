@@ -61,6 +61,48 @@ function normalizeKey(name) {
   return normalizeName(name).toLowerCase();
 }
 
+function buildNameSuggestions(name, entries = []) {
+  const baseName = normalizeName(name) || "Guest";
+  const existingKeys = new Set(entries.map((entry) => normalizeKey(entry.name)));
+  const candidates = [
+    `${baseName} 2`,
+    `${baseName} ${String(baseName).charAt(0).toUpperCase() || "G"}`,
+    `${baseName} Jr`
+  ];
+  const suggestions = [];
+
+  for (const candidate of candidates) {
+    const cleanCandidate = normalizeName(candidate);
+
+    if (!cleanCandidate || existingKeys.has(normalizeKey(cleanCandidate)) || suggestions.includes(cleanCandidate)) {
+      continue;
+    }
+
+    suggestions.push(cleanCandidate);
+  }
+
+  let suffix = 3;
+  while (suggestions.length < 3) {
+    const candidate = `${baseName} ${suffix}`;
+
+    if (!existingKeys.has(normalizeKey(candidate)) && !suggestions.includes(candidate)) {
+      suggestions.push(candidate);
+    }
+
+    suffix += 1;
+  }
+
+  return suggestions;
+}
+
+function formatSuggestionList(suggestions = []) {
+  if (suggestions.length <= 1) {
+    return suggestions[0] || "";
+  }
+
+  return `${suggestions.slice(0, -1).join(", ")}, or ${suggestions[suggestions.length - 1]}`;
+}
+
 function parseNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : NaN;
@@ -675,13 +717,6 @@ async function handleCreateEntry(request, response, type) {
   }
 
   const store = await readStore();
-  const tokenMatchedUser = store.users.find((entry) => entry.sourceTokenHash && entry.sourceTokenHash === validated.sourceTokenHash);
-  const tokenMatchedGuess = store.guesses.find((entry) => entry.sourceTokenHash && entry.sourceTokenHash === validated.sourceTokenHash);
-
-  if (type === "users" && tokenMatchedUser) {
-    sendJson(response, 409, { error: "This device already added an age. Ask the host to reset if you need to fix it." });
-    return;
-  }
 
   if (type === "guesses") {
     if (store.settings?.guessEnabled === false) {
@@ -696,27 +731,23 @@ async function handleCreateEntry(request, response, type) {
       return;
     }
 
-    if (!tokenMatchedUser) {
-      sendJson(response, 400, { error: "Check in with your age before making a guess." });
+    const duplicateGuess = store.guesses.some((entry) => normalizeKey(entry.name) === normalizeKey(validated.name));
+
+    if (duplicateGuess) {
+      sendJson(response, 409, { error: "That name already submitted a guess. Choose your own name from the list." });
       return;
     }
+  } else {
+    const duplicateUser = store.users.some((entry) => normalizeKey(entry.name) === normalizeKey(validated.name));
 
-    if (tokenMatchedGuess) {
-      sendJson(response, 409, { error: "This device already submitted a guess. Ask the host to reset if you need to fix it." });
+    if (duplicateUser) {
+      const suggestions = buildNameSuggestions(validated.name, store.users);
+      sendJson(response, 409, {
+        error: `That name is already taken. Try ${formatSuggestionList(suggestions)}.`,
+        suggestions
+      });
       return;
     }
-
-    if (tokenMatchedUser && normalizeKey(tokenMatchedUser.name) !== normalizeKey(validated.name)) {
-      sendJson(response, 400, { error: "Use the same first name you used when adding your age." });
-      return;
-    }
-  }
-
-  const duplicate = store[type].some((entry) => normalizeKey(entry.name) === normalizeKey(validated.name));
-
-  if (duplicate) {
-    sendJson(response, 409, { error: "Duplicated name. Try again." });
-    return;
   }
 
   store[type].push({
