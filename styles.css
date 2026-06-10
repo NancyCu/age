@@ -4278,6 +4278,7 @@ body.checkin-page {
   padding: max(14px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   background: rgba(21, 16, 12, 0.62);
   backdrop-filter: blur(12px);
+  overscroll-behavior: contain;
 }
 
 .marble-dialog[hidden] {
@@ -4290,14 +4291,16 @@ body.checkin-page {
   width: min(920px, 100%);
   max-height: min(760px, calc(100dvh - 28px));
   overflow: auto;
-  border: 1px solid rgba(255, 255, 255, 0.48);
-  border-radius: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.64);
+  border-radius: 32px;
   background:
     linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(238, 249, 247, 0.94)),
     radial-gradient(circle at 15% 15%, rgba(92, 200, 255, 0.2), transparent 30%),
     radial-gradient(circle at 85% 16%, rgba(199, 146, 234, 0.19), transparent 28%);
-  box-shadow: 0 30px 70px rgba(24, 18, 12, 0.38);
-  padding: clamp(14px, 3vw, 24px);
+  box-shadow:
+    0 30px 70px rgba(24, 18, 12, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  padding: clamp(18px, 3vw, 26px);
 }
 
 .marble-dialog-header {
@@ -4347,10 +4350,15 @@ body.checkin-page {
   position: relative;
   min-height: clamp(360px, 58dvh, 560px);
   overflow: hidden;
-  border-radius: 24px;
+  border: 1px solid rgba(211, 243, 246, 0.72);
+  border-radius: 30px;
   background:
-    linear-gradient(180deg, rgba(187, 230, 238, 0.22), rgba(255, 255, 255, 0.16)),
-    radial-gradient(ellipse at 50% 97%, rgba(33, 21, 15, 0.17), transparent 44%);
+    linear-gradient(180deg, rgba(207, 244, 250, 0.34), rgba(255, 255, 255, 0.2)),
+    radial-gradient(ellipse at 50% 96%, rgba(33, 21, 15, 0.2), transparent 42%),
+    radial-gradient(ellipse at 50% 22%, rgba(255, 255, 255, 0.62), transparent 58%);
+  box-shadow:
+    inset 0 0 28px rgba(255, 255, 255, 0.6),
+    inset 0 -24px 42px rgba(42, 82, 88, 0.1);
 }
 
 .marble-jar-canvas {
@@ -4367,15 +4375,41 @@ body.checkin-page {
   inset: 4% 12% 2%;
   z-index: 2;
   pointer-events: none;
-  border: 4px solid rgba(255, 255, 255, 0.58);
-  border-top-width: 2px;
+  border: 7px solid rgba(255, 255, 255, 0.88);
+  border-top-width: 5px;
   border-radius: 32% 32% 18% 18% / 9% 9% 14% 14%;
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.46), transparent 18% 72%, rgba(255, 255, 255, 0.3)),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 48%, rgba(255, 255, 255, 0.2));
+    linear-gradient(90deg, rgba(255, 255, 255, 0.6), transparent 15% 72%, rgba(255, 255, 255, 0.42)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), transparent 48%, rgba(255, 255, 255, 0.3));
   box-shadow:
-    inset 0 0 26px rgba(255, 255, 255, 0.36),
-    inset 0 -18px 32px rgba(52, 92, 98, 0.12);
+    0 0 18px rgba(255, 255, 255, 0.62),
+    0 18px 34px rgba(39, 81, 88, 0.18),
+    inset 0 0 34px rgba(255, 255, 255, 0.42),
+    inset 0 -22px 36px rgba(52, 92, 98, 0.16);
+}
+
+.marble-jar-glass::before {
+  position: absolute;
+  inset: -18px 12% auto;
+  height: 42px;
+  border: 6px solid rgba(255, 255, 255, 0.82);
+  border-bottom-color: rgba(226, 246, 248, 0.5);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.64), rgba(214, 239, 242, 0.2));
+  box-shadow: 0 8px 18px rgba(39, 81, 88, 0.12);
+  content: "";
+}
+
+.marble-jar-glass::after {
+  position: absolute;
+  top: 13%;
+  bottom: 12%;
+  left: 11%;
+  width: 16%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.36), transparent);
+  filter: blur(0.4px);
+  content: "";
 }
 
 .marble-empty {
@@ -4405,7 +4439,7 @@ body.checkin-page {
 
 .marble-legend-row {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) minmax(36px, auto);
+  grid-template-columns: 42px minmax(0, 1fr) minmax(66px, auto);
   align-items: center;
   gap: 10px;
   min-height: 50px;
@@ -4424,16 +4458,22 @@ body.checkin-page {
   height: 38px;
   border: 2px solid rgba(255, 255, 255, 0.74);
   border-radius: 50%;
-  background: var(--marble-color);
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.9), transparent 22%),
+    radial-gradient(circle at 58% 62%, var(--marble-color), rgba(26, 18, 13, 0.22));
   color: rgba(35, 23, 16, 0.78);
   font-size: 0.8rem;
-  box-shadow: inset -6px -7px 12px rgba(24, 17, 12, 0.16), inset 7px 8px 12px rgba(255, 255, 255, 0.34);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.48);
+  box-shadow:
+    0 5px 12px rgba(31, 24, 18, 0.18),
+    inset -7px -8px 12px rgba(24, 17, 12, 0.18),
+    inset 8px 9px 12px rgba(255, 255, 255, 0.42);
 }
 
 .marble-legend-row strong {
-  min-width: 2ch;
+  min-width: 5ch;
   color: #1e6d72;
-  font-size: 1.35rem;
+  font-size: 1.08rem;
   text-align: right;
 }
 
@@ -4450,6 +4490,58 @@ body.checkin-page {
 
 .marble-shake-button:active {
   transform: translateY(1px) scale(0.99);
+}
+
+.marble-calculator {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(33, 21, 15, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.marble-calculator-display {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid rgba(30, 109, 114, 0.14);
+  border-radius: 10px;
+  background: rgba(236, 250, 247, 0.84);
+  color: #1e3f42;
+  font: 1000 1.2rem / 1.1 "Manrope", sans-serif;
+  padding: 0 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.marble-calculator-keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.marble-calculator-keys button {
+  min-height: 38px;
+  border: 1px solid rgba(37, 63, 68, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #231712;
+  cursor: pointer;
+  font: 1000 1rem / 1 "Manrope", sans-serif;
+  box-shadow: 0 4px 10px rgba(39, 81, 88, 0.08);
+}
+
+.marble-calculator-keys button[data-calc-action="use"] {
+  grid-column: span 3;
+  background: #f6c95d;
+  color: #241915;
+}
+
+.marble-calculator-keys button:active {
+  transform: translateY(1px);
 }
 
 .marble-motion-status {
@@ -4644,12 +4736,43 @@ body.checkin-page {
     grid-template-columns: 1fr;
   }
 
+  .marble-dialog-card {
+    border-radius: 28px;
+    max-height: calc(100dvh - 18px);
+  }
+
   .marble-jar-stage {
-    min-height: min(54dvh, 430px);
+    min-height: min(50dvh, 430px);
   }
 
   .marble-info {
     gap: 10px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) and (max-width: 940px) {
+  .marble-dialog {
+    align-items: start;
+    overflow: auto;
+    padding: 8px;
+  }
+
+  .marble-dialog-card {
+    width: min(430px, calc(100dvw - 16px));
+    max-height: none;
+    min-height: calc(100dvh - 16px);
+  }
+
+  .marble-dialog-header h2 {
+    font-size: 2.65rem;
+  }
+
+  .marble-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .marble-jar-stage {
+    min-height: 430px;
   }
 }
 

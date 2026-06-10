@@ -7,6 +7,8 @@ const elements = {
   guessNameSelect: document.querySelector("#guestGuessName"),
   guessStatus: document.querySelector("#guestGuessStatus"),
   keypad: document.querySelector(".checkin-keypad"),
+  marbleCalculatorDisplay: document.querySelector("#marbleCalculatorDisplay"),
+  marbleCalculatorKeys: document.querySelector(".marble-calculator-keys"),
   marbleCanvas: document.querySelector("#marbleJarCanvas"),
   marbleClose: document.querySelector("#marbleJarClose"),
   marbleDialog: document.querySelector("#marbleJarDialog"),
@@ -54,7 +56,9 @@ const state = {
 
 const marbleJar = {
   bodies: [],
+  calculatorValue: "",
   engine: null,
+  expression: [],
   fallbackFrame: null,
   fallbackMarbles: [],
   isFallback: false,
@@ -67,11 +71,11 @@ const marbleJar = {
 };
 
 const fallbackMarbleGroups = [
-  { color: "#5cc8ff", count: 0, key: "minors", label: "Minors" },
-  { color: "#7bd88f", count: 0, key: "youngAdults", label: "Young Adults" },
-  { color: "#ffd166", count: 0, key: "adults", label: "Adults" },
-  { color: "#f78c6b", count: 0, key: "seniors", label: "Seniors" },
-  { color: "#c792ea", count: 0, key: "beyondSeniors", label: "Beyond Seniors" }
+  { color: "#5cc8ff", count: 0, key: "minors", label: "Minors", rangeLabel: "0-17" },
+  { color: "#7bd88f", count: 0, key: "youngAdults", label: "Young Adults", rangeLabel: "18-25" },
+  { color: "#ffd166", count: 0, key: "adults", label: "Adults", rangeLabel: "26-64" },
+  { color: "#f78c6b", count: 0, key: "seniors", label: "Seniors", rangeLabel: "65-74" },
+  { color: "#c792ea", count: 0, key: "beyondSeniors", label: "Beyond Seniors", rangeLabel: "75+" }
 ];
 
 async function requestJson(url, options = {}) {
@@ -288,6 +292,10 @@ function getMarbleInitial(label) {
   return words.map((word) => word.charAt(0).toUpperCase()).join("").slice(0, 2) || "?";
 }
 
+function getRangeLabel(group = {}) {
+  return String(group.rangeLabel || "").trim() || "Any";
+}
+
 function renderMarbleHint(summary = state.latestSummary || {}) {
   const groups = getMarbleGroups(summary);
   const total = getMarbleTotal(groups);
@@ -295,12 +303,11 @@ function renderMarbleHint(summary = state.latestSummary || {}) {
   elements.marbleEmpty.hidden = total > 0;
   elements.marbleLegend.innerHTML = groups
     .map((group) => {
-      const count = Number(group.count || 0);
       return `
         <div class="marble-legend-row">
           <span class="marble-swatch" style="--marble-color: ${escapeHtml(group.color)}">${escapeHtml(getMarbleInitial(group.label))}</span>
           <span>${escapeHtml(group.label)}</span>
-          <strong>${count}</strong>
+          <strong>${escapeHtml(getRangeLabel(group))}</strong>
         </div>
       `;
     })
@@ -316,15 +323,34 @@ function openMarbleJar() {
   marbleJar.isOpen = true;
   elements.marbleClose.focus();
   renderMarbleHint();
+  renderCalculator();
   startMarbleScene();
   startMarbleMotion();
+  lockMarblePortrait();
 }
 
 function closeMarbleJar() {
   elements.marbleDialog.hidden = true;
   marbleJar.isOpen = false;
   stopMarbleScene();
+  unlockMarblePortrait();
   elements.openMarbleButton.focus();
+}
+
+function lockMarblePortrait() {
+  if (!screen.orientation?.lock) {
+    return;
+  }
+
+  screen.orientation.lock("portrait-primary").catch(() => {
+    // Mobile browsers often allow orientation lock only for installed/fullscreen apps.
+  });
+}
+
+function unlockMarblePortrait() {
+  if (screen.orientation?.unlock) {
+    screen.orientation.unlock();
+  }
 }
 
 function getMarbleCanvasSize() {
@@ -417,21 +443,24 @@ function startMatterScene() {
   marbleJar.runner = runner;
   Matter.World.add(engine.world, buildMatterWalls(width, height));
   Matter.World.add(engine.world, buildMatterMarbles(width, height));
-  Matter.Events.on(render, "afterRender", drawMatterMarbleLabels);
+  Matter.Events.on(engine, "afterUpdate", () => containMatterMarbles(width, height));
+  Matter.Events.on(render, "afterRender", drawMatterMarbles);
   Matter.Render.run(render);
   Matter.Runner.run(runner, engine);
 }
 
 function buildMatterWalls(width, height) {
   const Matter = window.Matter;
-  const wall = 44;
+  const wall = 86;
   const wallStyle = { fillStyle: "rgba(255,255,255,0)", strokeStyle: "rgba(255,255,255,0)" };
 
   return [
-    Matter.Bodies.rectangle(width / 2, height + wall / 2 - 16, width, wall, { isStatic: true, render: wallStyle }),
-    Matter.Bodies.rectangle(width * 0.13, height / 2 + 28, wall, height * 0.88, { angle: -0.08, isStatic: true, render: wallStyle }),
-    Matter.Bodies.rectangle(width * 0.87, height / 2 + 28, wall, height * 0.88, { angle: 0.08, isStatic: true, render: wallStyle }),
-    Matter.Bodies.rectangle(width / 2, -wall / 2 + 8, width, wall, { isStatic: true, render: wallStyle })
+    Matter.Bodies.rectangle(width / 2, height + wall / 2 - 24, width, wall, { isStatic: true, render: wallStyle }),
+    Matter.Bodies.rectangle(width * 0.15, height / 2 + 22, wall, height * 1.08, { angle: -0.04, isStatic: true, render: wallStyle }),
+    Matter.Bodies.rectangle(width * 0.85, height / 2 + 22, wall, height * 1.08, { angle: 0.04, isStatic: true, render: wallStyle }),
+    Matter.Bodies.rectangle(width / 2, -wall / 2 + 8, width, wall, { isStatic: true, render: wallStyle }),
+    Matter.Bodies.rectangle(-wall / 2, height / 2, wall, height * 1.5, { isStatic: true, render: wallStyle }),
+    Matter.Bodies.rectangle(width + wall / 2, height / 2, wall, height * 1.5, { isStatic: true, render: wallStyle })
   ];
 }
 
@@ -454,14 +483,16 @@ function buildMatterMarbles(width, height) {
       const y = height * 0.2 + row * radius * 1.48 + Math.random() * radius * 0.35;
       const body = Matter.Bodies.circle(x, y, radius, {
         friction: 0.04,
-        frictionAir: 0.018,
-        restitution: 0.72,
+        frictionAir: 0.026,
+        restitution: 0.58,
         render: {
-          fillStyle: group.color,
-          lineWidth: 2,
-          strokeStyle: "rgba(255, 255, 255, 0.72)"
+          fillStyle: "rgba(255, 255, 255, 0)",
+          lineWidth: 0,
+          strokeStyle: "rgba(255, 255, 255, 0)",
+          visible: false
         }
       });
+      body.marbleColor = group.color;
       body.marbleLabel = getMarbleInitial(group.label);
       marbles.push(body);
       index += 1;
@@ -472,20 +503,112 @@ function buildMatterMarbles(width, height) {
   return marbles;
 }
 
-function drawMatterMarbleLabels() {
+function getJarBounds(width, height, radius = 0) {
+  return {
+    bottom: height - 27 - radius,
+    left: width * 0.15 + radius,
+    right: width * 0.85 - radius,
+    top: 10 + radius
+  };
+}
+
+function containMatterMarbles(width, height) {
+  if (!window.Matter) {
+    return;
+  }
+
+  const Matter = window.Matter;
+  marbleJar.bodies.forEach((body) => {
+    const radius = body.circleRadius || 18;
+    const bounds = getJarBounds(width, height, radius);
+    const nextPosition = {
+      x: Math.max(bounds.left, Math.min(bounds.right, body.position.x)),
+      y: Math.max(bounds.top, Math.min(bounds.bottom, body.position.y))
+    };
+    const velocity = { x: body.velocity.x, y: body.velocity.y };
+
+    if (nextPosition.x !== body.position.x) {
+      velocity.x *= -0.46;
+    }
+
+    if (nextPosition.y !== body.position.y) {
+      velocity.y *= -0.38;
+    }
+
+    if (nextPosition.x !== body.position.x || nextPosition.y !== body.position.y) {
+      Matter.Body.setPosition(body, nextPosition);
+      Matter.Body.setVelocity(body, velocity);
+    }
+  });
+}
+
+function drawMatterMarbles() {
   if (!marbleJar.render) {
     return;
   }
 
   const context = marbleJar.render.context;
+  marbleJar.bodies.forEach((body) => {
+    drawCanvasMarble(context, body.position.x, body.position.y, body.circleRadius || 18, body.marbleColor || "#ffd166", body.marbleLabel || "");
+  });
+}
+
+function hexToRgb(color) {
+  const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(String(color || ""));
+  if (!match) {
+    return { b: 128, g: 128, r: 128 };
+  }
+
+  return {
+    b: parseInt(match[3], 16),
+    g: parseInt(match[2], 16),
+    r: parseInt(match[1], 16)
+  };
+}
+
+function tintColor(color, amount) {
+  const rgb = hexToRgb(color);
+  const mix = amount >= 0 ? 255 : 0;
+  const weight = Math.abs(amount);
+  const channel = (value) => Math.round(value + (mix - value) * weight);
+  return `rgb(${channel(rgb.r)}, ${channel(rgb.g)}, ${channel(rgb.b)})`;
+}
+
+function drawCanvasMarble(context, x, y, radius, color, label) {
   context.save();
-  context.font = "900 13px Manrope, sans-serif";
+  context.shadowColor = "rgba(18, 12, 8, 0.24)";
+  context.shadowBlur = radius * 0.36;
+  context.shadowOffsetY = radius * 0.14;
+
+  const gradient = context.createRadialGradient(x - radius * 0.38, y - radius * 0.46, radius * 0.08, x + radius * 0.18, y + radius * 0.2, radius * 1.08);
+  gradient.addColorStop(0, "rgba(255, 255, 255, 0.96)");
+  gradient.addColorStop(0.18, tintColor(color, 0.42));
+  gradient.addColorStop(0.58, color);
+  gradient.addColorStop(1, tintColor(color, -0.22));
+
+  context.beginPath();
+  context.arc(x, y, radius, 0, Math.PI * 2);
+  context.fillStyle = gradient;
+  context.fill();
+  context.shadowColor = "transparent";
+
+  context.lineWidth = Math.max(2, radius * 0.08);
+  context.strokeStyle = "rgba(255, 255, 255, 0.86)";
+  context.stroke();
+
+  context.beginPath();
+  context.arc(x - radius * 0.32, y - radius * 0.38, radius * 0.24, 0, Math.PI * 2);
+  context.fillStyle = "rgba(255, 255, 255, 0.58)";
+  context.fill();
+
+  context.font = `1000 ${Math.max(13, Math.round(radius * 0.55))}px Manrope, sans-serif`;
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillStyle = "rgba(35, 23, 16, 0.78)";
-  marbleJar.bodies.forEach((body) => {
-    context.fillText(body.marbleLabel || "", body.position.x, body.position.y + 1);
-  });
+  context.lineWidth = Math.max(2, radius * 0.1);
+  context.strokeStyle = "rgba(255, 255, 255, 0.56)";
+  context.strokeText(label, x + radius * 0.02, y + radius * 0.04);
+  context.fillStyle = "rgba(30, 24, 18, 0.78)";
+  context.fillText(label, x + radius * 0.02, y + radius * 0.04);
   context.restore();
 }
 
@@ -539,18 +662,7 @@ function startFallbackScene() {
         marble.vy *= -0.58;
       }
 
-      context.beginPath();
-      context.arc(marble.x, marble.y, marble.radius, 0, Math.PI * 2);
-      context.fillStyle = marble.color;
-      context.fill();
-      context.lineWidth = 2;
-      context.strokeStyle = "rgba(255, 255, 255, 0.72)";
-      context.stroke();
-      context.fillStyle = "rgba(35, 23, 16, 0.78)";
-      context.font = "900 13px Manrope, sans-serif";
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-      context.fillText(marble.label, marble.x, marble.y + 1);
+      drawCanvasMarble(context, marble.x, marble.y, marble.radius, marble.color, marble.label);
     });
     marbleJar.fallbackFrame = window.requestAnimationFrame(tick);
   }
@@ -573,8 +685,8 @@ function shakeMarbleJar() {
 
   marbleJar.bodies.forEach((body) => {
     window.Matter.Body.applyForce(body, body.position, {
-      x: (Math.random() - 0.5) * 0.035,
-      y: -0.04 - Math.random() * 0.025
+      x: (Math.random() - 0.5) * 0.022,
+      y: -0.026 - Math.random() * 0.017
     });
   });
 }
@@ -598,6 +710,68 @@ function pushMarbles(deltaX, deltaY) {
       y: deltaY * 0.0008
     });
   });
+}
+
+function getCalculatorTotal() {
+  return [...marbleJar.expression, marbleJar.calculatorValue]
+    .filter((value) => value !== "")
+    .reduce((sum, value) => sum + Number(value || 0), 0);
+}
+
+function renderCalculator() {
+  const parts = [...marbleJar.expression];
+  if (marbleJar.calculatorValue || !parts.length) {
+    parts.push(marbleJar.calculatorValue || "0");
+  }
+
+  const expressionText = parts.join(" + ");
+  const total = getCalculatorTotal();
+  elements.marbleCalculatorDisplay.textContent = parts.length > 1 ? `${expressionText} = ${total}` : expressionText;
+}
+
+function clearCalculator() {
+  marbleJar.calculatorValue = "";
+  marbleJar.expression = [];
+  renderCalculator();
+}
+
+function handleCalculatorAction(action) {
+  if (action === "clear") {
+    clearCalculator();
+    return;
+  }
+
+  if (action === "backspace") {
+    marbleJar.calculatorValue = marbleJar.calculatorValue.slice(0, -1);
+    renderCalculator();
+    return;
+  }
+
+  if (action === "plus") {
+    if (marbleJar.calculatorValue) {
+      marbleJar.expression.push(marbleJar.calculatorValue);
+      marbleJar.calculatorValue = "";
+    }
+    renderCalculator();
+    return;
+  }
+
+  if (action === "use") {
+    const total = getCalculatorTotal();
+    if (total > 0) {
+      elements.guessInput.value = String(total);
+      setGuessStatus("");
+    }
+  }
+}
+
+function appendCalculatorDigit(digit) {
+  if (marbleJar.calculatorValue.length >= 6) {
+    return;
+  }
+
+  marbleJar.calculatorValue = `${marbleJar.calculatorValue}${digit}`.replace(/^0+(?=\d)/, "");
+  renderCalculator();
 }
 
 function startMarbleMotion() {
@@ -636,8 +810,14 @@ function handleDeviceTilt(event) {
 
   const gamma = Number(event.gamma || 0);
   const beta = Number(event.beta || 0);
-  marbleJar.engine.gravity.x = Math.max(-0.8, Math.min(0.8, gamma / 45));
-  marbleJar.engine.gravity.y = Math.max(0.35, Math.min(1.25, 0.85 + beta / 120));
+  if (Math.abs(gamma) > 58) {
+    marbleJar.engine.gravity.x = 0;
+    marbleJar.engine.gravity.y = 0.9;
+    return;
+  }
+
+  marbleJar.engine.gravity.x = Math.max(-0.45, Math.min(0.45, gamma / 70));
+  marbleJar.engine.gravity.y = Math.max(0.55, Math.min(1.1, 0.9 + beta / 180));
 }
 
 elements.keypad.addEventListener("click", (event) => {
@@ -680,6 +860,23 @@ elements.successDialog.addEventListener("click", (event) => {
 elements.openMarbleButton.addEventListener("click", openMarbleJar);
 elements.marbleClose.addEventListener("click", closeMarbleJar);
 elements.shakeMarbleButton.addEventListener("click", shakeMarbleJar);
+
+elements.marbleCalculatorKeys.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+
+  if (!button) {
+    return;
+  }
+
+  if (button.dataset.calcKey) {
+    appendCalculatorDigit(button.dataset.calcKey);
+    return;
+  }
+
+  if (button.dataset.calcAction) {
+    handleCalculatorAction(button.dataset.calcAction);
+  }
+});
 
 elements.marbleDialog.addEventListener("click", (event) => {
   if (event.target === elements.marbleDialog) {

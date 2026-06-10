@@ -36,11 +36,11 @@ function birthDateYearsAgo(yearsAgo) {
 
 function expectedAgeClassificationGroups(counts = {}) {
   return [
-    { color: "#5cc8ff", count: counts.minors || 0, key: "minors", label: "Minors" },
-    { color: "#7bd88f", count: counts.youngAdults || 0, key: "youngAdults", label: "Young Adults" },
-    { color: "#ffd166", count: counts.adults || 0, key: "adults", label: "Adults" },
-    { color: "#f78c6b", count: counts.seniors || 0, key: "seniors", label: "Seniors" },
-    { color: "#c792ea", count: counts.beyondSeniors || 0, key: "beyondSeniors", label: "Beyond Seniors" }
+    { color: "#5cc8ff", count: counts.minors || 0, key: "minors", label: "Minors", rangeLabel: "0-17" },
+    { color: "#7bd88f", count: counts.youngAdults || 0, key: "youngAdults", label: "Young Adults", rangeLabel: "18-25" },
+    { color: "#ffd166", count: counts.adults || 0, key: "adults", label: "Adults", rangeLabel: "26-64" },
+    { color: "#f78c6b", count: counts.seniors || 0, key: "seniors", label: "Seniors", rangeLabel: "65-74" },
+    { color: "#c792ea", count: counts.beyondSeniors || 0, key: "beyondSeniors", label: "Beyond Seniors", rangeLabel: "75+" }
   ];
 }
 

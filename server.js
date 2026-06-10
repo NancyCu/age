@@ -47,11 +47,11 @@ const defaultStore = {
 
 // App-specific guessing buckets; public age-category definitions vary by source.
 const ageClassificationRanges = [
-  { key: "minors", label: "Minors", color: "#5cc8ff", min: 0, max: 17 },
-  { key: "youngAdults", label: "Young Adults", color: "#7bd88f", min: 18, max: 25 },
-  { key: "adults", label: "Adults", color: "#ffd166", min: 26, max: 64 },
-  { key: "seniors", label: "Seniors", color: "#f78c6b", min: 65, max: 74 },
-  { key: "beyondSeniors", label: "Beyond Seniors", color: "#c792ea", min: 75, max: Infinity }
+  { key: "minors", label: "Minors", color: "#5cc8ff", min: 0, max: 17, rangeLabel: "0-17" },
+  { key: "youngAdults", label: "Young Adults", color: "#7bd88f", min: 18, max: 25, rangeLabel: "18-25" },
+  { key: "adults", label: "Adults", color: "#ffd166", min: 26, max: 64, rangeLabel: "26-64" },
+  { key: "seniors", label: "Seniors", color: "#f78c6b", min: 65, max: 74, rangeLabel: "65-74" },
+  { key: "beyondSeniors", label: "Beyond Seniors", color: "#c792ea", min: 75, max: Infinity, rangeLabel: "75+" }
 ];
 
 function normalizeName(name) {
@@ -560,7 +560,8 @@ function getAgeClassificationGroups(store) {
     color: range.color,
     count: counts[range.key] || 0,
     key: range.key,
-    label: range.label
+    label: range.label,
+    rangeLabel: range.rangeLabel
   }));
 }
 

@@ -145,10 +145,29 @@
           <p id="marbleJarEmpty" class="marble-empty">No marbles yet.</p>
         </div>
 
-        <section class="marble-info" aria-label="Marble color counts">
+        <section class="marble-info" aria-label="Marble age ranges and calculator">
           <div id="marbleLegend" class="marble-legend"></div>
           <button id="shakeMarbleJarButton" class="marble-shake-button" type="button">Shake Jar</button>
-          <p id="marbleMotionStatus" class="marble-motion-status" aria-live="polite">Drag or shake your phone to move the marbles.</p>
+          <div class="marble-calculator" aria-label="Mini calculator">
+            <div id="marbleCalculatorDisplay" class="marble-calculator-display" aria-live="polite">0</div>
+            <div class="marble-calculator-keys">
+              <button type="button" data-calc-key="7">7</button>
+              <button type="button" data-calc-key="8">8</button>
+              <button type="button" data-calc-key="9">9</button>
+              <button type="button" data-calc-action="clear">C</button>
+              <button type="button" data-calc-key="4">4</button>
+              <button type="button" data-calc-key="5">5</button>
+              <button type="button" data-calc-key="6">6</button>
+              <button type="button" data-calc-action="backspace">⌫</button>
+              <button type="button" data-calc-key="1">1</button>
+              <button type="button" data-calc-key="2">2</button>
+              <button type="button" data-calc-key="3">3</button>
+              <button type="button" data-calc-action="plus">+</button>
+              <button type="button" data-calc-key="0">0</button>
+              <button type="button" data-calc-action="use">Use</button>
+            </div>
+          </div>
+          <p id="marbleMotionStatus" class="marble-motion-status" aria-live="polite">Drag or tap Shake to move the marbles.</p>
         </section>
       </div>
     </div>
