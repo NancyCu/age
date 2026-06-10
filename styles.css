@@ -907,6 +907,102 @@ h2 {
   color: var(--muted);
 }
 
+.host-editor-panel {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.host-participant-list {
+  display: grid;
+  gap: 10px;
+}
+
+.host-participant-list.is-empty {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.host-participant-row {
+  display: grid;
+  grid-template-columns: 42px minmax(130px, 1.1fr) 58px minmax(96px, 0.7fr) auto;
+  align-items: end;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(128, 88, 35, 0.13);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.host-edit-field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.host-edit-field span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.host-edit-field input {
+  width: 100%;
+  min-height: 42px;
+  min-width: 0;
+  border: 1px solid rgba(42, 28, 19, 0.18);
+  border-radius: 8px;
+  background: #fffdf8;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.host-age-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: rgba(244, 179, 64, 0.16);
+  color: var(--ink);
+  font-weight: 1000;
+}
+
+.host-row-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(84px, auto));
+  gap: 8px;
+}
+
+.host-save-person-button,
+.host-delete-person-button {
+  min-height: 42px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+}
+
+.host-editor-status {
+  min-height: 20px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.host-editor-status[data-tone="success"] {
+  color: var(--teal-dark);
+}
+
+.host-editor-status[data-tone="warning"] {
+  color: var(--coral-dark);
+}
+
 .inline-host-link {
   color: var(--teal-dark);
   font-weight: 900;
@@ -4040,6 +4136,7 @@ body.checkin-page {
   grid-template-areas:
     "name"
     "total"
+    "hint"
     "keypad"
     "save"
     "status";
@@ -4060,6 +4157,27 @@ body.checkin-page {
 
 .guess-keypad {
   grid-area: keypad;
+}
+
+.marble-hint-button {
+  grid-area: hint;
+  justify-self: center;
+  width: min(760px, 100%);
+  min-height: clamp(44px, 6.8dvh, 62px);
+  border: 2px solid rgba(37, 63, 68, 0.18);
+  border-radius: clamp(14px, 3vw, 22px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(229, 248, 243, 0.84)),
+    radial-gradient(circle at 22% 35%, rgba(92, 200, 255, 0.24), transparent 28%),
+    radial-gradient(circle at 78% 45%, rgba(247, 140, 107, 0.26), transparent 26%);
+  color: #1f3e42;
+  cursor: pointer;
+  font: 1000 clamp(1.25rem, 4.4dvh, 2.2rem) / 1 "Baloo 2", "Manrope", sans-serif;
+  box-shadow: 0 9px 18px rgba(58, 86, 88, 0.12);
+}
+
+.marble-hint-button:active {
+  transform: translateY(1px) scale(0.99);
 }
 
 .guest-save-button {
@@ -4151,6 +4269,197 @@ body.checkin-page {
   color: rgba(37, 63, 68, 0.58);
 }
 
+.marble-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: max(14px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  background: rgba(21, 16, 12, 0.62);
+  backdrop-filter: blur(12px);
+}
+
+.marble-dialog[hidden] {
+  display: none;
+}
+
+.marble-dialog-card {
+  display: grid;
+  gap: clamp(12px, 2.2dvh, 18px);
+  width: min(920px, 100%);
+  max-height: min(760px, calc(100dvh - 28px));
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(238, 249, 247, 0.94)),
+    radial-gradient(circle at 15% 15%, rgba(92, 200, 255, 0.2), transparent 30%),
+    radial-gradient(circle at 85% 16%, rgba(199, 146, 234, 0.19), transparent 28%);
+  box-shadow: 0 30px 70px rgba(24, 18, 12, 0.38);
+  padding: clamp(14px, 3vw, 24px);
+}
+
+.marble-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.marble-kicker {
+  margin: 0;
+  color: #1e6d72;
+  font-size: 0.78rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.marble-dialog-header h2 {
+  margin: 0;
+  color: #21150f;
+  font: 1000 clamp(2.1rem, 8vw, 4.2rem) / 0.9 "Baloo 2", "Manrope", sans-serif;
+}
+
+.marble-close-button {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(33, 21, 15, 0.16);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.82);
+  color: #21150f;
+  cursor: pointer;
+  font: 900 2rem / 1 "Manrope", sans-serif;
+}
+
+.marble-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(220px, 0.52fr);
+  gap: clamp(14px, 2.8vw, 22px);
+  align-items: stretch;
+}
+
+.marble-jar-stage {
+  position: relative;
+  min-height: clamp(360px, 58dvh, 560px);
+  overflow: hidden;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(187, 230, 238, 0.22), rgba(255, 255, 255, 0.16)),
+    radial-gradient(ellipse at 50% 97%, rgba(33, 21, 15, 0.17), transparent 44%);
+}
+
+.marble-jar-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.marble-jar-glass {
+  position: absolute;
+  inset: 4% 12% 2%;
+  z-index: 2;
+  pointer-events: none;
+  border: 4px solid rgba(255, 255, 255, 0.58);
+  border-top-width: 2px;
+  border-radius: 32% 32% 18% 18% / 9% 9% 14% 14%;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.46), transparent 18% 72%, rgba(255, 255, 255, 0.3)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 48%, rgba(255, 255, 255, 0.2));
+  box-shadow:
+    inset 0 0 26px rgba(255, 255, 255, 0.36),
+    inset 0 -18px 32px rgba(52, 92, 98, 0.12);
+}
+
+.marble-empty {
+  position: absolute;
+  inset: auto 0 42%;
+  z-index: 3;
+  margin: 0;
+  color: rgba(35, 23, 16, 0.58);
+  font: 1000 clamp(1.15rem, 5vw, 2rem) / 1 "Baloo 2", "Manrope", sans-serif;
+  text-align: center;
+}
+
+.marble-empty[hidden] {
+  display: none;
+}
+
+.marble-info {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.marble-legend {
+  display: grid;
+  gap: 8px;
+}
+
+.marble-legend-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) minmax(36px, auto);
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 8px 10px;
+  border: 1px solid rgba(33, 21, 15, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #241915;
+  font-weight: 1000;
+}
+
+.marble-swatch {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 2px solid rgba(255, 255, 255, 0.74);
+  border-radius: 50%;
+  background: var(--marble-color);
+  color: rgba(35, 23, 16, 0.78);
+  font-size: 0.8rem;
+  box-shadow: inset -6px -7px 12px rgba(24, 17, 12, 0.16), inset 7px 8px 12px rgba(255, 255, 255, 0.34);
+}
+
+.marble-legend-row strong {
+  min-width: 2ch;
+  color: #1e6d72;
+  font-size: 1.35rem;
+  text-align: right;
+}
+
+.marble-shake-button {
+  min-height: 54px;
+  border: 0;
+  border-radius: 14px;
+  background: #1e6d72;
+  color: #fffdfa;
+  cursor: pointer;
+  font: 1000 1.35rem / 1 "Baloo 2", "Manrope", sans-serif;
+  box-shadow: 0 12px 22px rgba(30, 109, 114, 0.22);
+}
+
+.marble-shake-button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.marble-motion-status {
+  margin: 0;
+  color: rgba(35, 23, 16, 0.62);
+  font-size: 0.92rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+
 @media (min-width: 860px) {
   .checkin-page .checkin-shell {
     padding-block: 14px 18px;
@@ -4228,6 +4537,11 @@ body.checkin-page {
     min-height: 60px;
     font-size: 2.35rem;
   }
+
+  .marble-hint-button {
+    min-height: 54px;
+    font-size: 1.95rem;
+  }
 }
 
 @media (orientation: landscape) and (max-height: 760px) {
@@ -4278,6 +4592,7 @@ body.checkin-page {
     grid-template-areas:
       "name keypad"
       "total keypad"
+      "hint keypad"
       "save keypad"
       "status keypad";
   }
@@ -4318,6 +4633,24 @@ body.checkin-page {
     font-size: clamp(1.45rem, 5.2dvh, 2.2rem);
   }
 
+  .marble-hint-button {
+    min-height: clamp(38px, 8dvh, 52px);
+    font-size: clamp(1.25rem, 4.6dvh, 1.85rem);
+  }
+}
+
+@media (max-width: 720px) {
+  .marble-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .marble-jar-stage {
+    min-height: min(54dvh, 430px);
+  }
+
+  .marble-info {
+    gap: 10px;
+  }
 }
 
 /* Host party-screen layout: list-first, compact controls, reveal data at bottom. */
@@ -4352,6 +4685,7 @@ body.checkin-page {
     "lists"
     "controls"
     "qr"
+    "editor"
     "winner"
     "updated";
   gap: 10px;
@@ -4416,6 +4750,16 @@ body.checkin-page {
 
 .host-controls {
   grid-area: controls;
+}
+
+.host-editor-panel {
+  grid-area: editor;
+  min-height: 0;
+  padding: clamp(14px, 1.7vw, 22px);
+}
+
+.host-editor-panel .host-list-heading h2 {
+  font-size: clamp(1.55rem, 2.6vw, 2.35rem);
 }
 
 .host-controls h2 {
@@ -4521,6 +4865,7 @@ body.checkin-page {
     grid-template-areas:
       "lists controls"
       "lists qr"
+      "editor editor"
       "winner winner"
       "updated updated";
     min-height: calc(100svh - 92px);
@@ -4559,6 +4904,7 @@ body.checkin-page {
     grid-template-rows: minmax(0, 1fr) clamp(178px, 26vh, 210px) min-content;
     grid-template-areas:
       "lists controls"
+      "editor controls"
       "winner qr"
       "updated updated";
     min-height: calc(100svh - 84px);
@@ -4599,6 +4945,20 @@ body.checkin-page {
   .host-control-grid .ghost-button,
   .host-control-grid .danger-button {
     min-height: clamp(44px, 8vh, 58px);
+  }
+
+  .host-participant-row {
+    grid-template-columns: 38px minmax(118px, 1fr) 52px minmax(80px, 0.7fr) auto;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .host-edit-field input,
+  .host-age-pill,
+  .host-save-person-button,
+  .host-delete-person-button {
+    min-height: 36px;
+    font-size: 0.82rem;
   }
 
   .host-winner-card {
@@ -4653,5 +5013,23 @@ body.checkin-page {
 
   .host-list-heading h2 {
     font-size: clamp(1.9rem, 10vw, 3rem);
+  }
+
+  .host-participant-row {
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .host-participant-row .host-person-avatar {
+    align-self: center;
+  }
+
+  .host-age-pill,
+  .host-row-actions {
+    grid-column: 2;
+  }
+
+  .host-row-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -21,10 +21,12 @@ const hostElements = {
   maskWinnerButton: document.querySelector("#hostMaskWinnerButton"),
   needGuessNames: document.querySelector("#hostNeedGuessNames"),
   password: document.querySelector("#hostPassword"),
+  participantRows: document.querySelector("#hostParticipantRows"),
   posterGuestLink: document.querySelector("#hostPosterGuestLink"),
   posterQrImage: document.querySelector("#hostPosterQrImage"),
   printQrButton: document.querySelector("#hostPrintQrButton"),
   resetButton: document.querySelector("#hostResetButton"),
+  editorStatus: document.querySelector("#hostEditorStatus"),
   waitingBadge: document.querySelector("#hostWaitingBadge"),
   winnerDifference: document.querySelector("#hostWinnerDifference"),
   winnerGuess: document.querySelector("#hostWinnerGuess"),
@@ -136,6 +138,19 @@ function normalizeHostDisplayName(name) {
   return String(name || "Guest").trim() || "Guest";
 }
 
+function normalizeHostKey(name) {
+  return String(name || "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function setHostEditorStatus(message, tone = "neutral") {
+  if (!hostElements.editorStatus) {
+    return;
+  }
+
+  hostElements.editorStatus.textContent = message;
+  hostElements.editorStatus.dataset.tone = tone;
+}
+
 function renderHostWinner(dashboard) {
   const nearestGuess = dashboard.nearestGuess || null;
   const winDataVisible = hostState.winnerMode === "real";
@@ -170,7 +185,57 @@ function renderHostWinner(dashboard) {
   hostElements.winnerMeta.textContent = "Winner data is showing. Guessed totals are visible for the reveal.";
 }
 
-function renderHostDashboard(payload) {
+function renderHostParticipantEditor(dashboard, options = {}) {
+  if (!hostElements.participantRows) {
+    return;
+  }
+
+  if (!options.forceEditor && hostElements.participantRows.contains(document.activeElement)) {
+    return;
+  }
+
+  const users = Array.isArray(dashboard.users) ? dashboard.users : [];
+  const guessesByName = new Map(
+    (Array.isArray(dashboard.guesses) ? dashboard.guesses : []).map((guess) => [normalizeHostKey(guess.name), guess])
+  );
+
+  if (!users.length) {
+    hostElements.participantRows.textContent = "No people checked in yet.";
+    hostElements.participantRows.classList.add("is-empty");
+    return;
+  }
+
+  hostElements.participantRows.classList.remove("is-empty");
+  hostElements.participantRows.innerHTML = users
+    .map((user) => {
+      const name = normalizeHostDisplayName(user.name);
+      const guess = guessesByName.get(normalizeHostKey(user.name)) || null;
+      const guessValue = guess && Number.isFinite(Number(guess.estimatedTotalAge)) ? String(Number(guess.estimatedTotalAge)) : "";
+      const ageValue = Number.isFinite(Number(user.age)) ? Number(user.age) : "-";
+
+      return `
+        <form class="host-participant-row" data-participant-id="${escapeHostHtml(user.id || "")}">
+          <span class="host-person-avatar" aria-hidden="true">${escapeHostHtml(name.charAt(0) || "?")}</span>
+          <label class="host-edit-field">
+            <span>Name</span>
+            <input name="name" type="text" maxlength="50" value="${escapeHostHtml(name)}" required />
+          </label>
+          <span class="host-age-pill" aria-label="${escapeHostHtml(name)} age">${escapeHostHtml(ageValue)}</span>
+          <label class="host-edit-field">
+            <span>Guess</span>
+            <input name="estimatedTotalAge" type="text" inputmode="numeric" pattern="[0-9]*" value="${escapeHostHtml(guessValue)}" />
+          </label>
+          <div class="host-row-actions">
+            <button class="ghost-button host-save-person-button" type="submit">Save</button>
+            <button class="danger-button host-delete-person-button" type="button" data-delete-participant>Delete</button>
+          </div>
+        </form>
+      `;
+    })
+    .join("");
+}
+
+function renderHostDashboard(payload, options = {}) {
   const dashboard = payload.dashboard || {};
   const summary = payload.summary || {};
   const previousGuessEnabled = hostState.guessEnabled;
@@ -193,6 +258,7 @@ function renderHostDashboard(payload) {
   renderHostWinner(dashboard);
   renderHostWaitingList(hostElements.needGuessNames, summary.availableGuessNames || [], "Everyone has submitted a guess.");
   renderHostGuessList(hostElements.guessNames, dashboard.guesses || [], "No guesses submitted yet.");
+  renderHostParticipantEditor(dashboard, options);
 
   const updatedAt = payload.updatedAt ? new Date(payload.updatedAt) : new Date();
   const backendLabel = payload.backend === "firebase" ? "Firebase" : "local data";
@@ -291,6 +357,55 @@ async function setHostWinnerMode(winnerMode) {
   });
 }
 
+async function saveHostParticipant(form) {
+  const participantId = form.dataset.participantId || "";
+  const formData = new FormData(form);
+  const name = String(formData.get("name") || "").trim();
+  const estimatedTotalAge = String(formData.get("estimatedTotalAge") || "").trim();
+
+  setHostEditorStatus("Saving...");
+
+  const result = await hostRequestJson(`/api/admin/participants/${encodeURIComponent(participantId)}`, {
+    body: JSON.stringify({ estimatedTotalAge, name }),
+    method: "POST"
+  });
+
+  if (document.activeElement && form.contains(document.activeElement)) {
+    document.activeElement.blur();
+  }
+
+  renderHostDashboard({
+    dashboard: result.dashboard,
+    summary: result.summary,
+    updatedAt: Date.now()
+  }, { forceEditor: true });
+  setHostEditorStatus("Saved.", "success");
+}
+
+async function deleteHostParticipant(form) {
+  const participantId = form.dataset.participantId || "";
+  const formData = new FormData(form);
+  const name = normalizeHostDisplayName(formData.get("name"));
+  const confirmed = window.confirm(`Delete ${name} and their guess completely?`);
+
+  if (!confirmed) {
+    return;
+  }
+
+  setHostEditorStatus("Deleting...");
+
+  const result = await hostRequestJson(`/api/admin/participants/${encodeURIComponent(participantId)}`, {
+    method: "DELETE"
+  });
+
+  renderHostDashboard({
+    dashboard: result.dashboard,
+    summary: result.summary,
+    updatedAt: Date.now()
+  }, { forceEditor: true });
+  setHostEditorStatus(`${name} deleted.`, "success");
+}
+
 hostElements.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
@@ -304,6 +419,41 @@ hostElements.loginForm.addEventListener("submit", async (event) => {
     await refreshHostDashboard();
   } catch (error) {
     alert(error.message);
+  }
+});
+
+hostElements.participantRows.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.target.closest(".host-participant-row");
+
+  if (!form) {
+    return;
+  }
+
+  try {
+    await saveHostParticipant(form);
+  } catch (error) {
+    setHostEditorStatus(error.message, "warning");
+  }
+});
+
+hostElements.participantRows.addEventListener("click", async (event) => {
+  const deleteButton = event.target.closest("[data-delete-participant]");
+
+  if (!deleteButton) {
+    return;
+  }
+
+  const form = deleteButton.closest(".host-participant-row");
+
+  if (!form) {
+    return;
+  }
+
+  try {
+    await deleteHostParticipant(form);
+  } catch (error) {
+    setHostEditorStatus(error.message, "warning");
   }
 });
 

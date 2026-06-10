@@ -45,12 +45,13 @@ const defaultStore = {
   guesses: []
 };
 
+// App-specific guessing buckets; public age-category definitions vary by source.
 const ageClassificationRanges = [
-  { key: "minors", label: "Minors", min: 0, max: 17 },
-  { key: "youngAdults", label: "Young Adults", min: 18, max: 25 },
-  { key: "adults", label: "Adults", min: 26, max: 64 },
-  { key: "seniors", label: "Seniors", min: 65, max: 74 },
-  { key: "beyondSeniors", label: "Beyond Seniors", min: 75, max: Infinity }
+  { key: "minors", label: "Minors", color: "#5cc8ff", min: 0, max: 17 },
+  { key: "youngAdults", label: "Young Adults", color: "#7bd88f", min: 18, max: 25 },
+  { key: "adults", label: "Adults", color: "#ffd166", min: 26, max: 64 },
+  { key: "seniors", label: "Seniors", color: "#f78c6b", min: 65, max: 74 },
+  { key: "beyondSeniors", label: "Beyond Seniors", color: "#c792ea", min: 75, max: Infinity }
 ];
 
 function normalizeName(name) {
@@ -106,6 +107,28 @@ function formatSuggestionList(suggestions = []) {
 function parseNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : NaN;
+}
+
+function createEntryId() {
+  return `entry_${crypto.randomUUID()}`;
+}
+
+function createLegacyEntryId(type, entry, index) {
+  return `legacy_${crypto
+    .createHash("sha256")
+    .update([
+      type,
+      entry?.createdAt || "",
+      entry?.sourceTokenHash || "",
+      index
+    ].join("|"))
+    .digest("base64url")
+    .slice(0, 32)}`;
+}
+
+function normalizeEntryId(value) {
+  const id = String(value || "").trim();
+  return /^[a-zA-Z0-9_-]{8,128}$/.test(id) ? id : "";
 }
 
 function createHash(value) {
@@ -229,6 +252,18 @@ function buildSettings(settings = {}) {
   return {
     guessEnabled: settings.guessEnabled !== false,
     winnerMode: normalizeWinnerMode(settings)
+  };
+}
+
+function normalizeEntry(entry = {}, type, index) {
+  const valueKey = type === "users" ? "age" : "estimatedTotalAge";
+  const cleanName = normalizeName(entry.name);
+  const cleanValue = parseNumber(entry[valueKey]);
+  return {
+    ...entry,
+    id: normalizeEntryId(entry.id) || createLegacyEntryId(type, entry, index),
+    name: cleanName,
+    ...(Number.isFinite(cleanValue) ? { [valueKey]: cleanValue } : {})
   };
 }
 
@@ -397,8 +432,8 @@ async function getStoreAdapter() {
 function normalizeStore(parsed = {}) {
   return {
     settings: buildSettings(parsed.settings),
-    users: Array.isArray(parsed.users) ? parsed.users : [],
-    guesses: Array.isArray(parsed.guesses) ? parsed.guesses : []
+    users: Array.isArray(parsed.users) ? parsed.users.map((entry, index) => normalizeEntry(entry, "users", index)) : [],
+    guesses: Array.isArray(parsed.guesses) ? parsed.guesses.map((entry, index) => normalizeEntry(entry, "guesses", index)) : []
   };
 }
 
@@ -518,6 +553,17 @@ function getAgeClassificationCounts(store) {
   return counts;
 }
 
+function getAgeClassificationGroups(store) {
+  const counts = getAgeClassificationCounts(store);
+
+  return ageClassificationRanges.map((range) => ({
+    color: range.color,
+    count: counts[range.key] || 0,
+    key: range.key,
+    label: range.label
+  }));
+}
+
 function sortDescending(entries, valueKey) {
   return [...entries].sort((left, right) => {
     const difference = Number(right[valueKey]) - Number(left[valueKey]);
@@ -631,6 +677,7 @@ function buildPublicSummary(store) {
 
   return {
     ageClassifications: getAgeClassificationCounts(store),
+    ageClassificationGroups: getAgeClassificationGroups(store),
     ...getTotals(store),
     guessEnabled: store.settings?.guessEnabled !== false,
     guessCount: store.guesses.length,
@@ -655,6 +702,24 @@ function buildAdminDashboard(store) {
     users: sortDescending(store.users, "age"),
     winnerMode
   };
+}
+
+function findEntryIndexById(entries, id) {
+  const cleanId = normalizeEntryId(id);
+  return entries.findIndex((entry) => entry.id === cleanId);
+}
+
+function findGuessIndexForName(store, name) {
+  const key = normalizeKey(name);
+  return store.guesses.findIndex((entry) => normalizeKey(entry.name) === key);
+}
+
+function sendAdminStorePayload(response, store) {
+  sendJson(response, 200, {
+    dashboard: buildAdminDashboard(store),
+    ok: true,
+    summary: buildPublicSummary(store)
+  });
 }
 
 function writeSse(response, payload) {
@@ -753,6 +818,7 @@ async function handleCreateEntry(request, response, type) {
   store[type].push({
     ...(validated.birthDate ? { birthDate: validated.birthDate } : {}),
     createdAt: Date.now(),
+    id: createEntryId(),
     [valueKey]: validated.value,
     name: validated.name,
     sourceTokenHash: validated.sourceTokenHash
@@ -1242,6 +1308,162 @@ async function handleAdminDashboard(request, response) {
   sendJson(response, 200, buildAdminDashboard(store));
 }
 
+async function handleAdminUpdateParticipant(request, response, participantId) {
+  if (!hasAdminSession(request)) {
+    sendJson(response, 401, { error: "Admin login required." });
+    return;
+  }
+
+  const body = await readRequestBody(request);
+  if (!body || typeof body !== "object") {
+    sendJson(response, 400, { error: "Request body must be valid JSON." });
+    return;
+  }
+
+  const store = await readStore();
+  const userIndex = findEntryIndexById(store.users, participantId);
+
+  if (userIndex < 0) {
+    sendJson(response, 404, { error: "Participant not found." });
+    return;
+  }
+
+  const currentUser = store.users[userIndex];
+  const requestedName = Object.prototype.hasOwnProperty.call(body, "name") ? body.name : currentUser.name;
+  const cleanName = normalizeName(requestedName);
+
+  if (!cleanName) {
+    sendJson(response, 400, { error: "First name is required." });
+    return;
+  }
+
+  const duplicateUser = store.users.some((entry, index) => index !== userIndex && normalizeKey(entry.name) === normalizeKey(cleanName));
+
+  if (duplicateUser) {
+    const otherUsers = store.users.filter((_, index) => index !== userIndex);
+    const suggestions = buildNameSuggestions(cleanName, otherUsers);
+    sendJson(response, 409, {
+      error: `That name is already taken. Enter another name or try ${formatSuggestionList(suggestions)}.`,
+      suggestions
+    });
+    return;
+  }
+
+  let nextAge = Number(currentUser.age);
+  const hasAgeUpdate = Object.prototype.hasOwnProperty.call(body, "age");
+  if (hasAgeUpdate) {
+    const validatedAge = validateNameAndValue(cleanName, body.age, "Age", 130);
+
+    if (validatedAge.error) {
+      sendJson(response, 400, { error: validatedAge.error });
+      return;
+    }
+
+    nextAge = validatedAge.value;
+  }
+
+  const now = Date.now();
+  const existingGuessIndex = findGuessIndexForName(store, currentUser.name);
+  const hasGuessUpdate = Object.prototype.hasOwnProperty.call(body, "estimatedTotalAge");
+  let nextGuessValue = null;
+  let shouldRemoveGuess = false;
+
+  if (hasGuessUpdate) {
+    const rawGuessValue = body.estimatedTotalAge;
+    shouldRemoveGuess = rawGuessValue === null || String(rawGuessValue).trim() === "";
+
+    if (!shouldRemoveGuess) {
+      const validatedGuess = validateNameAndValue(cleanName, rawGuessValue, "Estimated total age", 130000);
+
+      if (validatedGuess.error) {
+        sendJson(response, 400, { error: validatedGuess.error });
+        return;
+      }
+
+      nextGuessValue = validatedGuess.value;
+    }
+  }
+
+  const duplicateGuess = store.guesses.some((entry, index) => {
+    if (index === existingGuessIndex) {
+      return false;
+    }
+
+    return normalizeKey(entry.name) === normalizeKey(cleanName);
+  });
+
+  if ((hasGuessUpdate || existingGuessIndex >= 0) && !shouldRemoveGuess && duplicateGuess) {
+    sendJson(response, 409, { error: "That name already submitted a guess. Choose a unique checked-in name before saving." });
+    return;
+  }
+
+  store.users[userIndex] = {
+    ...currentUser,
+    ...(hasAgeUpdate ? { age: nextAge } : {}),
+    ...(hasAgeUpdate && currentUser.birthDate ? { birthDate: undefined } : {}),
+    name: cleanName,
+    updatedAt: now
+  };
+
+  if (store.users[userIndex].birthDate === undefined) {
+    delete store.users[userIndex].birthDate;
+  }
+
+  if (shouldRemoveGuess) {
+    if (existingGuessIndex >= 0) {
+      store.guesses.splice(existingGuessIndex, 1);
+    }
+  } else if (hasGuessUpdate) {
+    if (existingGuessIndex >= 0) {
+      store.guesses[existingGuessIndex] = {
+        ...store.guesses[existingGuessIndex],
+        estimatedTotalAge: nextGuessValue,
+        name: cleanName,
+        updatedAt: now
+      };
+    } else {
+      store.guesses.push({
+        createdAt: now,
+        estimatedTotalAge: nextGuessValue,
+        id: createEntryId(),
+        name: cleanName,
+        sourceTokenHash: currentUser.sourceTokenHash || createHash(`admin-${currentUser.id}`)
+      });
+    }
+  } else if (existingGuessIndex >= 0) {
+    store.guesses[existingGuessIndex] = {
+      ...store.guesses[existingGuessIndex],
+      name: cleanName,
+      updatedAt: now
+    };
+  }
+
+  await writeStore(store);
+  sendAdminStorePayload(response, store);
+}
+
+async function handleAdminDeleteParticipant(request, response, participantId) {
+  if (!hasAdminSession(request)) {
+    sendJson(response, 401, { error: "Admin login required." });
+    return;
+  }
+
+  const store = await readStore();
+  const userIndex = findEntryIndexById(store.users, participantId);
+
+  if (userIndex < 0) {
+    sendJson(response, 404, { error: "Participant not found." });
+    return;
+  }
+
+  const [deletedUser] = store.users.splice(userIndex, 1);
+  const deletedKey = normalizeKey(deletedUser.name);
+  store.guesses = store.guesses.filter((entry) => normalizeKey(entry.name) !== deletedKey);
+
+  await writeStore(store);
+  sendAdminStorePayload(response, store);
+}
+
 async function handleAdminGuessToggle(request, response) {
   if (!hasAdminSession(request)) {
     sendJson(response, 401, { error: "Admin login required." });
@@ -1519,6 +1741,17 @@ function createServer() {
 
       if (request.method === "POST" && url.pathname === "/api/admin/logout") {
         handleAdminLogout(response);
+        return;
+      }
+
+      const participantMatch = /^\/api\/admin\/participants\/([^/]+)$/.exec(url.pathname);
+      if (participantMatch && request.method === "POST") {
+        await handleAdminUpdateParticipant(request, response, decodeURIComponent(participantMatch[1]));
+        return;
+      }
+
+      if (participantMatch && request.method === "DELETE") {
+        await handleAdminDeleteParticipant(request, response, decodeURIComponent(participantMatch[1]));
         return;
       }
 

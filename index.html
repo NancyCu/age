@@ -95,6 +95,8 @@
             <p id="guessHelp" class="checkin-help">Guess the total age in the room.</p>
           </div>
 
+          <button id="openMarbleJarButton" class="marble-hint-button" type="button">View Marble Jar</button>
+
           <div class="guess-keypad" aria-label="Total guess keypad">
             <button type="button" data-guess-key="1">1</button>
             <button type="button" data-guess-key="2">2</button>
@@ -126,6 +128,33 @@
     </div>
   </div>
 
+  <div id="marbleJarDialog" class="marble-dialog" role="dialog" aria-modal="true" aria-labelledby="marbleJarTitle" hidden>
+    <div class="marble-dialog-card">
+      <header class="marble-dialog-header">
+        <div>
+          <p class="marble-kicker">Guess hint</p>
+          <h2 id="marbleJarTitle">Marble Jar</h2>
+        </div>
+        <button id="marbleJarClose" class="marble-close-button" type="button" aria-label="Close marble jar">×</button>
+      </header>
+
+      <div class="marble-layout">
+        <div class="marble-jar-stage">
+          <canvas id="marbleJarCanvas" class="marble-jar-canvas" aria-label="Interactive marble jar age group hint"></canvas>
+          <div class="marble-jar-glass" aria-hidden="true"></div>
+          <p id="marbleJarEmpty" class="marble-empty">No marbles yet.</p>
+        </div>
+
+        <section class="marble-info" aria-label="Marble color counts">
+          <div id="marbleLegend" class="marble-legend"></div>
+          <button id="shakeMarbleJarButton" class="marble-shake-button" type="button">Shake Jar</button>
+          <p id="marbleMotionStatus" class="marble-motion-status" aria-live="polite">Drag or shake your phone to move the marbles.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js" defer></script>
   <script src="/app.js" defer></script>
 </body>
 </html>

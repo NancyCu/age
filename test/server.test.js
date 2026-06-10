@@ -34,6 +34,16 @@ function birthDateYearsAgo(yearsAgo) {
   return `${today.getFullYear() - yearsAgo}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 }
 
+function expectedAgeClassificationGroups(counts = {}) {
+  return [
+    { color: "#5cc8ff", count: counts.minors || 0, key: "minors", label: "Minors" },
+    { color: "#7bd88f", count: counts.youngAdults || 0, key: "youngAdults", label: "Young Adults" },
+    { color: "#ffd166", count: counts.adults || 0, key: "adults", label: "Adults" },
+    { color: "#f78c6b", count: counts.seniors || 0, key: "seniors", label: "Seniors" },
+    { color: "#c792ea", count: counts.beyondSeniors || 0, key: "beyondSeniors", label: "Beyond Seniors" }
+  ];
+}
+
 test("firebase CLI parser ignores trailing status output", () => {
   const parsed = parseFirebaseCliJson(
     '{"settings":{"guessEnabled":true,"winnerMode":"real"},"users":[],"guesses":[]}\n{"status":"success"}\n',
@@ -79,6 +89,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
       seniors: 0,
       youngAdults: 0
     });
+    assert.deepEqual(createPayload.summary.ageClassificationGroups, expectedAgeClassificationGroups({ adults: 1 }));
     assert.deepEqual(createPayload.summary.availableGuessNames, ["Alice"]);
     assert.equal(createPayload.summary.guessEnabled, true);
     assert.deepEqual(createPayload.summary.userNames, ["Alice"]);
@@ -197,6 +208,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
         seniors: 1,
         youngAdults: 0
       },
+      ageClassificationGroups: expectedAgeClassificationGroups({ adults: 2, minors: 1, seniors: 1 }),
       availableGuessNames: ["Mia", "Nik", "Nora"],
       guessEnabled: true,
       guessCount: 1,
@@ -401,6 +413,80 @@ test("user, guess, duplicate, and admin flows work", async () => {
     assert.equal(response.status, 409);
     assert.equal((await response.json()).error, "That name already submitted a guess. Choose your own name from the list.");
 
+    response = await fetch(`${baseUrl}/api/admin/dashboard`, {
+      headers: { Cookie: cookie }
+    });
+    assert.equal(response.status, 200);
+    const editableDashboard = await response.json();
+    const aliceParticipant = editableDashboard.users.find((entry) => entry.name === "Alice");
+    assert.ok(aliceParticipant?.id);
+
+    response = await fetch(`${baseUrl}/api/admin/participants/${aliceParticipant.id}`, {
+      body: JSON.stringify({ estimatedTotalAge: 150, name: "Alicia" }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 401);
+
+    response = await fetch(`${baseUrl}/api/admin/participants/${aliceParticipant.id}`, {
+      body: JSON.stringify({ estimatedTotalAge: 150, name: "Mia" }),
+      headers: { Cookie: cookie, "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 409);
+    assert.match((await response.json()).error, /That name is already taken/);
+
+    response = await fetch(`${baseUrl}/api/admin/participants/${aliceParticipant.id}`, {
+      body: JSON.stringify({ estimatedTotalAge: 150, name: "Alicia" }),
+      headers: { Cookie: cookie, "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 200);
+    let editedParticipant = await response.json();
+    assert.deepEqual(editedParticipant.summary.userNames, ["Alicia", "Mia", "Nik", "Nora"]);
+    assert.deepEqual(editedParticipant.summary.guessNames, ["Alicia", "Mia"]);
+    assert.deepEqual(editedParticipant.summary.availableGuessNames, ["Nik", "Nora"]);
+    assert.equal(editedParticipant.summary.guessTotal, 268);
+    assert.equal(editedParticipant.dashboard.nearestGuess.name, "Alicia");
+    assert.equal(editedParticipant.dashboard.nearestGuess.difference, 1);
+    assert.equal(editedParticipant.dashboard.guesses.find((entry) => entry.name === "Alicia").estimatedTotalAge, 150);
+    assert.equal(editedParticipant.dashboard.guesses.some((entry) => entry.name === "Alice"), false);
+
+    response = await fetch(`${baseUrl}/api/admin/participants/${aliceParticipant.id}`, {
+      body: JSON.stringify({ estimatedTotalAge: "", name: "Alicia" }),
+      headers: { Cookie: cookie, "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 200);
+    editedParticipant = await response.json();
+    assert.deepEqual(editedParticipant.summary.guessNames, ["Mia"]);
+    assert.deepEqual(editedParticipant.summary.availableGuessNames, ["Alicia", "Nik", "Nora"]);
+    assert.equal(editedParticipant.summary.guessTotal, 118);
+
+    response = await fetch(`${baseUrl}/api/admin/participants/${aliceParticipant.id}`, {
+      body: JSON.stringify({ estimatedTotalAge: 149, name: "Alicia" }),
+      headers: { Cookie: cookie, "Content-Type": "application/json" },
+      method: "POST"
+    });
+    assert.equal(response.status, 200);
+    editedParticipant = await response.json();
+    assert.deepEqual(editedParticipant.summary.guessNames, ["Alicia", "Mia"]);
+    assert.deepEqual(editedParticipant.summary.availableGuessNames, ["Nik", "Nora"]);
+    assert.equal(editedParticipant.summary.guessTotal, 267);
+
+    response = await fetch(`${baseUrl}/api/admin/participants/${aliceParticipant.id}`, {
+      headers: { Cookie: cookie },
+      method: "DELETE"
+    });
+    assert.equal(response.status, 200);
+    const deletedParticipant = await response.json();
+    assert.deepEqual(deletedParticipant.summary.userNames, ["Mia", "Nik", "Nora"]);
+    assert.deepEqual(deletedParticipant.summary.guessNames, ["Mia"]);
+    assert.deepEqual(deletedParticipant.summary.availableGuessNames, ["Nik", "Nora"]);
+    assert.equal(deletedParticipant.summary.guessTotal, 118);
+    assert.equal(deletedParticipant.dashboard.users.some((entry) => entry.name === "Alicia"), false);
+    assert.equal(deletedParticipant.dashboard.guesses.some((entry) => entry.name === "Alicia"), false);
+
     response = await fetch(`${baseUrl}/api/admin/clear`, {
       headers: { Cookie: cookie, "Content-Type": "application/json" },
       method: "POST"
@@ -416,6 +502,7 @@ test("user, guess, duplicate, and admin flows work", async () => {
         seniors: 0,
         youngAdults: 0
       },
+      ageClassificationGroups: expectedAgeClassificationGroups(),
       availableGuessNames: [],
       guessEnabled: true,
       guessCount: 0,
