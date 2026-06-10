@@ -64,6 +64,7 @@ const marbleJar = {
   isFallback: false,
   isOpen: false,
   lastPointer: null,
+  motionFreezeTimeout: null,
   motionListening: false,
   render: null,
   runner: null,
@@ -396,11 +397,16 @@ function stopMarbleScene() {
     window.cancelAnimationFrame(marbleJar.fallbackFrame);
   }
 
+  if (marbleJar.motionFreezeTimeout) {
+    window.clearTimeout(marbleJar.motionFreezeTimeout);
+  }
+
   marbleJar.bodies = [];
   marbleJar.engine = null;
   marbleJar.fallbackFrame = null;
   marbleJar.fallbackMarbles = [];
   marbleJar.isFallback = false;
+  marbleJar.motionFreezeTimeout = null;
   marbleJar.render = null;
   marbleJar.runner = null;
 }
@@ -422,8 +428,9 @@ function startMatterScene() {
   elements.marbleCanvas.width = width;
   elements.marbleCanvas.height = height;
 
-  const engine = Matter.Engine.create();
-  engine.gravity.y = 0.9;
+  const engine = Matter.Engine.create({ enableSleeping: true });
+  engine.gravity.x = 0;
+  engine.gravity.y = 0;
   const render = Matter.Render.create({
     canvas: elements.marbleCanvas,
     engine,
@@ -445,6 +452,7 @@ function startMatterScene() {
   Matter.World.add(engine.world, buildMatterMarbles(width, height));
   Matter.Events.on(engine, "afterUpdate", () => containMatterMarbles(width, height));
   Matter.Events.on(render, "afterRender", drawMatterMarbles);
+  freezeMatterMarbles();
   Matter.Render.run(render);
   Matter.Runner.run(runner, engine);
 }
@@ -469,9 +477,10 @@ function buildMatterMarbles(width, height) {
   const groups = getMarbleGroups();
   const total = Math.max(1, getMarbleTotal(groups));
   const radius = Math.max(15, Math.min(32, Math.sqrt((width * height * 0.18) / (Math.PI * total))));
-  const columns = Math.max(3, Math.min(7, Math.floor((width * 0.62) / (radius * 1.25))));
-  const spacing = radius * 1.36;
-  const startX = width / 2 - ((columns - 1) * spacing) / 2;
+  const xStep = radius * 1.78;
+  const yStep = radius * 1.54;
+  const columns = Math.max(3, Math.min(7, Math.floor((width * 0.62) / xStep)));
+  const startX = width / 2 - ((columns - 1) * xStep) / 2;
   const marbles = [];
   let index = 0;
 
@@ -479,12 +488,14 @@ function buildMatterMarbles(width, height) {
     for (let count = 0; count < Number(group.count || 0); count += 1) {
       const column = index % columns;
       const row = Math.floor(index / columns);
-      const x = startX + column * spacing + Math.random() * radius * 0.22;
-      const y = height * 0.2 + row * radius * 1.48 + Math.random() * radius * 0.35;
+      const offsetX = row % 2 === 0 ? 0 : radius * 0.72;
+      const bounds = getJarBounds(width, height, radius);
+      const x = Math.max(bounds.left, Math.min(bounds.right, startX + column * xStep + offsetX));
+      const y = Math.max(bounds.top, bounds.bottom - row * yStep);
       const body = Matter.Bodies.circle(x, y, radius, {
         friction: 0.04,
-        frictionAir: 0.026,
-        restitution: 0.58,
+        frictionAir: 0.04,
+        restitution: 0.22,
         render: {
           fillStyle: "rgba(255, 255, 255, 0)",
           lineWidth: 0,
@@ -540,6 +551,37 @@ function containMatterMarbles(width, height) {
       Matter.Body.setVelocity(body, velocity);
     }
   });
+}
+
+function freezeMatterMarbles() {
+  if (!window.Matter || !marbleJar.engine) {
+    return;
+  }
+
+  marbleJar.engine.gravity.x = 0;
+  marbleJar.engine.gravity.y = 0;
+  marbleJar.bodies.forEach((body) => {
+    window.Matter.Body.setAngularVelocity(body, 0);
+    window.Matter.Body.setVelocity(body, { x: 0, y: 0 });
+    window.Matter.Sleeping.set(body, true);
+  });
+}
+
+function wakeMatterMarbles(options = {}) {
+  if (!window.Matter || !marbleJar.engine) {
+    return;
+  }
+
+  if (marbleJar.motionFreezeTimeout) {
+    window.clearTimeout(marbleJar.motionFreezeTimeout);
+  }
+
+  marbleJar.engine.gravity.x = Number(options.gravityX || 0);
+  marbleJar.engine.gravity.y = Number(options.gravityY || 0.75);
+  marbleJar.bodies.forEach((body) => {
+    window.Matter.Sleeping.set(body, false);
+  });
+  marbleJar.motionFreezeTimeout = window.setTimeout(freezeMatterMarbles, options.duration || 2400);
 }
 
 function drawMatterMarbles() {
@@ -683,10 +725,11 @@ function shakeMarbleJar() {
     return;
   }
 
+  wakeMatterMarbles({ duration: 4200, gravityY: 0.9 });
   marbleJar.bodies.forEach((body) => {
     window.Matter.Body.applyForce(body, body.position, {
-      x: (Math.random() - 0.5) * 0.022,
-      y: -0.026 - Math.random() * 0.017
+      x: (Math.random() - 0.5) * 0.008,
+      y: -0.005 - Math.random() * 0.004
     });
   });
 }
@@ -704,10 +747,11 @@ function pushMarbles(deltaX, deltaY) {
     return;
   }
 
+  wakeMatterMarbles({ duration: 1800, gravityY: 0.65 });
   marbleJar.bodies.forEach((body) => {
     window.Matter.Body.applyForce(body, body.position, {
-      x: deltaX * 0.0008,
-      y: deltaY * 0.0008
+      x: deltaX * 0.00042,
+      y: deltaY * 0.00042
     });
   });
 }
@@ -810,14 +854,23 @@ function handleDeviceTilt(event) {
 
   const gamma = Number(event.gamma || 0);
   const beta = Number(event.beta || 0);
-  if (Math.abs(gamma) > 58) {
-    marbleJar.engine.gravity.x = 0;
-    marbleJar.engine.gravity.y = 0.9;
+  const gravityX = Math.max(-0.32, Math.min(0.32, gamma / 90));
+  const gravityY = Math.max(0.5, Math.min(0.95, 0.72 + beta / 260));
+
+  if (Math.abs(gamma) < 8 && Math.abs(beta) < 8) {
     return;
   }
 
-  marbleJar.engine.gravity.x = Math.max(-0.45, Math.min(0.45, gamma / 70));
-  marbleJar.engine.gravity.y = Math.max(0.55, Math.min(1.1, 0.9 + beta / 180));
+  wakeMatterMarbles({ duration: 1200, gravityX, gravityY });
+
+  if (Math.abs(gamma) > 58) {
+    marbleJar.engine.gravity.x = 0;
+    marbleJar.engine.gravity.y = 0.7;
+    return;
+  }
+
+  marbleJar.engine.gravity.x = gravityX;
+  marbleJar.engine.gravity.y = gravityY;
 }
 
 elements.keypad.addEventListener("click", (event) => {
